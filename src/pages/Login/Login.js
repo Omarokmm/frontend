@@ -17,7 +17,7 @@ const Login = () => {
       email: email,
       password: password,
     };
-    const response = await fetch(`${_global.BASE_URL}/login`, {
+    const response = await fetch(`${_global.BASE_URL_WiTHOUT_API}login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -27,7 +27,7 @@ const Login = () => {
     const json = await response.json();
     if (response.ok) {
       console.log("login successfully");
-      navigate('/layout');
+      navigate("/layout/cases");
     const { password, confirmPassword, ...userWithoutPasswords } = json.data;
       localStorage.setItem("user", JSON.stringify(userWithoutPasswords));
       localStorage.setItem("departments", JSON.stringify(json.departments));
