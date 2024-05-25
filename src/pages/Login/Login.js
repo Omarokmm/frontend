@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { showToastMessage } from "../../helper/toaster";
+import * as _global from "../../config/global";
 const Login = () => {
   const user  = JSON.parse(localStorage.getItem("user"))
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const Login = () => {
       email: email,
       password: password,
     };
-    const response = await fetch("http://localhost:4000/login", {
+    const response = await fetch(`${_global.BASE_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
