@@ -614,6 +614,7 @@ cursor: pointer;
 .summary-teeth-cases p span{
   display: inline-block;
   padding-right: 8px;
+  font-weight: 500;
 }
 td,
  th {

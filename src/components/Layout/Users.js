@@ -795,7 +795,7 @@ function groupCasesTeethNumbersByName() {
                               groupTeethNumbersByName(item.teethNumbers)?.map((item)=>
                                 <p className="mb-0">
                                     <span>{item.name}:</span> 
-                                    <b>{item.count}</b>
+                                    <b className="badge text-bg-light">{item.count}</b>
                                 </p>
                                 )
                               }
@@ -806,7 +806,7 @@ function groupCasesTeethNumbersByName() {
                             <td  className="f-bold c-success" colSpan={3}>
                               <b>Total of Pieces</b>
                             </td>
-                            <td className="f-bold c-success">
+                            <td className="bg-success p-2 text-dark bg-opacity-50">
                                <b>{
                               sumOfTeethNumbersLength()
                               }</b> 
@@ -819,7 +819,7 @@ function groupCasesTeethNumbersByName() {
                               {groupCasesTeethNumbersByName()?.map((item)=>
                                   <p className="mb-0">
                                     <span>{item.name}:</span> 
-                                    <b className="c-success">{item.count}</b>
+                                    <b className="badge text-bg-success">{item.count}</b>
                                 </p>
                                 )}
                               </div>
