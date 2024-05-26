@@ -315,7 +315,8 @@ console.log("newModel",newModel);
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.ceramic), true)}</small>
                 </span>
 }
-             {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Ceramic" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&    <div className="btn-actions">
+             {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Caramic" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&  
+              <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"
                     disabled={

@@ -27,21 +27,32 @@ const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
          console.error("Error fetching case:", error);
        });
    }, []);
-      const chooseTeeth = (item, type) => {
-        setTeethData(item);
-        console.log(item, type);
-      };
-      const getFinishedDate = (item)=>{
-        if(item){
-          if(item.status.isEnd) {
-            return item.actions.find(i=> i.dateEnd)?.dateEnd
-          }
-          else{
-            return ""
-          }
-        } 
+  const chooseTeeth = (item, type) => {
+    setTeethData(item);
+    console.log(item, type);
+  };
+  const getFinishedDate = (item)=>{
+    if(item){
+      if(item.status.isEnd) {
+        return item.actions.find(i=> i.dateEnd)?.dateEnd
+      }
+      else{
         return ""
       }
+    } 
+    return ""
+  }
+  const getFinishedName = (item)=>{
+    if(item){
+      if(item.status.isEnd) {
+        return item.actions.find(i=> i.dateEnd)?.technicianName
+      }
+      else{
+        return ""
+      }
+    } 
+    return ""
+  }
 return (
   <div className="content view-case">
     <div className="card">
@@ -110,6 +121,7 @@ return (
                     : "red",
                 }}
               >
+                <span className="tooltip-phase-name" >{getFinishedName(caseData?.cadCam)}</span>
                 Cad Cam
                 <span className="tooltip-phase">
                   {caseData?.cadCam.status.isStart && (
@@ -122,7 +134,7 @@ return (
                     <i class="fa-solid fa-circle-check c-success"></i>
                   )}
                 </span>
-                <span className="tooltip-phase-date" >{_global.getFormateDate( getFinishedDate(caseData?.cadCam), true)}</span>
+                <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.cadCam), true)}</span>
               </div>
               <span class="arrow-right"></span>
               <span class="arrow-right-phone">
@@ -142,6 +154,7 @@ return (
                     : "red",
                 }}
               >
+                <span className="tooltip-phase-name" >{getFinishedName(caseData?.fitting)}</span>
                 Fitting
                 <span className="tooltip-phase">
                   {caseData?.fitting.status.isStart && (
@@ -174,6 +187,7 @@ return (
                     : "red",
                 }}
               >
+                <span className="tooltip-phase-name" >{getFinishedName(caseData?.ceramic)}</span>
                 Ceramic
                 <span className="tooltip-phase">
                   {caseData?.ceramic.status.isStart && (
@@ -187,7 +201,6 @@ return (
                   )}
                 </span>
                 <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.ceramic), true)}</span>
-
               </div>
               <span class="arrow-right"></span>
               <span class="arrow-right-phone t-90">
@@ -208,6 +221,7 @@ return (
                     : "red",
                 }}
               >
+                <span className="tooltip-phase-name" >{getFinishedName(caseData?.qualityControl)}</span>
                 QC
                 <span className="tooltip-phase">
                   {caseData?.qualityControl.status.isStart && (
@@ -237,6 +251,7 @@ return (
                     : "red",
                 }}
               >
+             <span className="tooltip-phase-name" >{getFinishedName(caseData?.designing)}</span>
                 Photos
                 <span className="tooltip-phase">
                   {caseData?.designing.status.isStart && (
@@ -269,6 +284,7 @@ return (
                     : "red",
                 }}
               >
+              <span className="tooltip-phase-name" >{getFinishedName(caseData?.receptionPacking)}</span>
                 Packing
                 <span className="tooltip-phase">
                   {caseData?.receptionPacking.status.isStart && (

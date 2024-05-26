@@ -73,7 +73,7 @@ const Navbar = () => {
           <ul class="dropdown-menu dropstart">
             <li>
               <a class="dropdown-item" href="#">
-                My Profile
+                {user.firstName} {user.lastName} 
               </a>
             </li>
             <li onClick={() => logout()}>

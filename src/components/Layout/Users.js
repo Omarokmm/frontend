@@ -35,8 +35,8 @@ const Users = () => {
     3: "technician",
     4: "Reception",
     5: "Driver",
-    6: "graphic_design",
-    7: "software_Engineer"
+    6: "Graphic Design",
+    7: "Software Engineer"
     // Add more roles as needed
   };
   useEffect(() => {
@@ -574,7 +574,7 @@ function groupCasesTeethNumbersByName() {
                         <option value="4">Reception</option>
                         <option value="5">Driver</option>
                         <option value="6">Graphic Design</option>
-                        <option value="6">Software Engineer</option>
+                        <option value="7">Software Engineer</option>
                       </select>
                     </div>{" "}
                   </div>

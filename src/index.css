@@ -398,6 +398,7 @@ cursor: pointer;
   justify-content: space-between;
   border: 1px solid #ccc;
   padding: 5px 7px;
+  font-size: 14px;
 }
 .date-in-out div span{
   padding-left: 8px;
@@ -546,7 +547,19 @@ cursor: pointer;
     border-radius: 16px;
     color: #000;
     font-size: 8px;
-    font-weight: 600;
+    /* font-weight: 600; */
+    width: max-content;
+}
+.tooltip-phase-name{
+  position: absolute;
+  left: 0;
+  top: -13px;
+  border-radius: 16px;
+  color: #000;
+  font-size: 8px;
+  font-weight: 600;
+  width: max-content;
+  z-index: 10;
 }
 .nav-tabs{
   margin-bottom: 1.3rem;
@@ -673,10 +686,10 @@ display: block;
   .teeth-item{
     padding: 5px ;
   }
-  .tooltip-phase-date{
+  /* .tooltip-phase-date{
     top: -10px;
     font-size: 6px;
-}
+} */
 .summary-teeth-cases{
   grid-template-columns: 1fr ;
 }
@@ -723,7 +736,7 @@ table th{
 .all-phases{
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 25px 35px;
+  gap: 50px 35px;
 }
 .all-phases .phaseName {
   width: 100%;
