@@ -34,7 +34,7 @@ body.dark {
   left: 0;
   background-color: var(--white-color);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   padding: 15px 30px;
   z-index: 1000;
@@ -53,6 +53,7 @@ body.dark {
   height: 35px;
   object-fit: cover;
   border-radius: 50%;
+  margin-right: 5px;
 }
 .search_bar {
   height: 47px;
@@ -640,6 +641,9 @@ td,
 }
 .modal .table{
   font-size: 13px;
+}
+.c-pointer{
+  cursor: pointer;
 }
 @media (max-width:768px){
   .navbar{

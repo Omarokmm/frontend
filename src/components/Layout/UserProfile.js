@@ -157,7 +157,7 @@ const searchByDate = (e) => {
     <thead>
         <tr className="table-secondary">
         <th scope="col">#</th>
-        <th  scope="col">CreatedAt</th>
+        <th scope="col">CreatedAt</th>
         <th scope="col">Doctor</th>
         <th scope="col">Patient</th>
         <th scope="col">#teeth</th>

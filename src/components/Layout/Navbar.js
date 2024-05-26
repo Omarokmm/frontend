@@ -41,8 +41,10 @@ const Navbar = () => {
             </li> */}
           </ul>
         </div>
-        <img src="/images/logo.png" alt="" />
-        Arak
+        <div className="c-pointer mr-2" onClick={()=>navigate("/layout/cases")}>
+          <img src="/images/logo.png" alt=""  />
+          <span>Arak</span>
+        </div>
       </div>
       {/* <div className="search_bar">
         <input type="text" placeholder="Search" />
@@ -74,9 +76,9 @@ const Navbar = () => {
                 My Profile
               </a>
             </li>
-            <li>
+            <li onClick={() => logout()}>
               <a class="dropdown-item">
-                <span onClick={() => logout()}>Logout</span>
+                <span >Logout</span>
               </a>
             </li>
             {/* <li>
