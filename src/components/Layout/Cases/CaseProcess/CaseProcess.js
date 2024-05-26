@@ -124,6 +124,17 @@ console.log("newModel",newModel);
         console.error("Error Updating  case:", error);
       });
   };
+  const getFinishedDate = (item)=>{
+    if(item){
+      if(item.status.isEnd) {
+        return item.actions.find(i=> i.dateEnd)?.dateEnd
+      }
+      else{
+        return ""
+      }
+    } 
+    return ""
+  }
   return (
     <div className="content view-case">
       <div className="card">
@@ -135,9 +146,9 @@ console.log("newModel",newModel);
             >
               <i class="fa-solid fa-arrow-left-long"></i>
             </span>
-            Case Number: #<strong>{caseData.caseNumber}</strong>
+            Case <span className="c-case-number">Number</span>: #<strong>{caseData.caseNumber}</strong>
           </span>
-          <span>
+          <span className="case-type">
             Case Type: <strong>{caseData.caseType}</strong>
           </span>
           <span>
@@ -150,6 +161,10 @@ console.log("newModel",newModel);
             <div className="col-lg-4">
               <div className={`card-case ${caseData.cadCam.status.isEnd ? 'bgc-success':'bgc-danger'}`} >
                 <h6>Cad Cam</h6>
+                {caseData?.cadCam.status.isEnd &&  <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.cadCam), true)}</small>
+                </span>
+}
                 {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"
@@ -198,6 +213,10 @@ console.log("newModel",newModel);
               <div className="col-lg-4">
                 <div  className={`card-case ${caseData.plaster.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                   <h6>Plaster</h6>
+                  {caseData?.plaster.status.isEnd &&   <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.plaster), true)}</small>
+                </span>
+}
                  {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Plaster" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&  <div className="btn-actions">
                     <button
                       className="btn btn-sm btn-success"
@@ -246,6 +265,10 @@ console.log("newModel",newModel);
             <div className="col-lg-4">
               <div  className={`card-case ${caseData.fitting.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                 <h6>Fitting</h6>
+                {caseData?.fitting.status.isEnd && <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.fitting), true)}</small>
+                </span>
+}
                {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Fitting"|| user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&  <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"
@@ -288,6 +311,10 @@ console.log("newModel",newModel);
             <div className="col-lg-4">
               <div className={`card-case ${caseData.ceramic.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                 <h6>Ceramic</h6>
+                {caseData?.ceramic.status.isEnd && <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.ceramic), true)}</small>
+                </span>
+}
              {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Ceramic" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&    <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"
@@ -332,6 +359,10 @@ console.log("newModel",newModel);
             <div className="col-lg-4">
               <div  className={`card-case ${caseData.qualityControl.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                 <h6>Quality Control</h6>
+                {caseData?.qualityControl.status.isEnd && <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.qualityControl), true)}</small>
+                </span>
+               }
                 {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" &&  <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"
@@ -380,7 +411,11 @@ console.log("newModel",newModel);
             <div className="col-lg-4">
               <div className={`card-case ${caseData.designing.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                 <h6>Photographing</h6>
-             {(user.roles[0] ===  _global.allRoles.graphic_design && departments[0].name === "Marketing"  || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&   <div className="btn-actions">
+                {caseData?.designing.status.isEnd &&  <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.designing), true)}</small>
+                </span>
+                }
+                  {(user.roles[0] ===  _global.allRoles.graphic_design && departments[0].name === "Marketing"  || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&   <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
@@ -424,6 +459,10 @@ console.log("newModel",newModel);
             <div className="col-lg-4">
               <div  className={`card-case ${caseData.receptionPacking.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                 <h6>Reception(Packing)</h6>
+                {caseData?.receptionPacking.status.isEnd && <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.receptionPacking), true)}</small>
+                </span>
+                }
                {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"

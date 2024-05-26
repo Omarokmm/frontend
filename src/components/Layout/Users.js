@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import * as _global from "../../config/global";
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [casesUser, setCasesUser] = useState([]);
   const [buffUsers, setBuffUsers] = useState([]);
   const [searchText, setSearchText] = useState([]);
   const [buffUser, setBuffUser] = useState([]);
@@ -69,6 +70,19 @@ const Users = () => {
         const filteredUsers = users.filter((user) => user._id !== result._id);
         setUsers(filteredUsers);
         showToastMessage("deleted User successfully", "success");
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+      });
+  };
+  const getCasesByUserId = (id) => {
+    axios
+      .get(`${_global.BASE_URL}users/actions/${id}`)
+      .then((res) => {
+        const result = res.data;
+        console.log('result',res)
+        setCasesUser(result);
+        groupCasesTeethNumbersByName()
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
@@ -182,6 +196,73 @@ const Users = () => {
       setUsers(buffUsers);
     }
   };
+  function sumOfTeethNumbersLength() {
+    let totalLength = 0;
+    casesUser.forEach(caseItem => {
+        totalLength += caseItem.teethNumbers.length;
+    });
+    return totalLength;
+}
+
+function groupTeethNumbersByName(teethNumbers) {
+  const result = {};
+
+  teethNumbers.forEach(teethNumber => {
+    const { name } = teethNumber;
+
+    if (!result[name]) {
+      result[name] = 0;
+    }
+
+    result[name]++;
+  });
+console.log(Object.entries(result).map(([name, count]) => ({ name, count })))
+  return Object.entries(result).map(([name, count]) => ({ name, count }));
+}
+function groupCasesTeethNumbersByName() {
+  const result = {};
+
+  casesUser.forEach(singleCase => {
+    singleCase.teethNumbers.forEach(teethNumber => {
+      const { name } = teethNumber;
+  
+      if (!result[name]) {
+        result[name] = 0;
+      }
+  
+      result[name]++;
+    });
+  });
+  console.log("cases by name",Object.entries(result).map(([name, teethNumbers]) => ({ name, teethNumbers })))
+  return Object.entries(result).map(([name, count]) => ({ name, count }));
+}
+// function groupTeethNumbersByType() {
+//   const result = {};
+
+//   // Iterate over each case
+//   casesUser.forEach(caseItem => {
+//     // Initialize an object to store teethNumbers grouped by name
+//     const teethNumbersByType = {};
+
+//     // Iterate over each teethNumber in the current case
+//     caseItem.teethNumbers.forEach(teethNumber => {
+//       const { name, teethNumber: number } = teethNumber;
+
+//       // Check if the name already exists in teethNumbersByType, if not create an empty array
+//       if (!teethNumbersByType[name]) {
+//         teethNumbersByType[name] = [];
+//       }
+
+//       // Push the teethNumber into the array
+//       teethNumbersByType[name].push(number);
+//     });
+
+//     // Add the teethNumbersByType to the result object with the caseNumber as key
+//     result[caseItem.caseNumber] = teethNumbersByType;
+//   });
+
+//   return result;
+// }
   return (
     <>
       <div className="content">
@@ -213,8 +294,8 @@ const Users = () => {
                 <thead>
                   <tr className="table-secondary">
                     <th scope="col">Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Phone</th>
+                    <th className="td-phone" scope="col">Email</th>
+                    <th className="td-phone" scope="col">Phone</th>
                     <th scope="col">Role</th>
                     <th scope="col">Actions</th>
                   </tr>
@@ -237,10 +318,10 @@ const Users = () => {
                       <td>
                         {item.firstName} {item.lastName}
                       </td>
-                      <td>
+                      <td className="td-phone">
                         {item.email} 
                       </td>
-                      <td>{item.phone}</td>
+                      <td className="td-phone">{item.phone}</td>
                       <td>
                         {item.roles.map((roleId, index) => (
                           <span className="text-capitalize" key={index}>
@@ -256,10 +337,16 @@ const Users = () => {
                             data-bs-target="#addNoteModal"
                             onClick={() => setBuffUser(item)}
                           >
-                            <i class="fa-solid fa-circle-plus"></i>
+                            <i class="fa-solid fa-circle-plus c-success"></i>
                           </span>
-                          <span onClick={(e) => deleteUser(item._id)}>
+                          {/* <span onClick={(e) => deleteUser(item._id)}>
                             <i className="fa-solid fa-trash-can"></i>
+                          </span> */}
+                         <span   data-bs-toggle="modal"
+                            data-bs-target="#casesUserModal" onClick={(e) => {
+                              setBuffUser(item)
+                              getCasesByUserId(item._id)}}>
+                            <i class="fa-solid fa-chart-column c-success"></i>
                           </span>
                         </div>
                       </td>
@@ -657,6 +744,96 @@ const Users = () => {
               >
                 Add
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Cases By User Modal */}
+      <div
+        class="modal fade"
+        id="casesUserModal"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content ">
+            <div class="modal-header bg-primary text-white">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">
+                {buffUser.firstName} {buffUser.lastName}
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              {casesUser.length > 0 &&
+                <table className="table text-center table-bordered">
+                        <thead>
+                          <tr className="table-secondary">
+                            <th scope="col">Case Number</th>
+                            <th scope="col">Doctor</th>
+                            <th scope="col">Patient</th>
+                            <th scope="col">#teeth</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {casesUser.map((item) => (
+                            <tr key={item._id}>
+                              <td>
+                                {item.caseNumber}
+                              </td>
+                              <td>{item?.dentistObj?.name}</td>
+                              <td>
+                                {item.patientName}
+                              </td>
+                              <td className="teeth-pieces">
+                              {
+                              groupTeethNumbersByName(item.teethNumbers)?.map((item)=>
+                                <p className="mb-0">
+                                    <span>{item.name}:</span> 
+                                    <b>{item.count}</b>
+                                </p>
+                                )
+                              }
+                              </td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td  className="f-bold c-success" colSpan={3}>
+                              <b>Total of Pieces</b>
+                            </td>
+                            <td className="f-bold c-success">
+                               <b>{
+                              sumOfTeethNumbersLength()
+                              }</b> 
+                              </td>
+                          </tr>
+                          <tr>
+                            <td   colSpan={4}>
+                            
+                              <div className="summary-teeth-cases">
+                              {groupCasesTeethNumbersByName()?.map((item)=>
+                                  <p className="mb-0">
+                                    <span>{item.name}:</span> 
+                                    <b className="c-success">{item.count}</b>
+                                </p>
+                                )}
+                              </div>
+                            </td>
+                          
+                          </tr>
+                        </tbody>
+                </table>
+              }
+              {casesUser.length <= 0 && 
+              <div className="text-center">
+                <h6>No have Works Yet!</h6>
+              </div>
+              }
             </div>
           </div>
         </div>

@@ -31,7 +31,17 @@ const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
         setTeethData(item);
         console.log(item, type);
       };
-
+      const getFinishedDate = (item)=>{
+        if(item){
+          if(item.status.isEnd) {
+            return item.actions.find(i=> i.dateEnd)?.dateEnd
+          }
+          else{
+            return ""
+          }
+        } 
+        return ""
+      }
 return (
   <div className="content view-case">
     <div className="card">
@@ -40,9 +50,9 @@ return (
           <span className="back-step" onClick={() => navigate("/layout/cases")}>
             <i class="fa-solid fa-arrow-left-long"></i>
           </span>
-          Case Number: #<strong>{caseData.caseNumber}</strong>
+          Case <span className="c-case-number">Number</span>: #<strong>{caseData.caseNumber}</strong>
         </span>
-        <span>
+        <span className="c-case-number">
           Case Type: <strong>{caseData.caseType}</strong>
         </span>
         <span>
@@ -87,6 +97,7 @@ return (
           <div className="col-lg-12 mt-4">
             <strong>Case Status</strong>
             <div className="all-phases">
+              <div className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -111,8 +122,14 @@ return (
                     <i class="fa-solid fa-circle-check c-success"></i>
                   )}
                 </span>
+                <span className="tooltip-phase-date" >{_global.getFormateDate( getFinishedDate(caseData?.cadCam), true)}</span>
               </div>
               <span class="arrow-right"></span>
+              <span class="arrow-right-phone">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              </div>
+              <div  className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -139,6 +156,12 @@ return (
                 </span>
               </div>
               <span class="arrow-right"></span>
+              <span class="arrow-right-phone">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              <span className="tooltip-phase-date" >{_global.getFormateDate( getFinishedDate(caseData?.fitting), true)}</span>
+              </div>
+              <div  className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -163,8 +186,16 @@ return (
                     <i class="fa-solid fa-circle-check c-success"></i>
                   )}
                 </span>
+                <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.ceramic), true)}</span>
+
               </div>
               <span class="arrow-right"></span>
+              <span class="arrow-right-phone t-90">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.fitting), true)}</span>
+              </div>
+              <div  className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -191,6 +222,9 @@ return (
                 </span>
               </div>
               <span class="arrow-right"></span>
+              <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.qualityControl), true)}</span>
+              </div>
+              <div  className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -217,6 +251,12 @@ return (
                 </span>
               </div>
               <span class="arrow-right"></span>
+              <span class="arrow-right-phone t-180">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.designing), true)}</span>
+              </div>
+              <div  className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -241,6 +281,11 @@ return (
                     <i class="fa-solid fa-circle-check c-success"></i>
                   )}
                 </span>
+                <span class="arrow-right-phone t-180">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.receptionPacking), true)}</span>
+              </div>
               </div>
             </div>
           </div>
@@ -335,7 +380,7 @@ return (
             </div>
           </div>
           <div class="col-lg-6">
-            <div class="p-3 text-center">
+            <div class="teeth-block">
               {numOfTeeth.teeth_top_left
                 .slice()
                 .reverse()
@@ -378,7 +423,7 @@ return (
             </div>
           </div>
           <div class="col-lg-6">
-            <div class="text-center p-3">
+            <div class="teeth-block">
               {numOfTeeth.teeth_top_right.map((item, index) => (
                 <span
                   data-bs-toggle="modal"
@@ -417,7 +462,7 @@ return (
             </div>
           </div>
           <div class="col-lg-6">
-            <div class="text-center p-3">
+            <div class="teeth-block">
               {numOfTeeth.teeth_bottom_left
                 .slice()
                 .reverse()
@@ -459,7 +504,7 @@ return (
             </div>
           </div>
           <div class="col-lg-6">
-            <div class="text-center p-3">
+            <div class="teeth-block">
               {numOfTeeth.teeth_bottom_right.map((item, index) => (
                 <span
                   data-bs-toggle="modal"

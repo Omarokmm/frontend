@@ -740,7 +740,7 @@ console.log(caseModel.address)
               <label>Teeth Numbers</label>
             </div>
             <div class="col-lg-6">
-              <div class="p-3 text-center">
+              <div class="teeth-block">
                 {numOfTeeth.teeth_top_left
                   .slice()
                   .reverse()
@@ -788,7 +788,7 @@ console.log(caseModel.address)
               </div>
             </div>
             <div class="col-lg-6">
-              <div class="text-center p-3">
+              <div class="teeth-block">
                 {numOfTeeth.teeth_top_right.map((item, index) => (
                   <span
                     data-bs-toggle="modal"
@@ -845,7 +845,7 @@ console.log(caseModel.address)
               </div>
             </div>
             <div class="col-lg-6">
-              <div class="text-center p-3">
+              <div class="teeth-block">
                 {numOfTeeth.teeth_bottom_left
                   .slice()
                   .reverse()
@@ -892,7 +892,7 @@ console.log(caseModel.address)
               </div>
             </div>
             <div class="col-lg-6">
-              <div class="text-center p-3">
+              <div class="teeth-block">
                 {numOfTeeth.teeth_bottom_right.map((item, index) => (
                   <span
                     data-bs-toggle="modal"

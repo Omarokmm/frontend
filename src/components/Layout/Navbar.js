@@ -9,7 +9,38 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="logo_item">
-        <i className="bx bx-menu" id="sidebarOpen"></i>
+        
+        <div class="btn-group dropend menu-navbar">
+          <button
+            type="button"
+            class="btn btn-menu dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i className="bx bx-menu" id="sidebarOpen"></i>
+          </button>
+          <ul class="dropdown-menu dropstart">
+            <li>
+              <Link class="dropdown-item" to="/layout/cases">
+              Cases
+              </Link>
+              <Link class="dropdown-item" to="/layout/users">
+               Users
+              </Link>
+              <Link class="dropdown-item" to="/layout/departments">
+              Departments
+              </Link>
+              <Link class="dropdown-item" to="/layout/doctors">
+               Doctors
+              </Link>
+            </li>
+            {/* <li>
+              <a class="dropdown-item" href="#">
+                Something else here
+              </a>
+            </li> */}
+          </ul>
+        </div>
         <img src="/images/logo.png" alt="" />
         Arak
       </div>
@@ -31,7 +62,7 @@ const Navbar = () => {
         <div class="btn-group dropstart profile-navbar">
           <button
             type="button"
-            class="btn btn-secondary dropdown-toggle"
+            class="btn btn-arak dropdown-toggle"
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >

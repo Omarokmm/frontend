@@ -396,8 +396,8 @@ const Cases = ()=>{
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">#Case</th>
-                      <th scope="col">Doctor Name</th>
-                      <th scope="col">Patient Name</th>
+                      <th scope="col">Doctor </th>
+                      <th scope="col">Patient</th>
                       <th scope="col">Type</th>
                       <th scope="col">Actions</th>
                     </tr>
