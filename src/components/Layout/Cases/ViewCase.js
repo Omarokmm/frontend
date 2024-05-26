@@ -55,14 +55,14 @@ return (
         <span className="c-case-number">
           Case Type: <strong>{caseData.caseType}</strong>
         </span>
-        <span>
+        {/* <span>
           Deadline:{" "}
           <strong>
             {caseData.deadline
-              ? _global.getFormateDate(caseData.deadline, false)
+              ? _global.formatDateToYYYYMMDD(caseData.deadline)
               : "Unknown"}
           </strong>
-        </span>
+        </span> */}
         {/* <span onClick={()=>window.print()}>print</span> */}
       </h5>
       <div className="card-body">
@@ -72,18 +72,18 @@ return (
               <div className="date-in">
                 {" "}
                 <strong>DATE IN:</strong>
-                <span>{_global.getFormateDate(caseData.dateIn, false)}</span>
+                <span>{_global.formatDateToYYYYMMDD(caseData.dateIn)}</span>
               </div>
               <div className="date-out">
                 {" "}
                 <strong>DATE OUT:</strong>
-                <span>
+                <span> 
                   {caseData.dateOut
-                    ? _global.getFormateDate(caseData.dateOut, false)
+                    ?_global.formatDateToYYYYMMDD(caseData.dateOut)
                     : "Unknown"}
                 </span>
               </div>
-              <div className="time">
+              {/* <div className="time">
                 {" "}
                 <strong>TIME:</strong>
                 <span>
@@ -91,7 +91,7 @@ return (
                     ? _global.timeFromDate(caseData.dateOut)
                     : "Unknown"}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="col-lg-12 mt-4">

@@ -155,13 +155,13 @@ const Departments = () => {
                         >
                           <i class="fa-solid fa-users"></i>
                         </span>
-                        <span
+                        {/* <span
                           onClick={(e) => setBuffDepartment(item)}
                           data-bs-toggle="modal"
                           data-bs-target="#deleteDepartmentModal"
                         >
                           <i className="fa-solid fa-trash-can"></i>
-                        </span>
+                        </span> */}
                       </div>
                     </td>
                   </tr>

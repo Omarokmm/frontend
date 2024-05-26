@@ -153,7 +153,7 @@ console.log("newModel",newModel);
           </span>
           <span>
             Deadline:{" "}
-            <strong>{_global.getFormateDate(caseData.dateOut,false)}</strong>
+            <strong>{_global.formatDateToYYYYMMDD(caseData.dateOut)}</strong>
           </span>
         </h5>
         <div className="card-body">

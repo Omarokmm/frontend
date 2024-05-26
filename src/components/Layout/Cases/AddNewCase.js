@@ -497,6 +497,7 @@ console.log(caseModel.address)
               </div>
             </div>
             <div className="col-lg-4">
+              <div className="form-group">
               <label>Gender:</label>
               <select
                 className={`form-select`}
@@ -507,6 +508,7 @@ console.log(caseModel.address)
                 <option value="Male">Male</option>
                 <option value="Male">Female</option>
               </select>
+              </div>
             </div>
             <div className="col-lg-4">
               <div className="form-group">

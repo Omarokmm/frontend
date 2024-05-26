@@ -425,14 +425,15 @@ padding: 10px 15px;
 }  
 
 .back-step{
-      border: 1px solid #000;
+    border: 1px solid #000;
     display: inline-flex;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border-radius: 20px;
     justify-content: center;
     align-items: center;
     margin-right: 10px;
+    font-size: 14px;
 }
 .back-step:hover{
   cursor: pointer;
@@ -610,6 +611,7 @@ cursor: pointer;
 .teeth-piece{
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px !important;
   font-weight: 500;
 }
@@ -709,7 +711,7 @@ table th{
 .card-title{
   display: flex;
   align-items: baseline;
-  padding: 10px 4px;
+  padding: 10px 8px;
 }
 .card-title span{
   font-size: 13px;
@@ -776,5 +778,15 @@ table th{
 
 .phase-view:nth-child(n+7) {
   order: 5;
+}
+.badge{
+  height: fit-content;
+}
+.teeth-piece{
+  font-size: 10px;
+}
+.actions-btns{
+  flex-direction: column;
+  gap: 10px;
 }
 }

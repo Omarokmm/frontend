@@ -111,7 +111,10 @@ const searchByDate = (e) => {
     <div className="card">
     <h6 class="card-title">
      <span >
-        <small>{userData.firstName} {userData.lastName}</small>
+     <span className="back-step" onClick={() => navigate("/layout/users")}>
+            <i class="fa-solid fa-arrow-left-long"></i>
+     </span>
+    <small>{userData.firstName} {userData.lastName}</small>
      </span>
      <span >
         <small>Role:       
@@ -143,7 +146,7 @@ const searchByDate = (e) => {
         <input
         type="date"
         className="form-control"
-        placeholder="Search by name"
+        placeholder="Date"
         onChange={(e) => searchByDate(e)}
         />
         </div>
@@ -153,8 +156,8 @@ const searchByDate = (e) => {
     <table className="table text-center table-bordered">
     <thead>
         <tr className="table-secondary">
-        <th scope="col">Case Number</th>
-        <th scope="col">CreatedAt</th>
+        <th scope="col">#</th>
+        <th  scope="col">CreatedAt</th>
         <th scope="col">Doctor</th>
         <th scope="col">Patient</th>
         <th scope="col">#teeth</th>
@@ -166,7 +169,7 @@ const searchByDate = (e) => {
             <td>
             {item.caseNumber}
             </td>
-            <td>
+            <td >
             {_global.formatDateToYYYYMMDD(item.dateCreated)}
             </td>
             <td>{item?.dentistObj?.name}</td>
