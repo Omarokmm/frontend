@@ -13,6 +13,7 @@ import Cases from "./components/Layout/Cases/Cases";
 import ViewCase from "./components/Layout/Cases/ViewCase";
 import AddNewCase from "./components/Layout/Cases/AddNewCase";
 import CaseProcess from "./components/Layout/Cases/CaseProcess/CaseProcess";
+import UserProfile from "./components/Layout/UserProfile";
 function App() {
   return (
     <div className="App">
@@ -24,6 +25,7 @@ function App() {
             <Route element={<RequireAuth allowedRoles={[0]} />}>
               <Route path="layout" element={<Layout />}>
                 <Route path="users" element={<Users />} />
+                <Route path="user-profile" element={<UserProfile />} />
                 <Route path="departments" element={<Departments />} />
                 <Route path="doctors" element={<Doctors />} />
                 <Route path="cases" element={<Cases />} />

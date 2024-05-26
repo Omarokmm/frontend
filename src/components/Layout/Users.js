@@ -342,10 +342,14 @@ function groupCasesTeethNumbersByName() {
                           {/* <span onClick={(e) => deleteUser(item._id)}>
                             <i className="fa-solid fa-trash-can"></i>
                           </span> */}
-                         <span   data-bs-toggle="modal"
-                            data-bs-target="#casesUserModal" onClick={(e) => {
-                              setBuffUser(item)
-                              getCasesByUserId(item._id)}}>
+                         <span   
+                         onClick={()=>navigate("/layout/user-profile", { state: { ...item } })}
+                        //  data-bs-toggle="modal"
+                        //     data-bs-target="#casesUserModal"
+                        //      onClick={(e) => {
+                        //       setBuffUser(item)
+                        //       getCasesByUserId(item._id)}}
+                              >
                             <i class="fa-solid fa-chart-column c-success"></i>
                           </span>
                         </div>

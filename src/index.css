@@ -607,6 +607,12 @@ cursor: pointer;
 .teeth-pieces {
   text-align: left !important;
 }
+.teeth-piece{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px !important;
+  font-weight: 500;
+}
 .teeth-pieces  p span{
   display: inline-block;
   padding-right: 8px;
@@ -616,10 +622,14 @@ cursor: pointer;
   padding-right: 8px;
   font-weight: 500;
 }
+table{
+  font-size: 14px;
+}
 td,
  th {
   vertical-align: middle !important;
 }
+
 .summary-teeth-cases{
   gap: 5px;
   display: grid;
