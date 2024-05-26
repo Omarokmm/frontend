@@ -1,9 +1,9 @@
 // live url
-// export const BASE_URL = "https://backend-pr1m.onrender.com/api/";
-// export const BASE_URL_WiTHOUT_API = "https://backend-pr1m.onrender.com/";
+export const BASE_URL = "https://backend-pr1m.onrender.com/api/";
+export const BASE_URL_WiTHOUT_API = "https://backend-pr1m.onrender.com/";
 // local url 
-export const BASE_URL = "http://localhost:3000/api/";
-export const BASE_URL_WiTHOUT_API = "http://localhost:3000/";
+// export const BASE_URL = "http://localhost:3000/api/";
+// export const BASE_URL_WiTHOUT_API = "http://localhost:3000/";
 export const Roles = [0,1,2,3,4,5,6];
 export const naturalOfWorks = [
   {
