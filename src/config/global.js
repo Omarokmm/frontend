@@ -73,7 +73,7 @@ export const numOfTeeth = {
       id: 1,
       name: "11",
       color: "red",
-      naturalOfWorks: [],
+      naturalOfWorks:[],
     },
     {
       id: 2,

@@ -13,6 +13,7 @@ const [historyData, setHistoryData] = useState(null);
 const [teethNumbers, setTeethNumbers] = useState(state.teethNumbers);
 const [teethData, setTeethData] = useState(null);
 const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
+const [naturalOfWork, setNaturalOfWork] = useState(null);
 
    console.log(state);
    useEffect(() => {
@@ -27,7 +28,9 @@ const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
          console.error("Error fetching case:", error);
        });
    }, []);
-  const chooseTeeth = (item, type) => {
+  const chooseTeeth = (item,natural, type) => {
+    setNaturalOfWork(natural)
+    console.log(natural);
     setTeethData(item);
     console.log(item, type);
   };
@@ -405,7 +408,7 @@ return (
                     data-bs-toggle="modal"
                     data-bs-target="#chooseNaturalModal"
                     className="teeth-item"
-                    onClick={() => chooseTeeth(item, "teeth_bottom_left")}
+                    onClick={() => chooseTeeth(item, teethNumbers.find((t) => t.teethNumber === item.name),"teeth_bottom_left")}
                     style={{
                       backgroundColor: teethNumbers.find(
                         (t) => t.teethNumber === item.name
@@ -445,7 +448,7 @@ return (
                   data-bs-toggle="modal"
                   data-bs-target="#chooseNaturalModal"
                   className="teeth-item"
-                  onClick={() => chooseTeeth(item, "teeth_bottom_left")}
+                  onClick={() => chooseTeeth(item, teethNumbers.find((t) => t.teethNumber === item.name) ,"teeth_bottom_left")}
                   style={{
                     backgroundColor: teethNumbers.find(
                       (t) => t.teethNumber === item.name
@@ -487,7 +490,7 @@ return (
                     data-bs-toggle="modal"
                     data-bs-target="#chooseNaturalModal"
                     className="teeth-item"
-                    onClick={() => chooseTeeth(item, "teeth_bottom_left")}
+                    onClick={() => chooseTeeth(item, teethNumbers.find((t) => t.teethNumber === item.name),"teeth_bottom_left")}
                     style={{
                       backgroundColor: teethNumbers.find(
                         (t) => t.teethNumber === item.name
@@ -526,7 +529,7 @@ return (
                   data-bs-toggle="modal"
                   data-bs-target="#chooseNaturalModal"
                   className="teeth-item"
-                  onClick={() => chooseTeeth(item, "teeth_bottom_left")}
+                  onClick={() => chooseTeeth(item, teethNumbers.find((t) => t.teethNumber === item.name),"teeth_bottom_left")}
                   style={{
                     backgroundColor: teethNumbers.find(
                       (t) => t.teethNumber === item.name
@@ -595,7 +598,9 @@ return (
           </div>
           <div class="modal-body">
             {naturalOfWorks.map((item, index) => (
-              <div className="natural-item">
+              <div className="natural-item"   style = {{
+                backgroundColor: item.name === naturalOfWork?.name ? 'rgb(242 242 242)' : ''
+              }}>
                 <div className="form-check">
                   <label className="form-check-label" htmlFor={item.name}>
                     {item.name}

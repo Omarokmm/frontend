@@ -465,7 +465,17 @@ cursor: pointer;
 }
 .natural-item{
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  margin-bottom: .5rem;
+  padding: 3px 5px;
+  border-radius: 5px;
+}
+.natural-item label{
+  margin-bottom: 0;
+}
+.natural-item .form-check {
+  min-height: 1rem;
 }
 .color-natural{
   width: 20px;
