@@ -509,6 +509,58 @@ console.log("newModel",newModel);
 }
               </div>
             </div>
+            <div className="col-lg-4">
+              <div  className={`card-case ${caseData.delivering.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
+                <h6>Delivering</h6>
+                {caseData?.delivering.status.isEnd && <span className="finished-date">
+                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.delivering), true)}</small>
+                </span>
+                }
+               {(user.roles[0] ===  _global.allRoles.Driver && departments[0].name === "Drivers" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
+                  <button
+                    className="btn btn-sm btn-success"
+                    disabled={
+                      !caseData.delivering.status.isStart
+                    }
+                    onClick={() =>
+                      changeStatus(state._id, "delivering", "start")
+                    }
+                  >
+                    Start
+                  </button>
+                  <button
+                    className="btn btn-sm btn-warning"
+                    data-bs-toggle="modal"
+                    data-bs-target="#notePauseModal"
+                    disabled={!caseData.delivering.status.isPause}
+                     onClick={() => {
+                      setPhaseName('delivering')
+                      setBuffActionName('pause')
+                     }}
+                  >
+                    Pause
+                  </button>
+                  <button
+                    className="btn btn-sm btn-danger"
+                    disabled={caseData.delivering.status.isEnd}
+                    onClick={() =>
+                      changeStatus(state._id, "delivering", "end")
+                    }
+                  >
+                    End
+                  </button>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#chooseNaturalModal"
+                    onClick={() => setPhaseModel(caseData.delivering)}
+                  >
+                    History
+                  </button>
+                </div>
+}
+              </div>
+            </div>
           </div>
         </div>
       </div>

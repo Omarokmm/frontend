@@ -278,6 +278,16 @@ console.log(caseModel.address)
       },
       obj: {},
     },
+    delivering: {
+      namePhase: "Delivering",
+      actions: [],
+      status: {
+        isStart: true,
+        isPause: false,
+        isEnd: false,
+      },
+      obj: {},
+    },
     logs: [
       {
         id: user._id,

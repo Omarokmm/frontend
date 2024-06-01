@@ -16,18 +16,18 @@ const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
 const [naturalOfWork, setNaturalOfWork] = useState(null);
 
    console.log(state);
-   useEffect(() => {
-     // get cases
-     axios
-       .get(`${_global.BASE_URL}cases/${state._id}`)
-       .then((res) => {
-         const result = res.data;
-         setCaseData(result);
-       })
-       .catch((error) => {
-         console.error("Error fetching case:", error);
-       });
-   }, []);
+  //  useEffect(() => {
+  //    // get cases
+  //    axios
+  //      .get(`${_global.BASE_URL}cases/${state._id}`)
+  //      .then((res) => {
+  //        const result = res.data;
+  //        setCaseData(result);
+  //      })
+  //      .catch((error) => {
+  //        console.error("Error fetching case:", error);
+  //      });
+  //  }, []);
   const chooseTeeth = (item,natural, type) => {
     setNaturalOfWork(natural)
     console.log(natural);
@@ -65,6 +65,20 @@ return (
             <i class="fa-solid fa-arrow-left-long"></i>
           </span>
           Case <span className="c-case-number">Number</span>: #<strong>{caseData.caseNumber}</strong>
+        </span>
+        <span>
+          <i class="fa-solid fa-truck" style={{
+                  color: caseData?.delivering.status.isEnd
+                    ? "#2ba51c "
+                    : "rgb(255 63 63) "
+                }}></i>
+         {caseData?.delivering?.status?.isEnd ?
+           <small className="delivering-icon">
+            {_global.getFormateDate(getFinishedDate(caseData?.delivering), true)}
+          </small>
+          : 
+          <small> Not Delivered</small>
+         }
         </span>
         <span className="c-case-number">
           Case Type: <strong>{caseData.caseType}</strong>
@@ -565,7 +579,7 @@ return (
             <div className="job-description mt-3">
               <strong>Job Description:</strong>
               {/* <p>{caseData.jobDescription}</p> */}
-              <textarea className="form-control mt-3" disabled={true} rows={6}>
+              <textarea className="form-control mt-3"  disabled={true} rows={6}>
                 {caseData.jobDescription}
               </textarea>
             </div>
@@ -579,7 +593,7 @@ return (
       id="chooseNaturalModal"
       data-bs-backdrop="static"
       data-bs-keyboard="false"
-      tabindex="-1"
+      tabIndex="-1"
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
     >
