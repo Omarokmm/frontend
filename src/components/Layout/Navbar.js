@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
+import * as _global from "../../config/global";
 const Navbar = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+  const departments = JSON.parse(localStorage.getItem("departments"))
   const logout = ()=>{
     localStorage.removeItem("user");
     navigate("/");
@@ -24,6 +26,8 @@ const Navbar = () => {
               <Link class="dropdown-item" to="/layout/cases">
               Cases
               </Link>
+           {user.roles[0] ===  _global.allRoles.admin  && 
+        <>
               <Link class="dropdown-item" to="/layout/users">
                Users
               </Link>
@@ -32,7 +36,8 @@ const Navbar = () => {
               </Link>
               <Link class="dropdown-item" to="/layout/doctors">
                Doctors
-              </Link>
+              </Link></>
+          }
             </li>
             {/* <li>
               <a class="dropdown-item" href="#">
