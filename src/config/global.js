@@ -24,7 +24,7 @@ export const naturalOfWorks = [
   },
   {
     id: 4,
-    name: "Esthetic Veneer",
+    name: "Veneer",
     color: "#6dfff2",
   },
   {

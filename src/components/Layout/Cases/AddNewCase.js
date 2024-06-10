@@ -95,12 +95,15 @@ const AddNewCase = () => {
  const [dentistPhone, setDentistPhone] = useState(" ");
  const [occlusalStaining, setOcclusalStaining] = useState("");
  const [texture, setTexture] = useState("");
+ const [naturalOfTeeth, setNaturalOfTeeth] = useState("");
+ const [isSubmit, setIsSubmit] = useState(false);
  const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
  const [dentistObj, setDentistObj] = useState({
    id: "",
    name: "",
    phone: "1",
  });
+
 const [doctors, setDoctors] = useState([]);
 const [doctorsOptions, setDoctorsOptions] = useState([]);
   useEffect(() => {
@@ -179,152 +182,169 @@ console.log(caseModel.address)
        }));
   };
   const handleSubmit = async() => {
-  const buffDoctor = doctors.find(
-    (doctor) => doctor._id === dentistObj.id
-  );
-  let model = {
-    caseType: buffCaseType,
-    dateIn: caseModel.dateIn,
-    dateOut: caseModel.dateOut,
-    dentistObj: {
-      id: dentistObj.id,
-      name: `${buffDoctor.firstName}, ${buffDoctor.lastName}, (${buffDoctor.clinicName})`,
-      phone: dentistPhone,
-    },
-    address: caseModel.address,
-    patientName: caseModel.patientName,
-    age: caseModel.age,
-    gender: caseModel.gender,
-    patientPhone: caseModel.patientPhone,
-    shadeCase: caseModel.shadeCase,
-    occlusalStaining: occlusalStaining,
-    texture: texture,
-    jobDescription: caseModel.jobDescription,
-    isInvoice: false,
-    isEmail: false,
-    isPhoto: false,
-    isHold:false,
-    teethNumbers: teethNumbers,
-    naturalOfWorks: [],
-    translucency: caseModel.translucency,
-    photos: [],
-    fitting: {
-      namePhase: "Fitting",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    plaster: {
-      namePhase: "Fitting",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    ceramic: {
-      namePhase: "Ceramic",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    cadCam: {
-      namePhase: "Cad Cam",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    designing: {
-      namePhase: "Photo",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    qualityControl: {
-      namePhase: "Quality Control",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    receptionPacking: {
-      namePhase: "Reception Packing",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    delivering: {
-      namePhase: "Delivering",
-      actions: [],
-      status: {
-        isStart: true,
-        isPause: false,
-        isEnd: false,
-      },
-      obj: {},
-    },
-    logs: [
-      {
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`,
-        date: new Date(),
-        msg: `Create Case by`,
-      },
-    ],
-    deadline: caseModel.dateOut,
-    dateReceived: new Date(),
-    dateReceivedInEmail: caseModel.dateReceivedInEmail,
-    notes: [],
-  };
-  console.log(model)
-     const response = await fetch(`${_global.BASE_URL}cases`, {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify(model),
-     });
-       if (response.ok) {
-        navigate('/layout/cases')
-           showToastMessage("Added Case successfully", "success");
-       }
-       if (!response.ok) {
-         showToastMessage("Error Added Case", "error");
-       }
+    setIsSubmit(true)
+    if(teethNumbers.length > 0 && dentistObj.id !== ""){
+      const buffDoctor = doctors.find(
+        (doctor) => doctor._id === dentistObj.id
+      );
+      let model = {
+        caseType: buffCaseType,
+        dateIn: caseModel.dateIn,
+        dateOut: caseModel.dateOut,
+        dentistObj: {
+          id: dentistObj.id,
+          name: `${buffDoctor.firstName}, ${buffDoctor.lastName}, (${buffDoctor.clinicName})`,
+          phone: dentistPhone,
+        },
+        address: caseModel.address,
+        patientName: caseModel.patientName,
+        age: caseModel.age,
+        gender: caseModel.gender,
+        patientPhone: caseModel.patientPhone,
+        shadeCase: caseModel.shadeCase,
+        occlusalStaining: occlusalStaining,
+        texture: texture,
+        jobDescription: caseModel.jobDescription,
+        isInvoice: false,
+        isEmail: false,
+        isPhoto: false,
+        isHold:false,
+        teethNumbers: teethNumbers,
+        naturalOfWorks: [],
+        translucency: caseModel.translucency,
+        photos: [],
+        fitting: {
+          namePhase: "Fitting",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        plaster: {
+          namePhase: "Fitting",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        ceramic: {
+          namePhase: "Ceramic",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        cadCam: {
+          namePhase: "Cad Cam",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        designing: {
+          namePhase: "Photo",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        qualityControl: {
+          namePhase: "Quality Control",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        receptionPacking: {
+          namePhase: "Reception Packing",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        delivering: {
+          namePhase: "Delivering",
+          actions: [],
+          status: {
+            isStart: true,
+            isPause: false,
+            isEnd: false,
+          },
+          obj: {},
+        },
+        logs: [
+          {
+            id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+            date: new Date(),
+            msg: `Create Case by`,
+          },
+        ],
+        deadline: caseModel.dateOut,
+        dateReceived: new Date(),
+        dateReceivedInEmail: caseModel.dateReceivedInEmail,
+        notes: [],
+      };
+      console.log(model)
+         const response = await fetch(`${_global.BASE_URL}cases`, {
+           method: "POST",
+           headers: {
+             "Content-Type": "application/json",
+           },
+           body: JSON.stringify(model),
+         });
+           if (response.ok) {
+            setIsSubmit(false)
+            navigate('/layout/cases')
+               showToastMessage("Added Case successfully", "success");
+           }
+           if (!response.ok) {
+             setIsSubmit(false)
+             showToastMessage("Error Added Case", "error");
+           }
+    }
+    else if(teethNumbers.length <= 0 ){
+      setIsSubmit(false)
+      showToastMessage("Please Choose Teeth Numbers", "error");
+    }
+    else{
+      setIsSubmit(false)
+      showToastMessage("Please fill All fields have *", "error");
+    }
+ 
   }
    const chooseTeeth = (item,type)=>{
     setNaturalOfWorks(_global.naturalOfWorks);
     setTeethData(item);
     console.log(item, type);
   }
-  const handleChangeColor = (e) => {
+  const handleChangeColor = (color) => {
+    console.log('color',color)
+    setNaturalOfTeeth(color)
+    console.log('naturalOfTeeth',naturalOfTeeth)
       const item =  naturalOfWorks.find((item) =>
-        item.name.toLowerCase().includes(e.target.value.toLowerCase())
+        item.name.toLowerCase().includes(naturalOfTeeth.toLowerCase())
       );
       console.log(teethNumbers);
       console.log("teethData.name", teethData);
@@ -358,7 +378,7 @@ console.log(caseModel.address)
   
   };
   const chooseColor = () => {
-    console.log(teethNumbers);
+    handleChangeColor(naturalOfTeeth)
   };
   const resetTeeth = ()=>{
     const updatedTeethNumbers = [...teethNumbers];
@@ -410,7 +430,7 @@ console.log(caseModel.address)
             {/* date in */}
             <div className="col-lg-4">
               <div className="form-group">
-                <label>DATE IN:</label>
+                <label>DATE IN: <span className="required">*</span></label>
                 <input
                   type="date"
                   name="dateIn"
@@ -456,7 +476,7 @@ console.log(caseModel.address)
             )}
             <div className="col-lg-8">
               <div className="form-group">
-                <label>Doctor Name:</label>
+                <label>Doctor Name: <span className="required">*</span></label>
                 <Select
                   className="basic-single"
                   classNamePrefix="select"
@@ -508,7 +528,7 @@ console.log(caseModel.address)
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-              <label>Gender:</label>
+              <label>Gender: <span className="required">*</span></label>
               <select
                 className={`form-select`}
                 onChange={handleChange}
@@ -522,7 +542,7 @@ console.log(caseModel.address)
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-                <label>Patient Name:</label>
+                <label>Patient Name: <span className="required">*</span></label>
                 <input
                   type="text"
                   name="patientName"
@@ -534,7 +554,7 @@ console.log(caseModel.address)
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-                <label>Patient Age:</label>
+                <label>Patient Age: </label>
                 <input
                   type="text"
                   name="age"
@@ -749,7 +769,7 @@ console.log(caseModel.address)
               </div>
             </div>
             <div className="col-lg-12">
-              <label>Teeth Numbers</label>
+              <label>Teeth Numbers <span className="required">*</span></label>
             </div>
             <div class="col-lg-6">
               <div class="teeth-block">
@@ -944,7 +964,7 @@ console.log(caseModel.address)
             </div>
             <div className="col-lg-12 mt-4">
               <div className="form-group">
-                <label htmlFor="description"> Job Description: </label>{" "}
+                <label htmlFor="description"> Job Description: <span className="required">*</span> </label>{" "}
                 <textarea
                   type="text"
                   id="description"
@@ -960,9 +980,16 @@ console.log(caseModel.address)
                 type="button"
                 className="btn btn-success"
                 onClick={handleSubmit}
+                disabled={isSubmit}
               >
                 Add
               </button>
+            </div>
+            <div className="col-lg-12 ">
+              <small className="required-note">
+                <span className="required">Note: </span> 
+                <span>All fields marked with an asterisk (<span className="required">* </span> ) are required.</span>
+              </small>
             </div>
           </div>
         </div>
@@ -987,6 +1014,7 @@ console.log(caseModel.address)
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="modal"
+                onClick={(e) => resetTeeth()}
                 aria-label="Close"
               ></button>
             </div>
@@ -1000,7 +1028,7 @@ console.log(caseModel.address)
                       name="color"
                       value={item.name}
                       id={item.name}
-                      onChange={handleChangeColor}
+                      onChange={(e)=>handleChangeColor(e.target.value)}
                     />
                     <label className="form-check-label" htmlFor={item.name}>
                       {item.name}
