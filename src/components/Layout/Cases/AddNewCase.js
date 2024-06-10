@@ -528,7 +528,19 @@ console.log(caseModel.address)
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-              <label>Gender: <span className="required">*</span></label>
+                <label>Patient Name: <span className="required">*</span></label>
+                <input
+                  type="text"
+                  name="patientName"
+                  placeholder="Enter Patient Name"
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+            <div className="col-lg-4">
+              <div className="form-group">
+              <label>Gender: </label>
               <select
                 className={`form-select`}
                 onChange={handleChange}
@@ -538,18 +550,6 @@ console.log(caseModel.address)
                 <option value="Male">Male</option>
                 <option value="Male">Female</option>
               </select>
-              </div>
-            </div>
-            <div className="col-lg-4">
-              <div className="form-group">
-                <label>Patient Name: <span className="required">*</span></label>
-                <input
-                  type="text"
-                  name="patientName"
-                  placeholder="Enter Patient Name"
-                  onChange={handleChange}
-                  className="form-control"
-                />
               </div>
             </div>
             <div className="col-lg-4">
