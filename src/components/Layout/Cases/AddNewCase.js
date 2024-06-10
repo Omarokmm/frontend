@@ -183,7 +183,7 @@ console.log(caseModel.address)
   };
   const handleSubmit = async() => {
     setIsSubmit(true)
-    if(teethNumbers.length > 0 && dentistObj.id !== ""){
+    if(dentistObj.id !== ""){
       const buffDoctor = doctors.find(
         (doctor) => doctor._id === dentistObj.id
       );
@@ -323,10 +323,6 @@ console.log(caseModel.address)
              setIsSubmit(false)
              showToastMessage("Error Added Case", "error");
            }
-    }
-    else if(teethNumbers.length <= 0 ){
-      setIsSubmit(false)
-      showToastMessage("Please Choose Teeth Numbers", "error");
     }
     else{
       setIsSubmit(false)
@@ -769,7 +765,7 @@ console.log(caseModel.address)
               </div>
             </div>
             <div className="col-lg-12">
-              <label>Teeth Numbers <span className="required">*</span></label>
+              <label>Teeth Numbers </label>
             </div>
             <div class="col-lg-6">
               <div class="teeth-block">
