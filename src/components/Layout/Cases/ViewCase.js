@@ -37,6 +37,7 @@ const [naturalOfWork, setNaturalOfWork] = useState(null);
   const getFinishedDate = (item)=>{
     if(item){
       if(item.status.isEnd) {
+        console.log('item.actions.find(i=> i.dateEnd)?.dateEnd',item.namePhase,item.actions.find(i=> i.dateEnd)?.dateEnd)
         return item.actions.find(i=> i.dateEnd)?.dateEnd
       }
       else{
@@ -223,7 +224,7 @@ return (
               <span class="arrow-right-phone t-90">
               <i class="fa-solid fa-right-long"></i>
               </span>
-              <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.fitting), true)}</span>
+              {/* <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.ceramic), true)}</span> */}
               </div>
               <div  className="phase-view">
               <div
