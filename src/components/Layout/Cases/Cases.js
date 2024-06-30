@@ -289,7 +289,7 @@ const Cases = ()=>{
         <h5 class="card-title">
           <span>Cases</span>
           <span className="add-user-icon">
-            {user.roles[0] === _global.allRoles.admin && 
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception) && 
             <span onClick={() => navigate("/layout/add-case")}>
               {" "}
               <i class="fa-solid fa-circle-plus "></i>
