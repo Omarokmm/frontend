@@ -105,7 +105,7 @@ return (
               </div>
               <div className="date-out">
                 {" "}
-                <strong>DATE OUT:</strong>
+                <strong>Due Date:</strong>
                 <span> 
                   {caseData.dateOut
                     ?_global.formatDateToYYYYMMDD(caseData.dateOut)

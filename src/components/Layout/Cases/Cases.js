@@ -398,7 +398,8 @@ const Cases = ()=>{
                       <th scope="col">#</th>
                       <th scope="col">Doctor </th>
                       <th scope="col">Patient</th>
-                      <th scope="col">Type</th>
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
@@ -411,7 +412,9 @@ const Cases = ()=>{
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
-                        <td>{item.caseType}</td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
                         <td>
                           <div className="actions-btns">
                             <span
@@ -478,7 +481,9 @@ const Cases = ()=>{
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor Name</th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col">Type</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
@@ -488,7 +493,9 @@ const Cases = ()=>{
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
-                        <td>{item.caseType}</td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
                         <td>
                           <div className="actions-btns">
                             <span
@@ -549,7 +556,9 @@ const Cases = ()=>{
                         <th scope="col">#Case</th>
                         <th scope="col">Doctor Name</th>
                         <th scope="col">Patient Name</th>
-                        <th scope="col">Type</th>
+                        {/* <th scope="col">Type</th> */}
+                        <th scope="col">In</th>
+                        <th scope="col">Due</th>
                         <th scope="col">Actions</th>
                       </tr>
                     </thead>
@@ -559,7 +568,9 @@ const Cases = ()=>{
                           <td>{item.caseNumber}</td>
                           <td>{item.dentistObj.name}</td>
                           <td>{item.patientName}</td>
-                          <td>{item.caseType}</td>
+                          {/* <td>{item.caseType}</td> */}
+                          <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                          <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
                           <td>
                             <div className="actions-btns">
                               <span
@@ -626,7 +637,9 @@ const Cases = ()=>{
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor Name</th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col">Type</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
@@ -636,7 +649,9 @@ const Cases = ()=>{
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
-                        <td>{item.caseType}</td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
                         <td>
                           <div className="actions-btns">
                             <span

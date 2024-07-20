@@ -437,7 +437,7 @@ console.log(caseModel.address)
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-                <label>DATE OUT:</label>
+                <label>Due To: <span className="required">*</span></label>
                 <input
                   type="date"
                   name="dateOut"

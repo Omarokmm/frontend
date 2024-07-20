@@ -257,6 +257,10 @@ body.dark {
   display: none;
 }
 @media screen and (max-width: 768px) {
+  td,
+ th {
+  padding: .25rem 0.25rem !important;
+}
   #sidebarOpen {
     font-size: 25px;
     display: block;
