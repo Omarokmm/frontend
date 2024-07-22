@@ -832,3 +832,17 @@ table th{
 .required-note{
   font-size: small;
 }
+
+.print-btn{
+  text-align: right;
+  margin-bottom: 1rem;
+}
+@page {
+  size: auto;
+  margin: 20mm 10mm;
+}
+@media print {
+  .non-print{
+    display: none;
+  }
+}

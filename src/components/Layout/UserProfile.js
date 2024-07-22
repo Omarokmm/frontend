@@ -1,14 +1,16 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as _global from "../../config/global";
-
+import ReactToPrint, { useReactToPrint } from 'react-to-print';
 const UserProfile = ()=>{
+  const userRef = useRef();
+  const user  = JSON.parse(localStorage.getItem("user"))
    const { state } = useLocation();
    const navigate = useNavigate();
   const [casesUser, setCasesUser] = useState([]);
   const [buffCasesUser, setBuffCasesUser] = useState([]);
-   const [userData, setUserData] = useState(state);
+   const [userData, setUserData] = useState(state ? state : user );
   const [searchText, setSearchText] = useState([]);
   console.log('User Data',userData)
 
@@ -24,8 +26,9 @@ const UserProfile = ()=>{
     // Add more roles as needed
   };
   useEffect(()=>{
+    
     axios
-    .get(`${_global.BASE_URL}users/actions/${state._id}`)
+    .get(`${_global.BASE_URL}users/actions/${state ? state._id : user._id}`)
     .then((res) => {
       const result = res.data;
       setCasesUser(result);
@@ -103,9 +106,11 @@ const searchByDate = (e) => {
     else {
         setCasesUser(buffCasesUser);
     }
-
-      
-};
+  }
+  const handlePrint = useReactToPrint({
+    content: () => userRef.current,
+    documentTitle: `Name: ${user.firstName}   ${user.lastName}`,
+  })
     return (
     <div className="content user-profile">
     <div className="card">
@@ -129,6 +134,11 @@ const searchByDate = (e) => {
     </h6>
     <div className="card-body">
     <div className="row">
+    {casesUser.length > 0 && 
+    <div className="col-12 mb-3 print-btn">
+        <button className="btn btn-sm btn-primary " onClick={()=>handlePrint()}> <i class="fas fa-print"></i> print</button>
+      </div>
+   }
      <div className="col-lg-8 ">
         <div className="form-group">
         <input
@@ -152,6 +162,7 @@ const searchByDate = (e) => {
         </div>
     </div>
     </div>
+    <div ref={userRef} style={{width:"100%"}}>
     {casesUser.length > 0 &&
     <table className="table text-center table-bordered">
     <thead>
@@ -215,6 +226,7 @@ const searchByDate = (e) => {
     </tbody>
     </table>
     }
+    </div>
     {
     casesUser.length <= 0 && 
     <div className="text-center">

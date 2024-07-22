@@ -27,17 +27,20 @@ const Navbar = () => {
               Cases
               </Link>
            {user.roles[0] ===  _global.allRoles.admin  && 
-        <>
+          <>
               <Link class="dropdown-item" to="/layout/users">
                Users
               </Link>
               <Link class="dropdown-item" to="/layout/departments">
               Departments
               </Link>
-              <Link class="dropdown-item" to="/layout/doctors">
-               Doctors
-              </Link></>
+          </>
           }
+           {(user.roles[0] ===  _global.allRoles.admin || user.roles[0] ===  _global.allRoles.Reception ) && 
+             <Link class="dropdown-item" to="/layout/doctors">
+               Doctors
+              </Link>
+           }
             </li>
             {/* <li>
               <a class="dropdown-item" href="#">

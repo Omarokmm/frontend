@@ -516,7 +516,7 @@ console.log("newModel",newModel);
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.delivering), true)}</small>
                 </span>
                 }
-               {(user.roles[0] ===  _global.allRoles.Driver && departments[0].name === "Drivers" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
+               {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
                   <button
                     className="btn btn-sm btn-success"
                     disabled={

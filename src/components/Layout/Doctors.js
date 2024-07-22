@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { showToastMessage } from "../../helper/toaster";
 import { format } from "date-fns";
 import * as _global from "../../config/global";
+import { useReactToPrint } from "react-to-print";
 const Doctors = () => {
+  const doctorsRef = useRef();
+  const user  = JSON.parse(localStorage.getItem("user"))
   const [doctors, setDoctors] = useState([]);
   const [buffDoctor, setBuffDoctor] = useState([]);
   const [buffDoctors, setBuffDoctors] = useState([]);
@@ -181,6 +184,10 @@ const Doctors = () => {
         setDoctors(buffDoctors);
       }
     };
+    const handlePrint = useReactToPrint({
+      content: () => doctorsRef.current,
+      documentTitle: `List of Doctors`,
+    })
   return (
     <>
       <div className="content">
@@ -189,15 +196,18 @@ const Doctors = () => {
             <span>
               Doctors <small>({doctors.length})</small>
             </span>
-            <span className="add-user-icon">
+           {user.roles[0] === _global.allRoles.admin && <span className="add-user-icon">
               <a data-bs-toggle="modal" data-bs-target="#exampleModal">
                 {" "}
                 <i class="fa-solid fa-circle-plus"></i>
               </a>
             </span>
+          }
           </h5>
           <div className="card-body">
-            <div className="form-group">
+              <div className="row mb-2">
+                <div className="col-lg-10">
+                <div className="form-group">
               <input
                 type="text"
                 name="searchText"
@@ -207,6 +217,13 @@ const Doctors = () => {
                 onChange={(e) => searchByName(e.target.value)}
               />
             </div>
+           
+                </div>
+                <div className="col-lg-2 ">
+                 <button className="btn btn-sm btn-primary p-2 w-100"  onClick={()=>handlePrint()}> <i class="fas fa-print"></i> print</button>
+            </div>
+              </div>
+              <div ref={doctorsRef} style={{width:"100%"}}>
             {doctors.length > 0 && (
               <table className="table text-center table-bordered">
                 <thead>
@@ -214,7 +231,7 @@ const Doctors = () => {
                     <th scope="col">Name</th>
                     <th scope="col">Clinic Name</th>
                     <th scope="col">Country</th>
-                    <th scope="col">Actions</th>
+                    {user.roles[0] === _global.allRoles.admin && <th scope="col" className="non-print">Actions</th> }
                   </tr>
                 </thead>
                 <tbody>
@@ -230,8 +247,8 @@ const Doctors = () => {
                       </td>
                       <td>{item.clinicName}</td>
                       <td>{item?.address?.country}</td>
-                      <td>
-                        <div className="actions-btns">
+                      {user.roles[0] === _global.allRoles.admin && <td className="non-print">
+                        <div className="actions-btns ">
                           <span
                             data-bs-toggle="modal"
                             data-bs-target="#addNoteModal"
@@ -251,11 +268,13 @@ const Doctors = () => {
                             </span> */}
                         </div>
                       </td>
+                      }
                     </tr>
                   ))}
                 </tbody>
               </table>
             )}
+            </div>
             {(doctors.length <= 0 || searchByName === "") && (
               <div className="no-content">Doctor Not Found</div>
             )}

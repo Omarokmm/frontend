@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SubmenuItem from "./SubmenuItem"; // Assuming SubmenuItem is in the same directory
 import * as _global from "../../config/global";
 const Sidebar = () => {
   const user  = JSON.parse(localStorage.getItem("user"))
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const navigate = useNavigate();
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -56,7 +57,7 @@ const Sidebar = () => {
               ]}
             />
             }
-            {user.roles[0] === _global.allRoles.admin  &&
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception)  && 
             <SubmenuItem
               title="Doctors"
               iconClass="bx bxs-user"
@@ -68,6 +69,22 @@ const Sidebar = () => {
                 "Nav Sub Link 3",
                 "Nav Sub Link 4",
               ]}
+              
+            />
+            }
+          {(user.roles[0] !== _global.allRoles.admin || user.roles[0] !== _global.allRoles.manager)  && 
+            <SubmenuItem
+              title="My Work"
+              iconClass="bx bxs-user"
+              icon="fas fa-tasks" 
+              link="/layout/user-profile"
+              sublinks={[
+                "Nav Sub Link 1",
+                "Nav Sub Link 2",
+                "Nav Sub Link 3",
+                "Nav Sub Link 4",
+              ]}
+              
             />
             }
           </li>
