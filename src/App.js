@@ -14,6 +14,7 @@ import ViewCase from "./components/Layout/Cases/ViewCase";
 import AddNewCase from "./components/Layout/Cases/AddNewCase";
 import CaseProcess from "./components/Layout/Cases/CaseProcess/CaseProcess";
 import UserProfile from "./components/Layout/UserProfile";
+import EditCase from "./components/Layout/Cases/EditCase";
 function App() {
   return (
     <div className="App">
@@ -31,6 +32,7 @@ function App() {
                 <Route path="cases" element={<Cases />} />
                 <Route path="view-case" element={<ViewCase />} />
                 <Route path="add-case" element={<AddNewCase />} />
+                <Route path="edit-case/:id" element={<EditCase />} />
                 <Route path="process-case" element={<CaseProcess />} />
               </Route>
             </Route>

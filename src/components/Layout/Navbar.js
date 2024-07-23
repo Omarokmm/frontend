@@ -56,13 +56,12 @@ const Navbar = () => {
         <div className="c-pointer mr-2" onClick={()=>navigate("/layout/cases")}>
           <img src="/images/logo.png" alt=""  />
           <span>Arak</span>
-          <sup>1.0.5</sup>
+          <sup>1.0.6</sup>
         </div>
       </div>
       {/* <div className="search_bar">
         <input type="text" placeholder="Search" />
       </div> */}
-
       <div className="navbar_content">
         <i className="bi bi-grid"></i>
         {/* <i className='bx bx-sun' id="darkLight"></i> */}

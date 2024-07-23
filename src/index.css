@@ -310,6 +310,7 @@ text-decoration: none;
 .actions-btns{
     display: flex;
     justify-content: space-around;
+    gap: 10px;
 }
 .actions-btns span:hover{
   cursor: pointer;
@@ -335,7 +336,10 @@ color: #dc3545;
     padding: 10px;
     background-color: #CCC;
 }
-
+.edit-case-title{
+  justify-content: flex-start !important;
+  align-items: center;
+  }
 .view-case .card-title{
     font-size: 14px;
 }
@@ -745,6 +749,7 @@ table th{
   align-items: baseline;
   padding: 10px 8px;
 }
+
 .card-title span{
   font-size: 13px;
 }

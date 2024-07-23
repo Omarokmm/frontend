@@ -3,8 +3,9 @@ import './AddNewCase.css'
 import axios from "axios";
 import * as _global from "../../../config/global";
 import { showToastMessage } from "../../../helper/toaster";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
+import { Patch } from "react-axios";
 
 const initialData = {
   caseNumber: "",
@@ -28,7 +29,7 @@ const initialData = {
     stumpShade: "",
     gingShade: "",
   },
-  occlusalStaining: [],
+  occlusalStaining: '',
   texture: "",
   jobDescription: "",
   teethNumbers: [],
@@ -83,30 +84,65 @@ const initialData = {
   ],
 };
 
-const AddNewCase = () => {
-  // const naturalOfWorks = _global.naturalOfWorks
+const EditCase = () => {
+ const { id } = useParams();
+ console.log(id)
  const navigate = useNavigate()
  const numOfTeeth = _global.numOfTeeth;
  const user = JSON.parse(localStorage.getItem("user"))
  const [caseModel, setCaseModel] = useState(initialData);
- const [buffCaseType, setBuffCaseType] = useState("Digital");
+ const [buffCaseType, setBuffCaseType] = useState(caseModel.buffCaseType);
  const [teethData, setTeethData] = useState(null);
  const [teethNumbers, setTeethNumbers] = useState([]);
  const [dentistPhone, setDentistPhone] = useState(" ");
- const [occlusalStaining, setOcclusalStaining] = useState("");
+ const [occlusalStaining, setOcclusalStaining] = useState(caseModel.occlusalStaining);
  const [texture, setTexture] = useState("");
  const [naturalOfTeeth, setNaturalOfTeeth] = useState("");
+ const [defaultValueDoctor, setDefaultValueDoctor] = useState("");
  const [isSubmit, setIsSubmit] = useState(false);
  const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
  const [dentistObj, setDentistObj] = useState({
    id: "",
    name: "",
-   phone: "1",
+   phone: "",
  });
-
 const [doctors, setDoctors] = useState([]);
 const [doctorsOptions, setDoctorsOptions] = useState([]);
   useEffect(() => {
+    // Get Case by id 
+    axios
+    .get(`${_global.BASE_URL}cases/${id}`)
+    .then((res) => {
+      const result = res.data;
+      console.log('case by id ', result)
+    //   setDoctors(result);
+    //       setDoctorsOptions(
+    //         res.data.map((c) => {
+    //           return {
+    //             label: `${c.firstName} ${c.lastName}(${c.clinicName})`,
+    //             _id: c._id,
+    //           };
+    //         })
+    //       );
+      setCaseModel(res.data)
+      setBuffCaseType(result.caseType)
+      setOcclusalStaining(result.occlusalStaining)
+      setTexture(result.texture)
+      console.log(result);
+      setDentistObj(result.dentistObj)
+      console.log("dentistObj",dentistObj)
+      setDefaultValueDoctor({
+        label:result.dentistObj.name,
+        _id: result.dentistObj.id,
+    })
+    setTeethNumbers(result.teethNumbers)
+  console.log("defaultValueDoctor",defaultValueDoctor)
+    })
+    .catch((error) => {
+      console.error("Error fetching doctors:", error);
+    });
+
+    // get All Doctors
     axios
       .get(`${_global.BASE_URL}doctors`)
       .then((res) => {
@@ -169,20 +205,25 @@ const handleChange = (event) => {
     }));
   };
   const handleChangeSelect = (event) => {
-const doctor = doctors.find((d) => d._id === event._id);
-console.log(doctor)
-setCaseModel((prevFormData) => ({
-  ...prevFormData,
-  address: doctor.address.country
-}));
-console.log(caseModel.address)
-       setDentistObj((prevFormData) => ({
-         ...prevFormData,
-         id: event._id,
-       }));
-  };
+        const doctor = doctors.find((d) => d._id === event._id);
+        console.log(doctor)
+        setCaseModel((prevFormData) => ({
+        ...prevFormData,
+        address: doctor.address.country
+        }));
+        console.log(caseModel.address)
+        setDentistObj((prevFormData) => ({
+            ...prevFormData,
+            id: event._id,
+        }));
+        setDefaultValueDoctor({
+            label:event.label,
+            _id: event._id,
+        })
+       };
   const handleSubmit = async() => {
     setIsSubmit(true)
+    console.log("dentistObj",dentistObj)
     if(dentistObj.id !== ""){
       const buffDoctor = doctors.find(
         (doctor) => doctor._id === dentistObj.id
@@ -307,8 +348,8 @@ console.log(caseModel.address)
         notes: [],
       };
       console.log(model)
-         const response = await fetch(`${_global.BASE_URL}cases`, {
-           method: "POST",
+         const response = await fetch(`${_global.BASE_URL}cases/${id}`, {
+           method: "PATCH",
            headers: {
              "Content-Type": "application/json",
            },
@@ -317,11 +358,11 @@ console.log(caseModel.address)
            if (response.ok) {
             setIsSubmit(false)
             navigate('/layout/cases')
-               showToastMessage("Added Case successfully", "success");
+               showToastMessage("Updated Case successfully", "success");
            }
            if (!response.ok) {
              setIsSubmit(false)
-             showToastMessage("Error Added Case", "error");
+             showToastMessage("Error Updated Case", "error");
            }
     }
     else{
@@ -387,17 +428,23 @@ console.log(caseModel.address)
   return (
     <div className="content ">
       <div className="card">
-        <h5 class="card-title">New Case</h5>
+        <h5 class="card-title edit-case-title">
+            <span className="back-step" onClick={() => navigate("/layout/cases")}>
+            <i class="fa-solid fa-arrow-left-long"></i>
+        </span>
+            <span>Edit Case <b>#{caseModel.caseNumber} </b>
+            </span>
+        </h5>
         <div className="card-body">
           <div class="row">
-            <div className="col-lg-12">
+            {/* <div className="col-lg-12">
               <label>Case Type</label>
               <div className="type-case">
                 <div class="form-check">
                   <input
                     class="form-check-input"
                     type="radio"
-                    value="Physical"
+                    value={caseModel.caseType}
                     name="caseType"
                     onChange={(e) => setBuffCaseType(e.target.value)}
                     id="flexRadioDefault1"
@@ -412,7 +459,7 @@ console.log(caseModel.address)
                     class="form-check-input"
                     type="radio"
                     name="caseType"
-                    value="Digital"
+                    value={caseModel.caseType}
                     onChange={(e) => setBuffCaseType(e.target.value)}
                     id="flexRadioDefault2"
                     checked={buffCaseType === "Digital"}
@@ -422,13 +469,14 @@ console.log(caseModel.address)
                   </label>
                 </div>
               </div>
-            </div>
+            </div> */}
             {/* date in */}
             <div className="col-lg-4">
               <div className="form-group">
                 <label>DATE IN: <span className="required">*</span></label>
                 <input
                   type="date"
+                  value={_global.formatDateToYYYYMMDD(caseModel.dateIn)}
                   name="dateIn"
                   onChange={handleChange}
                   className="form-control"
@@ -441,6 +489,7 @@ console.log(caseModel.address)
                 <input
                   type="date"
                   name="dateOut"
+                  value={_global.formatDateToYYYYMMDD(caseModel.dateOut)}
                   onChange={handleChange}
                   className="form-control"
                 />
@@ -464,6 +513,7 @@ console.log(caseModel.address)
                   <input
                     type="date"
                     name="dateReceivedInEmail"
+                    value={_global.formatDateToYYYYMMDD(caseModel.dateReceivedInEmail)}
                     onChange={handleChange}
                     className="form-control"
                   />
@@ -476,6 +526,7 @@ console.log(caseModel.address)
                 <Select
                   className="basic-single"
                   classNamePrefix="select"
+                  value={defaultValueDoctor}
                   isLoading={true}
                   // isClearable={true}
                   onChange={(e) => handleChangeSelect(e)}
@@ -527,6 +578,7 @@ console.log(caseModel.address)
                 <label>Patient Name: <span className="required">*</span></label>
                 <input
                   type="text"
+                  value={caseModel.patientName}
                   name="patientName"
                   placeholder="Enter Patient Name"
                   onChange={handleChange}
@@ -539,10 +591,11 @@ console.log(caseModel.address)
               <label>Gender: </label>
               <select
                 className={`form-select`}
+                value={caseModel.gender}
                 onChange={handleChange}
                 name="gender"
               >
-                <option selected>Select Gender</option>
+                <option disabled>Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
@@ -554,6 +607,7 @@ console.log(caseModel.address)
                 <input
                   type="text"
                   name="age"
+                  value={caseModel.age}
                   placeholder="Enter Patient Age"
                   onChange={handleChange}
                   className="form-control"
@@ -578,6 +632,7 @@ console.log(caseModel.address)
                 <input
                   type="text"
                   name="shade"
+                  value={caseModel.shadeCase.shade}
                   placeholder="Enter Shade"
                   onChange={handleChangeShade}
                   className="form-control"
@@ -589,6 +644,7 @@ console.log(caseModel.address)
                 <label>Stump Shade:</label>
                 <input
                   type="text"
+                  value={caseModel.shadeCase.stumpShade}
                   name="stumpShade"
                   placeholder="Enter Stump Shade"
                   onChange={handleChangeShade}
@@ -602,6 +658,7 @@ console.log(caseModel.address)
                 <input
                   type="text"
                   name="gingShade"
+                  value={caseModel.shadeCase.gingShade}
                   placeholder="Enter Stump Shade "
                   onChange={handleChangeShade}
                   className="form-control"
@@ -620,6 +677,7 @@ console.log(caseModel.address)
                       name="occlusalStaining"
                       id="flexCheckDefaultn"
                       onChange={handleChangeOcclusal}
+                      checked={occlusalStaining === 'None'}
                     />
                     <label
                       className="form-check-label"
@@ -634,12 +692,13 @@ console.log(caseModel.address)
                       type="radio"
                       name="occlusalStaining"
                       value="Light"
-                      id="flexCheckDefaultl"
+                      id="flexCheckDefaultli"
                       onChange={handleChangeOcclusal}
+                    checked={occlusalStaining=== 'Light'}
                     />
                     <label
                       className="form-check-label"
-                      htmlFor="flexCheckDefaultl"
+                      htmlFor="flexCheckDefaultli"
                     >
                       Light
                     </label>
@@ -650,12 +709,13 @@ console.log(caseModel.address)
                       type="radio"
                       name="occlusalStaining"
                       value="Dark"
-                      id="flexCheckCheckedd"
+                      id="flexCheckChecked"
+                      checked={occlusalStaining === 'Dark'}
                       onChange={handleChangeOcclusal}
                     />
                     <label
                       className="form-check-label"
-                      htmlFor="flexCheckCheckedd"
+                      htmlFor="flexCheckChecked"
                     >
                       Dark
                     </label>
@@ -675,6 +735,7 @@ console.log(caseModel.address)
                       name="texture"
                       id="smooth_id"
                       onChange={handleChangeTexture}
+                      checked={texture=== 'Smooth'}
                     />
                     <label className="form-check-label" htmlFor="smooth_id">
                       Smooth
@@ -688,6 +749,7 @@ console.log(caseModel.address)
                       name="texture"
                       id="moderate_id"
                       onChange={handleChangeTexture}
+                      checked={texture=== 'Moderate'}
                     />
                     <label className="form-check-label" htmlFor="moderate_id">
                       Moderate
@@ -701,6 +763,7 @@ console.log(caseModel.address)
                       name="texture"
                       id="heavy_id"
                       onChange={handleChangeTexture}
+                      checked={texture=== 'Heavy'}
                     />
                     <label className="form-check-label" htmlFor="heavy_id">
                       Heavy
@@ -719,12 +782,13 @@ console.log(caseModel.address)
                       type="radio"
                       value="Normal"
                       name="translucency"
-                      id="flexCheckDefaultno"
+                      id="flexCheckDefaultnor"
                       onChange={handleChange}
+                      checked={caseModel.translucency=== 'Normal'}
                     />
                     <label
                       className="form-check-label"
-                      htmlFor="flexCheckDefaultno"
+                      htmlFor="flexCheckDefaultnor"
                     >
                       Normal
                     </label>
@@ -735,12 +799,13 @@ console.log(caseModel.address)
                       type="radio"
                       name="translucency"
                       value="Cloudy"
-                      id="flexCheckDefaultc"
+                      id="flexCheckDefaultclo"
                       onChange={handleChange}
+                      checked={caseModel.translucency=== 'Cloudy'}
                     />
                     <label
                       className="form-check-label"
-                      htmlFor="flexCheckDefaultc"
+                      htmlFor="flexCheckDefaultclo"
                     >
                       Cloudy
                     </label>
@@ -751,12 +816,13 @@ console.log(caseModel.address)
                       type="radio"
                       name="translucency"
                       value="high"
-                      id="flexCheckCheckedh"
+                      id="flexCheckCheckedhi"
                       onChange={handleChange}
+                      checked={caseModel.translucency === 'high'}
                     />
                     <label
-                      className="form-check-labelh"
-                      htmlFor="flexCheckCheckedh"
+                      className="form-check-label"
+                      htmlFor="flexCheckCheckedhi"
                     >
                       High
                     </label>
@@ -965,6 +1031,7 @@ console.log(caseModel.address)
                   type="text"
                   id="description"
                   rows={5}
+                  value={caseModel.jobDescription}
                   className="form-control"
                   name="jobDescription"
                   onChange={handleChange}
@@ -976,9 +1043,9 @@ console.log(caseModel.address)
                 type="button"
                 className="btn btn-success"
                 onClick={handleSubmit}
-                disabled={isSubmit}
+                // disabled={isSubmit}
               >
-                Add
+                Update
               </button>
             </div>
             <div className="col-lg-12 ">
@@ -1061,4 +1128,4 @@ console.log(caseModel.address)
     </div>
   );
 };
-export default AddNewCase;
+export default EditCase;

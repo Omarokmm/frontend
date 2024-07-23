@@ -78,6 +78,7 @@ const initialData = {
 };
 
 const Cases = ()=>{
+  const departments = JSON.parse(localStorage.getItem("departments"))
   const user = JSON.parse(localStorage.getItem("user"))
   const navigate = useNavigate();
   const [buffCase, setBuffCase] = useState(null);
@@ -283,6 +284,9 @@ const Cases = ()=>{
       }
     }
   };
+  const editCase = (id)=>{
+    navigate(`/layout/edit-case/${id}`)
+  }
   return (
     <div className="content">
       <div className="card">
@@ -429,6 +433,7 @@ const Cases = ()=>{
                             >
                               <i class="fa-brands fa-squarespace"></i>
                             </span>
+                         
                             {/* <span onClick={(e) => deleteCase(item._id)}>
                                 <i className="fa-solid fa-trash-can"></i>
                               </span> */}
@@ -445,6 +450,11 @@ const Cases = ()=>{
                                   <i class="fa-regular fa-circle-pause"></i>
                                 </span>
                               )}
+                            { (user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                            <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
+                            <i class="fas fa-edit"></i>
+                            </span>
+                           }
                           </div>
                         </td>
                       </tr>
@@ -510,6 +520,11 @@ const Cases = ()=>{
                             >
                               <i class="fa-brands fa-squarespace"></i>
                             </span>
+                           { (user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                            <span className="c-primary" onClick={(e) => editCase(item._id)}>
+                            <i class="fas fa-edit"></i>
+                            </span>
+                           }
                             {/* <span onClick={(e) => deleteCase(item._id)}>
                               <i className="fa-solid fa-trash-can"></i>
                             </span> */}
