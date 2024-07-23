@@ -339,7 +339,7 @@ const handleChange = (event) => {
             id: user._id,
             name: `${user.firstName} ${user.lastName}`,
             date: new Date(),
-            msg: `Create Case by`,
+            msg: `Updated Case by`,
           },
         ],
         deadline: caseModel.dateOut,

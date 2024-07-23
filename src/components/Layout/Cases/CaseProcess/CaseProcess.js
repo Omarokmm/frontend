@@ -164,9 +164,11 @@ console.log("newModel",newModel);
                 {caseData?.cadCam.status.isEnd &&  <span className="finished-date">
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.cadCam), true)}</small>
                 </span>
-}
-                {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
-                  <button
+                }
+                <div className="btn-actions">
+                {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& 
+                 <>
+                 <button
                     className="btn btn-sm btn-success"
                     disabled={!caseData.cadCam.status.isStart}
                     onClick={() => changeStatus(state._id, "cadCam", "start")}
@@ -197,6 +199,8 @@ console.log("newModel",newModel);
                   >
                     End
                   </button>
+                  </>
+                   }
                   <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
@@ -206,7 +210,6 @@ console.log("newModel",newModel);
                     History
                   </button>
                 </div>
-                }
               </div>
             </div>
             {caseData.caseType === "Physical" && (
@@ -214,10 +217,12 @@ console.log("newModel",newModel);
                 <div  className={`card-case ${caseData.plaster.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                   <h6>Plaster</h6>
                   {caseData?.plaster.status.isEnd &&   <span className="finished-date">
-                  <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.plaster), true)}</small>
-                </span>
-}
-                 {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Plaster" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&  <div className="btn-actions">
+                    <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.plaster), true)}</small>
+                    </span>
+                  }
+                   <div className="btn-actions">
+                   {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Plaster" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&
+                   <>
                     <button
                       className="btn btn-sm btn-success"
                       disabled={
@@ -249,6 +254,7 @@ console.log("newModel",newModel);
                     >
                       End
                     </button>
+                    </>}
                     <button
                       className="btn btn-sm btn-primary"
                       data-bs-toggle="modal"
@@ -258,7 +264,6 @@ console.log("newModel",newModel);
                       History
                     </button>
                   </div>
-}
                 </div>
               </div>
             )}
@@ -268,8 +273,10 @@ console.log("newModel",newModel);
                 {caseData?.fitting.status.isEnd && <span className="finished-date">
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.fitting), true)}</small>
                 </span>
-}
-               {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Fitting"|| user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&  <div className="btn-actions">
+                }
+               <div className="btn-actions">
+               {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Fitting"|| user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&  
+               <>
                   <button
                     className="btn btn-sm btn-success"
                     disabled={!caseData.fitting.status.isStart}
@@ -296,6 +303,8 @@ console.log("newModel",newModel);
                   >
                     End
                   </button>
+                  </>
+                  }
                   <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
@@ -305,7 +314,6 @@ console.log("newModel",newModel);
                     History
                   </button>
                 </div>
-}
               </div>
             </div>
             <div className="col-lg-4">
@@ -314,9 +322,11 @@ console.log("newModel",newModel);
                 {caseData?.ceramic.status.isEnd && <span className="finished-date">
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.ceramic), true)}</small>
                 </span>
-}
-             {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Caramic" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&  
+                }
+              
               <div className="btn-actions">
+              {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Caramic" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC") &&
+              <>
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
@@ -345,6 +355,7 @@ console.log("newModel",newModel);
                   >
                     End
                   </button>
+                  </>}
                   <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
@@ -353,8 +364,7 @@ console.log("newModel",newModel);
                   >
                     History
                   </button>
-                </div>
-}
+              </div>
               </div>
             </div>
             <div className="col-lg-4">
@@ -364,7 +374,9 @@ console.log("newModel",newModel);
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.qualityControl), true)}</small>
                 </span>
                }
-                {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" &&  <div className="btn-actions">
+                 <div className="btn-actions">
+                 {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" &&
+                 <>
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
@@ -397,6 +409,7 @@ console.log("newModel",newModel);
                   >
                     End
                   </button>
+                  </>}
                   <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
@@ -406,7 +419,6 @@ console.log("newModel",newModel);
                     History
                   </button>
                 </div>
-}
               </div>
             </div>
             <div className="col-lg-4">
@@ -416,7 +428,9 @@ console.log("newModel",newModel);
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.designing), true)}</small>
                 </span>
                 }
-                  {(user.roles[0] ===  _global.allRoles.graphic_design && departments[0].name === "Marketing"  || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&   <div className="btn-actions">
+                 <div className="btn-actions">
+                 {(user.roles[0] ===  _global.allRoles.graphic_design && departments[0].name === "Marketing"  || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                 <>
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
@@ -445,6 +459,8 @@ console.log("newModel",newModel);
                   >
                     End
                   </button>
+                  </>
+                  }
                   <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
@@ -454,7 +470,6 @@ console.log("newModel",newModel);
                     History
                   </button>
                 </div>
-}
               </div>
             </div>
             <div className="col-lg-4">
@@ -464,7 +479,9 @@ console.log("newModel",newModel);
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.receptionPacking), true)}</small>
                 </span>
                 }
-               {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
+                <div className="btn-actions">
+                {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                <>
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
@@ -497,6 +514,8 @@ console.log("newModel",newModel);
                   >
                     End
                   </button>
+                  </>
+                 }
                   <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
@@ -506,7 +525,6 @@ console.log("newModel",newModel);
                     History
                   </button>
                 </div>
-}
               </div>
             </div>
             <div className="col-lg-4">
@@ -516,7 +534,9 @@ console.log("newModel",newModel);
                   <span>Finished at:</span> <small  >{_global.getFormateDate( getFinishedDate(caseData?.delivering), true)}</small>
                 </span>
                 }
-               {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& <div className="btn-actions">
+                <div className="btn-actions">
+                {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                <>
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
@@ -549,6 +569,8 @@ console.log("newModel",newModel);
                   >
                     End
                   </button>
+                  </>
+                }
                   <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
@@ -558,7 +580,6 @@ console.log("newModel",newModel);
                     History
                   </button>
                 </div>
-}
               </div>
             </div>
           </div>
