@@ -116,9 +116,9 @@ const searchByDate = (e) => {
     <div className="card">
     <h6 class="card-title">
      <span >
-     <span className="back-step" onClick={() => navigate("/layout/users")}>
+     {/* <span className="back-step" onClick={() => navigate("/layout/users")}>
             <i class="fa-solid fa-arrow-left-long"></i>
-     </span>
+     </span> */}
     <small>{userData.firstName} {userData.lastName}</small>
      </span>
      <span >

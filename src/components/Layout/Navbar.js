@@ -26,6 +26,10 @@ const Navbar = () => {
               <Link class="dropdown-item" to="/layout/cases">
               Cases
               </Link>
+              {(user.roles[0] !== _global.allRoles.admin || user.roles[0] !== _global.allRoles.manager)  && <Link class="dropdown-item" to="/layout/user-profile">
+                  <i className="fas fa-tasks"></i> My Work
+                  </Link>
+              }
            {user.roles[0] ===  _global.allRoles.admin  && 
           <>
               <Link class="dropdown-item" to="/layout/users">
