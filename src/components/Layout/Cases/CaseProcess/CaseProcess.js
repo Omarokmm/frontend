@@ -166,7 +166,7 @@ console.log("newModel",newModel);
                 </span>
                 }
                 <div className="btn-actions">
-                {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& 
+                {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous")&& 
                  <>
                  <button
                     className="btn btn-sm btn-success"
