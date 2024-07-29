@@ -293,7 +293,7 @@ const Cases = ()=>{
         <h5 class="card-title">
           <span>Cases</span>
           <span className="add-user-icon">
-            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception) && 
+            {(user.roles[0] === _global.allRoles.admin || user.lastName === "Jamous") && 
             <span onClick={() => navigate("/layout/add-case")}>
               {" "}
               <i class="fa-solid fa-circle-plus "></i>
@@ -450,7 +450,7 @@ const Cases = ()=>{
                                   <i class="fa-regular fa-circle-pause"></i>
                                 </span>
                               )}
-                            { (user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                            { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
                             <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
                             <i class="fas fa-edit"></i>
                             </span>
@@ -520,7 +520,7 @@ const Cases = ()=>{
                             >
                               <i class="fa-brands fa-squarespace"></i>
                             </span>
-                           { (user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                           { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
                             <span className="c-primary" onClick={(e) => editCase(item._id)}>
                             <i class="fas fa-edit"></i>
                             </span>
