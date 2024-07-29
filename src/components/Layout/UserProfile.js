@@ -109,7 +109,7 @@ const searchByDate = (e) => {
   }
   const handlePrint = useReactToPrint({
     content: () => userRef.current,
-    documentTitle: `Name: ${user.firstName}   ${user.lastName}`,
+    documentTitle: `Name: ${userData.firstName}   ${userData.lastName}`,
   })
     return (
     <div className="content user-profile">
