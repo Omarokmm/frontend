@@ -67,6 +67,11 @@ export const naturalOfWorks = [
     name: "Night Guard",
     color: "rgb(160 255 113 / 66%)",
   },
+  {
+    id: 13,
+    name: "Study",
+    color: "rgb(140 113 255 / 66%)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [
