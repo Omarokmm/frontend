@@ -262,7 +262,12 @@ const handleChange = (event) => {
         qualityControl: caseModel.qualityControl,
         receptionPacking: caseModel.receptionPacking,
         delivering: caseModel.delivering,
-        logs: caseModel.logs,
+        logs: caseModel.logs.push({
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`,
+          date: new Date(),
+            msg: "Updated Case by"
+        }),
         deadline: caseModel.dateOut,
         dateReceived: caseModel.dateReceived,
         dateReceivedInEmail: caseModel.dateReceivedInEmail,

@@ -6,6 +6,7 @@ import ReactToPrint, { useReactToPrint } from 'react-to-print';
 const UserProfile = ()=>{
   const userRef = useRef();
   const user  = JSON.parse(localStorage.getItem("user"))
+  const departments = JSON.parse(localStorage.getItem("departments"))
    const { state } = useLocation();
    const navigate = useNavigate();
   const [casesUser, setCasesUser] = useState([]);
@@ -41,7 +42,6 @@ const UserProfile = ()=>{
   },[])
   function groupTeethNumbersByName(teethNumbers) {
     const result = {};
-  
     teethNumbers.forEach(teethNumber => {
       const { name } = teethNumber;
   
@@ -98,10 +98,54 @@ const searchByDate = (e) => {
     const date = e.target.value
     if(date != "")
     {
-    const filteredCases = buffCasesUser.filter((item) => {
-        return  _global.formatDateToYYYYMMDD(item.dateCreated) === date;
-    });
-        setCasesUser(filteredCases);
+      console.log("date")
+      if(userData.departments[0].name === "CadCam"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.cadCam.actions.find(i=>i.dateEnd).dateEnd) === date;
+      });
+          setCasesUser(filteredCases);
+      }
+      if(userData.departments[0].name === "Caramic"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i=>i.dateEnd).dateEnd) === date;
+      });
+          setCasesUser(filteredCases);
+      }
+      if(userData.departments[0].name === "Fitting"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.fitting.actions.find(i=>i.dateEnd).dateEnd) === date;
+      });
+      
+          setCasesUser(filteredCases);
+      }
+      if(userData.departments[0].name === "Plaster"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.plaster.actions.find(i=>i.dateEnd).dateEnd) === date;
+      });
+      
+          setCasesUser(filteredCases);
+      } 
+      if(userData.departments[0].name === "Reception"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.receptionPacking.actions.find(i=>i.dateEnd).dateEnd) === date;
+      });
+      
+          setCasesUser(filteredCases);
+      }
+      if(userData.departments[0].name === "Marketing"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.designing.actions.find(i=>i.dateEnd).dateEnd) === date;
+      });
+      
+          setCasesUser(filteredCases);
+      }
+      if(userData.departments[0].name === "Drivers"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.delivering.actions.find(i=>i.dateEnd).dateEnd) === date;
+      });
+      
+          setCasesUser(filteredCases);
+      }
     }
     else {
         setCasesUser(buffCasesUser);
@@ -111,6 +155,9 @@ const searchByDate = (e) => {
     content: () => userRef.current,
     documentTitle: `Name: ${userData.firstName}   ${userData.lastName}`,
   })
+  const editCase = (id)=>{
+    navigate(`/layout/edit-case/${id}`)
+  }
     return (
     <div className="content user-profile">
     <div className="card">
@@ -119,7 +166,7 @@ const searchByDate = (e) => {
      {/* <span className="back-step" onClick={() => navigate("/layout/users")}>
             <i class="fa-solid fa-arrow-left-long"></i>
      </span> */}
-    <small>{userData.firstName} {userData.lastName}</small>
+    <small>{userData.firstName} {userData.lastName} ({casesUser.length })</small>
      </span>
      <span >
         <small>Role:       
@@ -172,6 +219,7 @@ const searchByDate = (e) => {
         <th scope="col">Doctor</th>
         <th scope="col">Patient</th>
         <th scope="col">#teeth</th>
+        <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -196,6 +244,13 @@ const searchByDate = (e) => {
             </p>
             )
             }
+            </td>
+            <td>
+            { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                            <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
+                            <i class="fas fa-edit"></i>
+                            </span>
+}
             </td>
         </tr>
         ))}

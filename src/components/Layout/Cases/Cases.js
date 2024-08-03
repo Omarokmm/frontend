@@ -402,6 +402,7 @@ const Cases = ()=>{
                       <th scope="col">#</th>
                       <th scope="col">Doctor </th>
                       <th scope="col">Patient</th>
+                      <th scope="col">#tooth</th>
                       <th scope="col">In</th>
                       <th scope="col">Due</th>
                       <th scope="col">Actions</th>
@@ -416,6 +417,7 @@ const Cases = ()=>{
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
+                        <td className={`${item.teethNumbers.length <=0 ? "bg-danger" : "bg-white"}`}>{item.teethNumbers.length}</td>
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
@@ -450,7 +452,8 @@ const Cases = ()=>{
                                   <i class="fa-regular fa-circle-pause"></i>
                                 </span>
                               )}
-                            { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                            {/* { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& */}
+                            { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
                             <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
                             <i class="fas fa-edit"></i>
                             </span>
