@@ -343,7 +343,7 @@ function groupCasesTeethNumbersByName() {
                             <i className="fa-solid fa-trash-can"></i>
                           </span> */}
                          <span   
-                         onClick={()=>navigate("/layout/user-profile", { state: { ...item } })}
+                         onClick={()=>navigate("/layout/user-profile", { state: { ...item, isAdmin:true } })}
                         //  data-bs-toggle="modal"
                         //     data-bs-target="#casesUserModal"
                         //      onClick={(e) => {

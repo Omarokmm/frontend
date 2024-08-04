@@ -8,6 +8,7 @@ const UserProfile = ()=>{
   const user  = JSON.parse(localStorage.getItem("user"))
   const departments = JSON.parse(localStorage.getItem("departments"))
    const { state } = useLocation();
+   console.log("stateeeeeee",state)
    const navigate = useNavigate();
   const [casesUser, setCasesUser] = useState([]);
   const [buffCasesUser, setBuffCasesUser] = useState([]);
@@ -96,52 +97,60 @@ const searchByName = (searchText) => {
     }
 };
 const searchByDate = (e) => {
+  console.log("userData.departments[0]",userData.departments[0])
     const date = e.target.value
     setStartDat(date)
     if(date != "")
     {
       console.log("date")
-      if(userData.departments[0].name === "CadCam"){
+      if(userData.isAdmin ? userData.departments[0].name === "CadCam" : departments[0].name === "CadCam"){
         const filteredCases = buffCasesUser.filter((item) => {
           return  _global.formatDateToYYYYMMDD(item.cadCam.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
           setCasesUser(filteredCases);
       }
-      if(userData.departments[0].name === "Caramic"){
+      if(userData.isAdmin ? userData.departments[0].name === "Caramic" : departments[0].name === "Caramic"){
         const filteredCases = buffCasesUser.filter((item) => {
           return  _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
           setCasesUser(filteredCases);
       }
-      if(userData.departments[0].name === "Fitting"){
+      if(userData.isAdmin ? userData.departments[0].name === "Fitting" : departments[0].name === "Fitting"){
         const filteredCases = buffCasesUser.filter((item) => {
           return  _global.formatDateToYYYYMMDD(item.fitting.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
       
           setCasesUser(filteredCases);
       }
-      if(userData.departments[0].name === "Plaster"){
+      if(userData.isAdmin ? userData.departments[0].name === "Plaster" : departments[0].name === "Plaster"){
         const filteredCases = buffCasesUser.filter((item) => {
           return  _global.formatDateToYYYYMMDD(item.plaster.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
       
           setCasesUser(filteredCases);
       } 
-      if(userData.departments[0].name === "Reception"){
+      if(userData.isAdmin ? userData.departments[0].name === "Reception" : departments[0].name === "Reception"){
         const filteredCases = buffCasesUser.filter((item) => {
           return  _global.formatDateToYYYYMMDD(item.receptionPacking.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
       
           setCasesUser(filteredCases);
       }
-      if(userData.departments[0].name === "Marketing"){
+      if(userData.isAdmin ? userData.departments[0].name === "Marketing" : departments[0].name === "Marketing"){
         const filteredCases = buffCasesUser.filter((item) => {
           return  _global.formatDateToYYYYMMDD(item.designing.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
       
           setCasesUser(filteredCases);
       }
-      if(userData.departments[0].name === "Drivers"){
+      if(userData.isAdmin ? userData.departments[0].name === "QC" : departments[0].name === "QC"){
+        const filteredCases = buffCasesUser.filter((item) => {
+          return  _global.formatDateToYYYYMMDD(item.qualityControl.actions.find(i => i.dateEnd).dateEnd) === date;
+      });
+      
+          setCasesUser(filteredCases);
+      }
+      if(userData.isAdmin ? userData.departments[0].name === "Drivers" : departments[0].name === "Drivers"){
         const filteredCases = buffCasesUser.filter((item) => {
           return  _global.formatDateToYYYYMMDD(item.delivering.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
@@ -161,25 +170,28 @@ const searchByEndDate = (e) => {
   {
     const filteredCases = buffCasesUser.filter((item) => {
       let endDateStr = "";
-      if (userData.departments[0].name === "CadCam") {
+      if (userData.isAdmin ? userData.departments[0].name === "CadCam" : departments[0].name === "CadCam") {
           endDateStr = _global.formatDateToYYYYMMDD(item.cadCam.actions.find(i => i.dateEnd).dateEnd);
       }
-      if (userData.departments[0].name === "Caramic") {
+      if (userData.isAdmin ? userData.departments[0].name === "Caramic" : departments[0].name === "Caramic") {
           endDateStr = _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i => i.dateEnd).dateEnd);
       }
-      if (userData.departments[0].name === "Fitting") {
+      if (userData.isAdmin ? userData.departments[0].name === "Fitting" : departments[0].name === "Fitting") {
           endDateStr = _global.formatDateToYYYYMMDD(item.fitting.actions.find(i => i.dateEnd).dateEnd);
       }
-      if (userData.departments[0].name === "Plaster") {
+      if (userData.isAdmin ? userData.departments[0].name === "Plaster" : departments[0].name === "Plaster") {
           endDateStr = _global.formatDateToYYYYMMDD(item.plaster.actions.find(i => i.dateEnd).dateEnd);
       }
-      if (userData.departments[0].name === "Reception") {
+      if (userData.isAdmin ? userData.departments[0].name === "Reception" : departments[0].name === "Reception") {
           endDateStr = _global.formatDateToYYYYMMDD(item.receptionPacking.actions.find(i => i.dateEnd).dateEnd);
       }
-      if (userData.departments[0].name === "Marketing") {
+      if (userData.isAdmin ? userData.departments[0].name === "Marketing" : departments[0].name === "Marketing") {
           endDateStr = _global.formatDateToYYYYMMDD(item.designing.actions.find(i => i.dateEnd).dateEnd);
       }
-      if (userData.departments[0].name === "Drivers") {
+      if (userData.isAdmin ? userData.departments[0].name === "QC" : departments[0].name === "QC") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.qualityControl.actions.find(i => i.dateEnd).dateEnd);
+    }
+      if (userData.isAdmin ? userData.departments[0].name === "Drivers" : departments[0].name === "Drivers") {
           endDateStr = _global.formatDateToYYYYMMDD(item.delivering.actions.find(i => i.dateEnd).dateEnd);
       }
 
