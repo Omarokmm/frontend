@@ -13,6 +13,7 @@ const UserProfile = ()=>{
   const [buffCasesUser, setBuffCasesUser] = useState([]);
    const [userData, setUserData] = useState(state ? state : user );
   const [searchText, setSearchText] = useState([]);
+  const [startDate, setStartDat] = useState(new Date());
   console.log('User Data',userData)
 
    const Roles = {
@@ -96,6 +97,7 @@ const searchByName = (searchText) => {
 };
 const searchByDate = (e) => {
     const date = e.target.value
+    setStartDat(date)
     if(date != "")
     {
       console.log("date")
@@ -150,7 +152,75 @@ const searchByDate = (e) => {
     else {
         setCasesUser(buffCasesUser);
     }
+}
+const searchByEndDate = (e) => {
+  const date = e.target.value
+  const start = _global.formatDateToYYYYMMDD(startDate);
+  const end = _global.formatDateToYYYYMMDD(date);
+  if(date != "")
+  {
+    const filteredCases = buffCasesUser.filter((item) => {
+      let endDateStr = "";
+      if (userData.departments[0].name === "CadCam") {
+          endDateStr = _global.formatDateToYYYYMMDD(item.cadCam.actions.find(i => i.dateEnd).dateEnd);
+      }
+      if (userData.departments[0].name === "Caramic") {
+          endDateStr = _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i => i.dateEnd).dateEnd);
+      }
+      if (userData.departments[0].name === "Fitting") {
+          endDateStr = _global.formatDateToYYYYMMDD(item.fitting.actions.find(i => i.dateEnd).dateEnd);
+      }
+      if (userData.departments[0].name === "Plaster") {
+          endDateStr = _global.formatDateToYYYYMMDD(item.plaster.actions.find(i => i.dateEnd).dateEnd);
+      }
+      if (userData.departments[0].name === "Reception") {
+          endDateStr = _global.formatDateToYYYYMMDD(item.receptionPacking.actions.find(i => i.dateEnd).dateEnd);
+      }
+      if (userData.departments[0].name === "Marketing") {
+          endDateStr = _global.formatDateToYYYYMMDD(item.designing.actions.find(i => i.dateEnd).dateEnd);
+      }
+      if (userData.departments[0].name === "Drivers") {
+          endDateStr = _global.formatDateToYYYYMMDD(item.delivering.actions.find(i => i.dateEnd).dateEnd);
+      }
+
+      return endDateStr >= start && endDateStr <= end;
+  });
+  setCasesUser(filteredCases);
   }
+  else {
+      setCasesUser(buffCasesUser);
+  }
+}
+const getFinisheingDate = (item) => {
+  if (item) {
+    let endDateStr = "";
+    if (userData.departments[0].name === "CadCam") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.cadCam.actions.find(i => i.dateEnd).dateEnd);
+    }
+    if (userData.departments[0].name === "Caramic") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i => i.dateEnd).dateEnd);
+    }
+    if (userData.departments[0].name === "Fitting") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.fitting.actions.find(i => i.dateEnd).dateEnd);
+    }
+    if (userData.departments[0].name === "Plaster") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.plaster.actions.find(i => i.dateEnd).dateEnd);
+    }
+    if (userData.departments[0].name === "Reception") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.receptionPacking.actions.find(i => i.dateEnd).dateEnd);
+    }
+    if (userData.departments[0].name === "Marketing") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.designing.actions.find(i => i.dateEnd).dateEnd);
+    }
+    if (userData.departments[0].name === "Drivers") {
+        endDateStr = _global.formatDateToYYYYMMDD(item.delivering.actions.find(i => i.dateEnd).dateEnd);
+    }
+     return endDateStr
+  } else {
+    return '-';
+  }
+};
+
   const handlePrint = useReactToPrint({
     content: () => userRef.current,
     documentTitle: `Name: ${userData.firstName}   ${userData.lastName}`,
@@ -186,7 +256,8 @@ const searchByDate = (e) => {
         <button className="btn btn-sm btn-primary " onClick={()=>handlePrint()}> <i class="fas fa-print"></i> print</button>
       </div>
    }
-     <div className="col-lg-8 ">
+   {/* Search Input */}
+     <div className="col-lg-6 ">
         <div className="form-group">
         <input
         type="text"
@@ -198,13 +269,25 @@ const searchByDate = (e) => {
         />
         </div>
     </div>
-    <div className="col-lg-4 ">
+    {/* Start Date */}
+    <div className="col-lg-3 ">
     <div className="form-group">
         <input
         type="date"
         className="form-control"
-        placeholder="Date"
+        placeholder="Start Date"
         onChange={(e) => searchByDate(e)}
+        />
+        </div>
+    </div>
+    {/* End Date */}
+    <div className="col-lg-3 ">
+    <div className="form-group">
+        <input
+        type="date"
+        className="form-control"
+        placeholder=" End Date"
+        onChange={(e) => searchByEndDate(e)}
         />
         </div>
     </div>
@@ -215,7 +298,7 @@ const searchByDate = (e) => {
     <thead>
         <tr className="table-secondary">
         <th scope="col">#</th>
-        <th scope="col">CreatedAt</th>
+        <th scope="col">FinishedAt</th>
         <th scope="col">Doctor</th>
         <th scope="col">Patient</th>
         <th scope="col">#teeth</th>
@@ -229,7 +312,7 @@ const searchByDate = (e) => {
             {item.caseNumber}
             </td>
             <td >
-            {_global.formatDateToYYYYMMDD(item.dateCreated)}
+            {getFinisheingDate(item)}
             </td>
             <td>{item?.dentistObj?.name}</td>
             <td>
@@ -247,10 +330,10 @@ const searchByDate = (e) => {
             </td>
             <td>
             { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
-                            <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
-                            <i class="fas fa-edit"></i>
-                            </span>
-}
+                <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
+                <i class="fas fa-edit"></i>
+                </span>
+            }
             </td>
         </tr>
         ))}

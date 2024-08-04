@@ -402,7 +402,7 @@ const Cases = ()=>{
                       <th scope="col">#</th>
                       <th scope="col">Doctor </th>
                       <th scope="col">Patient</th>
-                      <th scope="col">#tooth</th>
+                      <th className="td-phone" scope="col">#tooth</th>
                       <th scope="col">In</th>
                       <th scope="col">Due</th>
                       <th scope="col">Actions</th>
@@ -417,7 +417,7 @@ const Cases = ()=>{
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
-                        <td className={`${item.teethNumbers.length <=0 ? "bg-danger" : "bg-white"}`}>{item.teethNumbers.length}</td>
+                        <td  className={`${item.teethNumbers.length <=0 ? "bg-danger" : "bg-white"} td-phone`}>{item.teethNumbers.length}</td>
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
