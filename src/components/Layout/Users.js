@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { showToastMessage } from "../../helper/toaster";
 import { format } from "date-fns";
 import * as _global from "../../config/global";
+import Select from "react-select";
+
 const Users = () => {
+  const user = JSON.parse(localStorage.getItem("user"))
   const [users, setUsers] = useState([]);
   const [casesUser, setCasesUser] = useState([]);
   const [buffUsers, setBuffUsers] = useState([]);
@@ -26,6 +29,11 @@ const Users = () => {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [noteUser, setNoteUser] = useState("");
+  const [allCases, setAllCases] = useState([]);
+  const [allBufferCases, setAllBufferCases] = useState([]);
+  const [caseId, setCaseId] = useState("");
+  const [caseNumber, setCaseNumber] = useState("");
+  const [noteType, setNoteType] = useState("");
   const navigate = useNavigate();
   const roles = [0, 1, 2, 3, 4, 5, 6,7];
   const Roles = {
@@ -47,6 +55,23 @@ const Users = () => {
         setUsers(result);
         setBuffUsers(result);
         console.log(result);
+          // get cases
+          axios
+          .get(`${_global.BASE_URL}cases`)
+          .then((res) => {
+            const result = res.data;
+            setAllBufferCases(result);
+            console.log("result",result)
+            setAllCases(result.map((c) => {
+              return {
+                label: `${c.caseNumber}`,
+                _id: c._id,
+              };
+            }));
+          })
+          .catch((error) => {
+            console.error("Error fetching cases:", error);
+          });
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
@@ -150,11 +175,21 @@ const Users = () => {
   };
   const onAddNote = async () => {
     // e.preventDefault();
+    const buffCase = allBufferCases.find(
+      (c) => c._id === caseId
+    );
     buffUser.notes.push(
       {
         title: noteUser,
+        caseId: caseId,
+        caseNumber: caseNumber,
+        noteType: noteType,
+        doctorName:buffCase.dentistObj.name,
+        patientName:buffCase.patientName,
+        numOfTooth:buffCase.teethNumbers.length,
         date: new Date(),
-        addedBy:"Admin"
+        addedBy:`${user.firstName}, ${user.lastName}`,
+        id:user._id
       }
     );
     console.log(buffUser);
@@ -174,12 +209,12 @@ const Users = () => {
       setNoteUser("");
       showToastMessage("Added note to successfully", "success");
     }
-    // if (!response.ok) {
-    //   console.log(json);
-    //   const newUsers = [...users, JSON.parse(JSON.stringify(json.data))];
-    //   setUsers(newUsers);
-    //   setEmptyFields(json.emptyFields);
-    // }
+    if (!response.ok) {
+      console.log(json);
+      const newUsers = [...users, JSON.parse(JSON.stringify(json.data))];
+      setUsers(newUsers);
+      setEmptyFields(json.emptyFields);
+    }
   };
   const searchByName = (searchText) => {
     setSearchText(searchText);
@@ -236,6 +271,10 @@ function groupCasesTeethNumbersByName() {
   console.log("cases by name",Object.entries(result).map(([name, teethNumbers]) => ({ name, teethNumbers })))
   return Object.entries(result).map(([name, count]) => ({ name, count }));
 }
+const handleChangeSelect = (event) => {
+  setCaseId(event._id)
+  setCaseNumber(event.label)
+};
 // function groupTeethNumbersByType() {
 //   const result = {};
 
@@ -342,6 +381,12 @@ function groupCasesTeethNumbersByName() {
                           {/* <span onClick={(e) => deleteUser(item._id)}>
                             <i className="fa-solid fa-trash-can"></i>
                           </span> */}
+                                 <span
+                            onClick={() => navigate('/layout/user-notes',{ state: { ...item } })}
+                          >
+                            <i class="fa-solid fa-eye c-success"></i>
+
+                          </span>
                          <span   
                          onClick={()=>navigate("/layout/user-profile", { state: { ...item, isAdmin:true } })}
                         //  data-bs-toggle="modal"
@@ -693,43 +738,78 @@ function groupCasesTeethNumbersByName() {
               ></button>
             </div>
             <div class="modal-body">
-              <div className="col-lg-12">
-                <div className="form-group">
-                  <label htmlFor="noteUser"> New Note </label>{" "}
-                  <input
-                    type="text"
-                    id="noteUser"
-                    name="noteUser"
-                    className={`form-control`}
-                    onChange={(e) => {
-                      setNoteUser(e.target.value);
-                    }}
-                    value={noteUser}
-                    placeholder="Enter note "
-                  />
-                </div>{" "}
-              </div>
-              <div className="col-lg-12">
-                <h6 className="old-notes">Previous Notes</h6>
-
-                {buffUser?.notes?.length <= 0 && (
-                  <div className="text-center mt-4 mb-4">
-                    No notes have been added yet!
+              <div className="row">
+                <div className="col-lg-6 mb-1">
+                  <div className="form-group">
+                    <label>Case Number </label>
+                      {/* <select class="form-select" aria-label="Default select example">
+                        <option selected>Open this select menu</option>
+                        {console.log("allCases",allCases)}
+                        {allCases.map((item,index)=>
+                          <option key={index} value={item._id}>{item.caseNumber}</option>
+                        )}
+                      </select> */}
+                      <Select
+                        className="basic-single"
+                        classNamePrefix="select"
+                        isLoading={true}
+                        // isClearable={true}
+                        onChange={(e) => handleChangeSelect(e)}
+                        isSearchable={true}
+                        name="color"
+                        options={allCases}
+                     />
                   </div>
-                )}
+                </div> 
+                <div className="col-lg-6 mb-1">
+                <div className="form-group">
+                    <label>Type </label>
+                  <select class="form-select" onChange={(e)=>setNoteType(e.target.value)} aria-label="Default select example">
+                      <option  disabled selected>Type of Note</option>
+                      <option value="Positive">Positive</option>
+                      <option value="Negative">Negative</option>
+                    </select>
+                  </div>
+              </div> 
+                <div className="col-lg-12">
+                  <div className="form-group">
+                    <label htmlFor="noteUser"> New Note </label>{" "}
+                    <textarea
+                      type="text"
+                      rows={3}
+                      id="noteUser"
+                      name="noteUser"
+                      className={`form-control`}
+                      onChange={(e) => {
+                        setNoteUser(e.target.value);
+                      }}
+                      value={noteUser}
+                      placeholder="Enter note "
+                    ></textarea>
+                  </div>{" "}
+                </div>
+                {/* <div className="col-lg-12">
+                  <h6 className="old-notes">Previous Notes()</h6>
 
-                {buffUser?.notes?.length > 0 && (
-                  <ol>
-                    {buffUser?.notes?.map((noteItem, index) => (
-                      <li key={index}>
-                        <div className="note-view">
-                          <span>{noteItem.title}</span>
-                          <span>{format(noteItem.date, "MMMM do yyyy")}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                )}
+                  {buffUser?.notes?.length <= 0 && (
+                    <div className="text-center mt-4 mb-4">
+                      No notes have been added yet!
+                    </div>
+                  )}
+
+                  {buffUser?.notes?.length > 0 && (
+                    <ol>
+                      {buffUser?.notes?.map((noteItem, index) => (
+                        <li key={index}>
+                          <div className="note-view">
+                            <span>{noteItem.title}</span>
+                            <span>{format(noteItem.date, "MMMM do yyyy")}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div> */}
               </div>
             </div>
             <div class="modal-footer ">

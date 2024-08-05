@@ -15,6 +15,7 @@ import AddNewCase from "./components/Layout/Cases/AddNewCase";
 import CaseProcess from "./components/Layout/Cases/CaseProcess/CaseProcess";
 import UserProfile from "./components/Layout/UserProfile";
 import EditCase from "./components/Layout/Cases/EditCase";
+import NotesUser from "./components/NotesUser";
 function App() {
   return (
     <div className="App">
@@ -34,6 +35,7 @@ function App() {
                 <Route path="add-case" element={<AddNewCase />} />
                 <Route path="edit-case/:id" element={<EditCase />} />
                 <Route path="process-case" element={<CaseProcess />} />
+                <Route path="user-notes" element={<NotesUser />} />
               </Route>
             </Route>
           </Routes>
