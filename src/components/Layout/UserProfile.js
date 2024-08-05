@@ -117,6 +117,7 @@ const searchByDate = (e) => {
       }
       if(userData.isAdmin ? userData.departments[0].name === "Fitting" : departments[0].name === "Fitting"){
         const filteredCases = buffCasesUser.filter((item) => {
+          if(item.fitting.actions.length > 0)
           return  _global.formatDateToYYYYMMDD(item.fitting.actions.find(i=>i.dateEnd).dateEnd) === date;
       });
       
@@ -177,7 +178,7 @@ const searchByEndDate = (e) => {
           endDateStr = _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i => i.dateEnd).dateEnd);
       }
       if (userData.isAdmin ? userData.departments[0].name === "Fitting" : departments[0].name === "Fitting") {
-          endDateStr = _global.formatDateToYYYYMMDD(item.fitting.actions.find(i => i.dateEnd).dateEnd);
+          endDateStr = _global.formatDateToYYYYMMDD(item.fitting.actions.find(i => i.dateEnd)?.dateEnd);
       }
       if (userData.isAdmin ? userData.departments[0].name === "Plaster" : departments[0].name === "Plaster") {
           endDateStr = _global.formatDateToYYYYMMDD(item.plaster.actions.find(i => i.dateEnd).dateEnd);
@@ -212,7 +213,8 @@ const getFinisheingDate = (item) => {
     if (userData.departments[0].name === "Caramic") {
         endDateStr = _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i => i.dateEnd).dateEnd);
     }
-    if (userData.departments[0].name === "Fitting") {
+    if (userData.departments[0].name === "Fitting" && item.fitting.actions.length > 0) {
+      console.log(item.fitting.actions.find(i => i.dateEnd),item.caseNumber)
         endDateStr = _global.formatDateToYYYYMMDD(item.fitting.actions.find(i => i.dateEnd).dateEnd);
     }
     if (userData.departments[0].name === "Plaster") {
@@ -313,8 +315,10 @@ const getFinisheingDate = (item) => {
         <th scope="col">FinishedAt</th>
         <th scope="col">Doctor</th>
         <th scope="col">Patient</th>
-        <th scope="col">#teeth</th>
-        <th scope="col">Actions</th>
+        {userData.isAdmin &&
+         <th scope="col">#teeth</th>
+        }
+        {/* <th scope="col">Actions</th> */}
         </tr>
     </thead>
     <tbody>
@@ -330,6 +334,7 @@ const getFinisheingDate = (item) => {
             <td>
             {item.patientName}
             </td>
+            {userData.isAdmin &&
             <td className="teeth-pieces">
             {
             groupTeethNumbersByName(item.teethNumbers)?.map((item)=>
@@ -340,15 +345,18 @@ const getFinisheingDate = (item) => {
             )
             }
             </td>
-            <td>
+             }
+            {/* <td>
             { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
                 <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
                 <i class="fas fa-edit"></i>
                 </span>
             }
-            </td>
+            </td> */}
         </tr>
         ))}
+         {userData.isAdmin &&
+         <>
         <tr>
         <td  className="f-bold c-success" colSpan={4}>
             <b>Total of Pieces</b>
@@ -373,6 +381,8 @@ const getFinisheingDate = (item) => {
         </td>
         
         </tr>
+        </>
+         }
     </tbody>
     </table>
     }
