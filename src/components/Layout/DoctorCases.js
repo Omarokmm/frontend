@@ -29,8 +29,8 @@ const DocotrCases = ()=> {
             setInProcessCases(
               result.filter(
                 (r) =>
-                  r.cadCam.status.isStart === true &&
-                  r.receptionPacking.status.isEnd === false
+                  // r.cadCam.status.isStart === true &&
+                  r.delivering.status.isEnd === false
               )
             );
           })
@@ -238,7 +238,7 @@ const DocotrCases = ()=> {
               aria-controls="home-tab-pane"
               aria-selected="true"
             >
-              In Process <small>({inProcessCases.length})</small>
+              In Progress <small>({inProcessCases.length})</small>
             </button>
           </li>
           <li

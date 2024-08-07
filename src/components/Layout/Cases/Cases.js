@@ -106,8 +106,8 @@ const Cases = ()=>{
         setInProcessCases(
           result.filter(
             (r) =>
-              r.cadCam.status.isStart === true &&
-              r.receptionPacking.status.isEnd === false
+              // r.cadCam.status.isStart === true &&
+              r.delivering.status.isEnd === false
           )
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
@@ -337,46 +337,54 @@ const Cases = ()=>{
   }
 }
   const checkCaseDate=(item)=>{
-    // console.log("groupTeethNumbersByName",groupTeethNumbersByName(item.teethNumbers))
-  let response = "" 
-  let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
-  const days = _global.getDaysfromTowDates(item.dateIn,new Date())
-  if(teethNumbersByName.length > 0){
-    const implant = teethNumbersByName.find(te => te.name === "Implant")
-    const zircon = teethNumbersByName.find(t => t.name === "Zircon")
-    const veneer = teethNumbersByName.find(tee => tee.name === "Veneer")
-    const emax = teethNumbersByName.find(tee => tee.name === "E-Max / Inlay/ Onlay")
-    const emaxCrown = teethNumbersByName.find(tee => tee.name === "E-Max Crown")
-    const study = teethNumbersByName.find(tee => tee.name === "Study")
-    if(implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4  && !item.receptionPacking.status.isEnd) {
-      response = "table-danger";
-      // addItemToDelayCases(item)
+    let response = "" 
+    if(user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC"){
+      let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
+      const days = _global.getDaysfromTowDates(item.dateIn,new Date())
+      if(teethNumbersByName.length > 0){
+        const implant = teethNumbersByName.find(te => te.name === "Implant")
+        const zircon = teethNumbersByName.find(t => t.name === "Zircon")
+        const veneer = teethNumbersByName.find(tee => tee.name === "Veneer")
+        const emax = teethNumbersByName.find(tee => tee.name === "E-Max / Inlay/ Onlay")
+        const emaxCrown = teethNumbersByName.find(tee => tee.name === "E-Max Crown")
+        const study = teethNumbersByName.find(tee => tee.name === "Study")
+        if(implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4  && !item.receptionPacking.status.isEnd) {
+          response = "table-danger";
+          // addItemToDelayCases(item)
+        }
+        if(implant && implant?.count >= 7 && days > 7 && !item.receptionPacking.status.isEnd) {
+          response = "table-danger";
+          // addItemToDelayCases(item)
+        }
+        if((zircon && zircon?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) ) {
+          response = "table-danger";
+          // addItemToDelayCases(item)
+        }
+        if((zircon && zircon?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) ) {
+          response = "table-danger";
+          // addItemToDelayCases(item)
+        }
+        if((emax && emax?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emax && emax?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
+          response = "table-danger";
+          // addItemToDelayCases(item)
+        }
+        if((emaxCrown && emaxCrown?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emaxCrown && emaxCrown?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
+          response = "table-danger";
+          // addItemToDelayCases(item)
+        }
+        if((study && study?.count >= 1 && days >= 3 && !item.receptionPacking.status.isEnd)) {
+          response = "table-danger";
+          // addItemToDelayCases(item)
+        }
+      }
     }
-    if(implant && implant?.count >= 7 && days > 7 && !item.receptionPacking.status.isEnd) {
-      response = "table-danger";
-      // addItemToDelayCases(item)
+    else if(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" && !item.cadCam.status.isEnd){
+      response = "table-warning"
     }
-    if((zircon && zircon?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) ) {
-      response = "table-danger";
-      // addItemToDelayCases(item)
+    else if(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" && item.receptionPacking.status.isEnd && !item.delivering.status.isEnd){
+      response = "table-success"
     }
-    if((zircon && zircon?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) ) {
-      response = "table-danger";
-      // addItemToDelayCases(item)
-    }
-    if((emax && emax?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emax && emax?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
-      response = "table-danger";
-      // addItemToDelayCases(item)
-    }
-    if((emaxCrown && emaxCrown?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emaxCrown && emaxCrown?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
-      response = "table-danger";
-      // addItemToDelayCases(item)
-    }
-    if((study && study?.count >= 1 && days >= 3 && !item.receptionPacking.status.isEnd)) {
-      response = "table-danger";
-      // addItemToDelayCases(item)
-    }
-  }
+
   return response ; 
   }
   function groupTeethNumbersByName(teethNumbers) {
@@ -483,7 +491,7 @@ const Cases = ()=>{
                 aria-controls="home-tab-pane"
                 aria-selected="true"
               >
-                In Process <small>({inProcessCases.length})</small>
+                In Progress <small>({inProcessCases.length})</small>
               </button>
             </li>
             <li

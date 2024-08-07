@@ -686,7 +686,7 @@ console.log("newModel",newModel);
               >Cancel</button>
               <button className="btn btn-sm btn-success"
                 data-bs-dismiss="modal"
-                disabled={implantName === "" && zirconName === "" && emaxName ===""}
+                disabled={implantName === "" && zirconName === "" && emaxName ==="" && study ===""}
               onClick={() => changeStatus(state._id, "cadCam", "end")}>Finish</button>
             </div>
           </div>
