@@ -58,12 +58,13 @@ const [naturalOfWork, setNaturalOfWork] = useState(null);
     return ""
   }
   const backHistory = ()=>{
-    if(state.type == 'cases'){
-      navigate("/layout/cases")
-    }
-    else{
-      navigate("/layout/doctors")
-    }
+    // if(state.type == 'cases'){
+    //   navigate("/layout/cases")
+    // }
+    // else{
+    //   navigate("/layout/doctors")
+    // }
+    window.history.back()
   }
 return (
   <div className="content view-case">
