@@ -25,12 +25,12 @@ const DocotrCases = ()=> {
             setDoctorCases(result);
             setAllCases(result);
             setBuffAllCases(result);
-            setFinishedCases(result.filter((r) => r.ceramic.status.isEnd === true));
+            setFinishedCases(result.filter((r) => r.receptionPacking.status.isEnd === true));
             setInProcessCases(
               result.filter(
                 (r) =>
                   r.cadCam.status.isStart === true &&
-                  r.ceramic.status.isEnd === false
+                  r.receptionPacking.status.isEnd === false
               )
             );
           })
@@ -134,7 +134,7 @@ const DocotrCases = ()=> {
         if((emaxCrown && emaxCrown?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emaxCrown && emaxCrown?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
           response = "table-danger";
         }
-        if((study && study?.count >= 1 && days >= 3 )) {
+        if((study && study?.count >= 1 && days >= 3 && !item.receptionPacking.status.isEnd)) {
           response = "table-danger";
         }
       }
@@ -167,37 +167,38 @@ const DocotrCases = ()=> {
         if(implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4  ) {
           msg = "4,5 unites implants and more than 4 days";
         }
-        if(implant && implant?.count >= 7 && days >= 7 && !item.receptionPacking.status.isEnd ) {
+        if(implant && implant?.count >= 7 && days >= 7  ) {
           msg = "more than 7 unites implants and more than 7 days";
         }
-        if(zircon && zircon?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) {
+        if(zircon && zircon?.count === 4 && days > 3 ) {
           msg = "4 unites Zircon and more than 3 days";
         }
-        if(zircon && zircon?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) {
+        if(zircon && zircon?.count > 4 && days > 7 ) {
           msg = "more than 4 unites Zircon and more than 7 days";
         }
-        if(veneer && veneer?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) {
+        if(veneer && veneer?.count === 4 && days > 3 ) {
           msg = "4 unites Veneer and more than 3 days";
         }
-        if(veneer && veneer?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) {
+        if(veneer && veneer?.count > 4 && days > 7 ) {
           msg = "more than 4 unites Veneer and more than 7 days";
         }
-        if(emax && emax?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) {
+        if(emax && emax?.count === 4 && days > 3 ) {
           msg = "4 unites E-Max / Inlay/ Onlay and more than 3 days";
         }
-        if(emax && emax?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) {
+        if(emax && emax?.count > 4 && days > 7 ) {
           msg = "more than 4 unites E-Max / Inlay/ Onlay and more than 7 days";
         }
-        if(emaxCrown && emaxCrown?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) {
+        if(emaxCrown && emaxCrown?.count === 4 && days > 3 ) {
           msg = "4 unites Emax Crown and more than 3 days";
         }
-        if(emaxCrown && emaxCrown?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) {
+        if(emaxCrown && emaxCrown?.count > 4 && days > 7 ) {
           msg = "more than 4 unites Emax Crown and more than 7 days";
         }
-        if((study && study?.count >= 1 && days >= 3 && !item.receptionPacking.status.isEnd)) {
+        if((study && study?.count >= 1 && days >= 3 )) {
           msg = "study than 3 days";
         }
       }
+      console.log(item.caseNumber,msg)
       return msg ; 
       }
     return (
@@ -301,11 +302,12 @@ const DocotrCases = ()=> {
                       className={(item.isHold? "table-danger" : "" ) || checkCaseDate(item)}
                       key={item._id}
                     >
-                      <td>
-                        <span data-bs-toggle="tooltip"
+                      <td data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        title={getReasonlate(item)}>{item.caseNumber}
-                        </span></td>
+                        title={getReasonlate(item)}>
+                        <span >{item.caseNumber}
+                        </span>
+                        </td>
                       <td>{item.dentistObj.name}</td>
                       <td>{item.patientName}</td>
                       <td  className={`${item.teethNumbers.length <=0 ? "bg-danger" : "bg-white"} td-phone`}>{item.teethNumbers.length}</td>

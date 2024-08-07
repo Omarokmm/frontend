@@ -102,12 +102,12 @@ const Cases = ()=>{
         setAllCases(result);
         console.log(result);
         setBuffAllCases(result);
-        setFinishedCases(result.filter((r) => r.ceramic.status.isEnd === true));
+        setFinishedCases(result.filter((r) => r.receptionPacking.status.isEnd === true));
         setInProcessCases(
           result.filter(
             (r) =>
               r.cadCam.status.isStart === true &&
-              r.ceramic.status.isEnd === false
+              r.receptionPacking.status.isEnd === false
           )
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
@@ -433,7 +433,7 @@ const Cases = ()=>{
       msg = "more than 4 unites Emax Crown and more than 7 days";
     }
     if((study && study?.count >= 1 && days >= 3 )) {
-      msg = "study than 3 days";
+      msg = "study and more than 3 days";
     }
   }
   return msg ; 
