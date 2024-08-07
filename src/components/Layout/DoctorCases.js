@@ -119,13 +119,13 @@ const DocotrCases = ()=> {
         if(implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4 && !item.receptionPacking.status.isEnd) {
           response = "table-danger";
         }
-        if(implant && implant?.count >= 7 && days >= 7 && !item.receptionPacking.status.isEnd ) {
+        if(implant && implant?.count >= 7 && days > 7 && !item.receptionPacking.status.isEnd ) {
           response = "table-danger";
         }
         if((zircon && zircon?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)  ) {
           response = "table-danger";
         }
-        if((zircon && zircon?.count > 4 && days >= 7 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) ) {
+        if((zircon && zircon?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) ) {
           response = "table-danger";
         }
         if((emax && emax?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emax && emax?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
@@ -167,7 +167,7 @@ const DocotrCases = ()=> {
         if(implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4  ) {
           msg = "4,5 unites implants and more than 4 days";
         }
-        if(implant && implant?.count >= 7 && days >= 7  ) {
+        if(implant && implant?.count >= 7 && days > 7  ) {
           msg = "more than 7 unites implants and more than 7 days";
         }
         if(zircon && zircon?.count === 4 && days > 3 ) {
