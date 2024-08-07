@@ -169,17 +169,17 @@ const handleChange = (event) => {
     }));
   };
   const handleChangeSelect = (event) => {
-const doctor = doctors.find((d) => d._id === event._id);
-console.log(doctor)
-setCaseModel((prevFormData) => ({
-  ...prevFormData,
-  address: doctor.address.country
-}));
-console.log(caseModel.address)
-       setDentistObj((prevFormData) => ({
-         ...prevFormData,
-         id: event._id,
-       }));
+    const doctor = doctors.find((d) => d._id === event._id);
+    console.log(doctor)
+    setCaseModel((prevFormData) => ({
+      ...prevFormData,
+      address: `${doctor.address.country} ${doctor.address.city ? ', ' + doctor.address.city :""}`
+    }));
+    console.log(caseModel.address)
+          setDentistObj((prevFormData) => ({
+            ...prevFormData,
+            id: event._id,
+          }));
   };
   const handleSubmit = async() => {
     setIsSubmit(true)

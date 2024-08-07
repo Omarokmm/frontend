@@ -583,8 +583,14 @@ cursor: pointer;
 .nav-tabs{
   margin-bottom: 1.3rem;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   gap: 10px;
+}
+.cases-doctors .nav-tabs{
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.notes-user .nav-tabs{
+  grid-template-columns: 1fr 1fr ;
 }
 .nav-tabs .nav-link{
     width: 100%;
@@ -718,7 +724,9 @@ display: block;
   font-size: 13px;
 }
 
-
+.cases-doctors .nav-tabs{
+  grid-template-columns: 1fr 1fr ;
+}
  table { 
   font-size: 11px;
 }
@@ -850,4 +858,7 @@ table th{
   .non-print{
     display: none;
   }
+}
+.ml-auto{
+  margin-left: auto;
 }

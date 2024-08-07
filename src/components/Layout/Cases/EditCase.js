@@ -209,7 +209,7 @@ const handleChange = (event) => {
         console.log(doctor)
         setCaseModel((prevFormData) => ({
         ...prevFormData,
-        address: doctor.address.country
+        address: `${doctor.address.country} ${doctor.address.city ? ', ' + doctor.address.city :""}`
         }));
         console.log(caseModel.address)
         setDentistObj((prevFormData) => ({

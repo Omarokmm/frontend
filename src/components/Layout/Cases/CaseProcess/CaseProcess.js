@@ -35,6 +35,7 @@ const CaseProcess = () => {
   const [zirconName, setZirconName] = useState("");
   const [emaxName, setEmaxName] = useState("");
   const [implantName, setImplantName] = useState("");
+  const [study, setStudy] = useState("");
   const [notePause, setNotePause] = useState("");
   const changeStatus = (id, type, actionName) => {
     console.log(actionName);
@@ -82,6 +83,7 @@ logs.push(action);
      buffObj.zirconName = zirconName 
      buffObj.emaxName = emaxName 
      buffObj.implantName = implantName 
+     buffObj.study = study 
     }
 let newModel = {
   namePhase: caseData[type].namePhase,
@@ -664,10 +666,16 @@ console.log("newModel",newModel);
                     <input type="text" className="form-control" value={emaxName} onChange={(e)=>setEmaxName(e.target.value)} placeholder="Enter E-Max Name"  />
                   </div>
                 </div>
-                     <div className="col-lg-12">
+                <div className="col-lg-12">
                   <div className="form-group">
                     <label>Implant</label>
                     <input type="text" className="form-control" value={implantName} onChange={(e)=>setImplantName(e.target.value)} placeholder="Enter Implant Name"  />
+                  </div>
+                </div>
+                <div className="col-lg-12">
+                  <div className="form-group">
+                    <label>Study</label>
+                    <input type="text" className="form-control" value={study} onChange={(e)=>setStudy(e.target.value)} placeholder="Enter Study"  />
                   </div>
                 </div>
                 </div>

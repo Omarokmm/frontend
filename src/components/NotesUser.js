@@ -7,7 +7,8 @@ const NotesUser =()=>{
  const { state } = useLocation();
  const [userData,setUserData]=useState(state)
  console.log(userData)
-
+const [positiveNotes,setPositiveNotes] = useState(userData.notes.filter(n =>n.noteType === "Positive"))
+const [negativeNotes,setNegativeNotes] = useState(userData.notes.filter(n =>n.noteType === "Negative"))
  const userRef = useRef();
  const Roles = {
     0: "admin",
@@ -84,34 +85,130 @@ const NotesUser =()=>{
     </div>
     <div ref={userRef} style={{width:"100%"}}>
     {userData?.notes.length > 0 &&
-    <table className="table text-center table-bordered">
-    <thead>
-        <tr className="table-secondary">
-        <th scope="col">#Case</th>
-        <th scope="col">Content</th>
-        <th scope="col">Date</th>
-        <th scope="col">Type</th>
-        </tr>
-    </thead>
-    <tbody>
-        {userData?.notes.map((item) => (
-        <tr key={item.id} className={item.noteType === "Negative" ? "table-danger" : "table-success"}>
-            <td>
-            {item.caseNumber}
-            </td>
-            <td >
-            {item.title}
-            </td>
-            <td className="w-25">
-                {_global.formatDateToYYYYMMDD(item.date)}
-            </td>
-            <td>
-            {item.noteType}
-            </td>
-        </tr>
-        ))}
-    </tbody>
-    </table>
+     <>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+        <button
+            class="nav-link active bgc-success"
+            id="positive-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#positive-tab-pane"
+            type="button"
+            role="tab"
+            aria-controls="positive-tab-pane"
+            aria-selected="false"
+        >
+            Positive <small>({positiveNotes.length})</small>
+        </button>
+        </li>
+        <li
+        class="nav-item"
+        role="presentation"
+        >
+        <button
+            class="nav-link  bgc-danger"
+            id="negative-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#negative-tab-pane"
+            type="button"
+            role="tab"
+            aria-controls="negative-tab-pane"
+            aria-selected="true"
+        >
+            Negative <small>({negativeNotes.length})</small>
+        </button>
+        </li>
+        </ul>
+        <div
+          class="tab-content"
+          id="myTabContent"
+        >
+          {/* Positive Notes */}
+          <div
+            class="tab-pane fade show active"
+            id="positive-tab-pane"
+            role="tabpanel"
+            aria-labelledby="positive-tab"
+            tabIndex="0"
+          >
+            {positiveNotes.length > 0 && (
+            <table className="table text-center table-bordered">
+            <thead>
+                <tr className="table-secondary">
+                <th scope="col">#Case</th>
+                <th scope="col">Content</th>
+                <th scope="col">Date</th>
+                <th scope="col">Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {positiveNotes.map((item) => (
+                <tr key={item.id} className={item.noteType === "Negative" ? "table-danger" : "table-success"}>
+                    <td>
+                    {item.caseNumber}
+                    </td>
+                    <td >
+                    {item.title}
+                    </td>
+                    <td className="w-25">
+                        {_global.formatDateToYYYYMMDD(item.date)}
+                    </td>
+                    <td>
+                    {item.noteType}
+                    </td>
+                </tr>
+                ))}
+            </tbody>
+            </table>
+            )}
+            {positiveNotes.length <= 0 && (
+              <div className="no-content">No Positive Notes Added yet!</div>
+            )}
+          </div>
+          {/* negative Notes*/}
+          <div
+            class="tab-pane fade "
+            id="negative-tab-pane"
+            role="tabpanel"
+            aria-labelledby="negative-tab"
+            tabIndex="0"
+          >
+            {negativeNotes.length > 0 && (
+                <table className="table text-center table-bordered">
+                <thead>
+                    <tr className="table-secondary">
+                    <th scope="col">#Case</th>
+                    <th scope="col">Content</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {negativeNotes.map((item) => (
+                    <tr key={item.id} className={item.noteType === "Negative" ? "table-danger" : "table-success"}>
+                        <td>
+                        {item.caseNumber}
+                        </td>
+                        <td >
+                        {item.title}
+                        </td>
+                        <td className="w-25">
+                            {_global.formatDateToYYYYMMDD(item.date)}
+                        </td>
+                        <td>
+                        {item.noteType}
+                        </td>
+                    </tr>
+                    ))}
+                </tbody>
+                </table>
+            )}
+            {negativeNotes.length <= 0 && (
+              <div className="no-content">No Negative Notes Added yet!</div>
+            )}
+          </div>
+        </div>
+    </>
     }
     </div>
     {

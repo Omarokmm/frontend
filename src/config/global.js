@@ -72,6 +72,11 @@ export const naturalOfWorks = [
     name: "Study",
     color: "rgb(140 113 255 / 66%)",
   },
+  {
+    id: 14,
+    name: "Implant",
+    color: "rgb(255 44 0)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [
@@ -331,3 +336,11 @@ export const allRoles= {
 
     return `${year}-${month}-${day}`;
   };
+
+  export const getDaysfromTowDates =(dateOne,datetow)=>{
+    const date1 = new Date(formatDateToYYYYMMDD(dateOne));
+    const date2 = new Date(formatDateToYYYYMMDD(datetow));
+    const diffTime = Math.abs(date2 - date1);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+    return diffDays;
+  }

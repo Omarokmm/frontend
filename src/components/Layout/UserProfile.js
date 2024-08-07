@@ -53,7 +53,6 @@ const UserProfile = ()=>{
   
       result[name]++;
     });
-  console.log(Object.entries(result).map(([name, count]) => ({ name, count })))
     return Object.entries(result).map(([name, count]) => ({ name, count }));
   }
   function groupCasesTeethNumbersByName() {

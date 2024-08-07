@@ -57,12 +57,20 @@ const [naturalOfWork, setNaturalOfWork] = useState(null);
     } 
     return ""
   }
+  const backHistory = ()=>{
+    if(state.type == 'cases'){
+      navigate("/layout/cases")
+    }
+    else{
+      navigate("/layout/doctors")
+    }
+  }
 return (
   <div className="content view-case">
     <div className="card">
       <h5 class="card-title">
         <span>
-          <span className="back-step" onClick={() => navigate("/layout/cases")}>
+          <span className="back-step" onClick={() => backHistory()}>
             <i class="fa-solid fa-arrow-left-long"></i>
           </span>
           Case <span className="c-case-number">Number</span>: #<strong>{caseData.caseNumber}</strong>

@@ -5,6 +5,8 @@ import { showToastMessage } from "../../helper/toaster";
 import { format } from "date-fns";
 import * as _global from "../../config/global";
 import { useReactToPrint } from "react-to-print";
+import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
+
 const Doctors = () => {
   const doctorsRef = useRef();
   const user  = JSON.parse(localStorage.getItem("user"))
@@ -29,8 +31,12 @@ const Doctors = () => {
   const [searchText, setSearchText] = useState([]);
   const [role, setRole] = useState("");
   const [country, setCountry] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
+  const [regionFilter, setRegionFilter] = useState("");
   const [city, setCity] = useState("");
+  const [region, setRegion] = useState("");
   const [noteDoctor, setNoteDoctor] = useState("");
+
   const navigate = useNavigate();
   const roles = [0, 1, 2, 3, 4, 5, 6];
   const Roles = {
@@ -171,6 +177,8 @@ const Doctors = () => {
 };
     const searchByName = (searchText) => {
       setSearchText(searchText);
+      setCountryFilter("")
+      setRegionFilter("")
       console.log(searchText);
 
       if (searchText !== "") {
@@ -184,10 +192,45 @@ const Doctors = () => {
         setDoctors(buffDoctors);
       }
     };
+    const searchByCountry = (searchText) => {
+      setCountryFilter(searchText);
+      if (searchText !== "") {
+        const filteredDoctor = buffDoctors.filter(
+          (item) =>
+            item.address.country.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setDoctors(filteredDoctor);
+      } else {
+        setDoctors(buffDoctors);
+      }
+    };
+    const searchByCity = (searchText) => {
+      setCountryFilter(countryFilter);
+      setRegionFilter(searchText);
+      if (searchText !== "") {
+        const filteredDoctor = buffDoctors.filter(
+          (item) =>
+            item.address.country.toLowerCase().includes(countryFilter.toLowerCase()) && item.address.city.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setDoctors(filteredDoctor);
+      } else {
+        setDoctors(buffDoctors);
+      }
+    };
     const handlePrint = useReactToPrint({
       content: () => doctorsRef.current,
       documentTitle: `List of Doctors`,
     })
+    const selectCountry = (val) => {
+      setCountry(val)
+    }
+    const selectRegion =  (val)=> {
+      setRegion(val)
+      setCity(val)
+    }
+    const viewCases = (item)=>{
+      navigate('/layout/cases-by-doctors',{ state: { ...item , type:'doctors'} })
+    }
   return (
     <>
       <div className="content">
@@ -206,7 +249,7 @@ const Doctors = () => {
           </h5>
           <div className="card-body">
               <div className="row mb-2">
-                <div className="col-lg-10">
+                <div className="col-lg-4">
                 <div className="form-group">
               <input
                 type="text"
@@ -219,7 +262,19 @@ const Doctors = () => {
             </div>
            
                 </div>
-                <div className="col-lg-2 ">
+                <div className="col-lg-4">
+                <CountryDropdown className="form-control mb-3"
+                          value={countryFilter}
+                          onChange={(val) => searchByCountry(val)} 
+                />
+                </div>
+                <div className="col-lg-4">
+                <RegionDropdown className="form-control mb-3"
+                          country={countryFilter}
+                          value={regionFilter}
+                          onChange={(val) => searchByCity(val)} />
+                </div>
+                <div className="col-lg-2 ml-auto mb-2">
                  <button className="btn btn-sm btn-primary p-2 w-100"  onClick={()=>handlePrint()}> <i class="fas fa-print"></i> print</button>
             </div>
               </div>
@@ -246,9 +301,14 @@ const Doctors = () => {
                         {item.firstName} {item.lastName}
                       </td>
                       <td>{item.clinicName}</td>
-                      <td>{item?.address?.country}</td>
+                      <td>{item?.address?.country} {`${item?.address?.city ? '(' + item?.address?.city+ ')' : ""}`}</td>
                       {user.roles[0] === _global.allRoles.admin && <td className="non-print">
                         <div className="actions-btns ">
+                        <span
+                            onClick={() => {viewCases(item) }}
+                          >
+                         <i class="fa-solid fa-eye c-success"></i>
+                          </span>
                           <span
                             data-bs-toggle="modal"
                             data-bs-target="#addNoteModal"
@@ -359,6 +419,37 @@ const Doctors = () => {
                         placeholder="Enter Clinic Name "
                       />
                     </div>{" "}
+                  </div>
+                  <div className="form-group">
+                  <label htmlFor="country"> Country </label>{" "}
+                      <div>
+                        <CountryDropdown className="form-control"
+                          value={country}
+                          onChange={(val) => selectCountry(val)} />
+                      </div>
+                      
+                        {/* <input
+                        type="text"
+                        id="country"
+                        name="country"
+                        className="form-control"
+                        value={buffDoctor?.address?.country}
+                        onChange={(e)=>{
+                                const updatedDoctor = { ...buffDoctor };
+                                updatedDoctor.address.country = e.target.value; // Replace with your desired country
+                                setBuffDoctor(updatedDoctor);
+                        }}
+                        placeholder="Enter Country "
+                      /> */}
+                  </div>{" "}
+                  <div className="form-group">
+                    <label >City</label>
+                    <div>
+                      <RegionDropdown className="form-control"
+                          country={country}
+                          value={region}
+                          onChange={(val) => selectRegion(val)} />
+                      </div>
                   </div>
                   {/* <div className="col-lg-4">
                     <div className="form-group">
@@ -560,7 +651,7 @@ const Doctors = () => {
                     </div>{" "}
                   </div>
                      <div className="col-lg-12">
-                    <div className="form-group">
+                    {/* <div className="form-group">
                       <label htmlFor="country"> Country </label>{" "}
                       <input
                         type="text"
@@ -575,7 +666,32 @@ const Doctors = () => {
                         }}
                         placeholder="Enter Country "
                       />
-                    </div>{" "}
+                    </div>{" "} */}
+                         <div className="form-group">
+                       <label htmlFor="country"> Country </label>{" "}
+                      <div>
+                        <CountryDropdown className="form-control"
+                          value={buffDoctor?.address?.country}
+                          onChange={(val)=>{
+                            const updatedDoctor = { ...buffDoctor };
+                            updatedDoctor.address.country = val; // Replace with your desired country
+                            setBuffDoctor(updatedDoctor);
+                    }} />
+                      </div>
+                  </div>{" "}
+                  <div className="form-group">
+                    <label >City</label>
+                    <div>
+                      <RegionDropdown className="form-control"
+                          country={buffDoctor?.address?.country}
+                          value={buffDoctor?.address?.city}
+                          onChange={(val)=>{
+                            const updatedDoctor = { ...buffDoctor };
+                            updatedDoctor.address.city = val; // Replace with your desired country
+                            setBuffDoctor(updatedDoctor);
+                    }} />
+                      </div>
+                  </div>
                   </div>
                 </div>
               </form>{" "}

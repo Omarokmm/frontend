@@ -89,6 +89,8 @@ const Cases = ()=>{
   const [holdingCases, setHoldingCases] = useState([]);
   const [finishedCases, setFinishedCases] = useState([]);
   const [buffAllCases, setBuffAllCases] = useState([]);
+  const [delayCases, setDelayCases] = useState([]);
+  const [buffDelayCases, setBuffDelayCases] = useState([]);
   const [searchText, setSearchText] = useState([]);
 
   useEffect(() => {
@@ -109,6 +111,10 @@ const Cases = ()=>{
           )
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
+        const delayCasesfilter =  result.filter(c => filterDaley(c))
+        console.log(delayCasesfilter)
+        setDelayCases(delayCasesfilter);
+        setBuffDelayCases(delayCasesfilter);
       })
       .catch((error) => {
         console.error("Error fetching cases:", error);
@@ -204,7 +210,7 @@ const Cases = ()=>{
   };
   const viewCase = (item, type) => {
     if (type === "view") {
-      navigate("/layout/view-case", { state: { ...item } });
+      navigate("/layout/view-case", { state: { ...item , type:'cases'} });
     } else if (type === "process") {
       navigate("/layout/process-case", { state: { ...item } });
     }
@@ -283,9 +289,154 @@ const Cases = ()=>{
         );
       }
     }
+    if (name === "delay") {
+      if (searchText !== "") {
+        const filteredAllCases = delayCases.filter(
+          (item) =>
+            item?.caseNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.dentistObj.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setDelayCases(filteredAllCases);
+      } else {
+        setDelayCases(buffDelayCases);
+      }
+    }
   };
   const editCase = (id)=>{
     navigate(`/layout/edit-case/${id}`)
+  }
+  const addItemToDelayCases = (item) => {
+    setDelayCases(prevDelayCases => [...prevDelayCases, item]);
+  };
+  const filterDaley=(item)=>{
+  let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
+  const days = _global.getDaysfromTowDates(item.dateIn,new Date())
+  if(teethNumbersByName.length > 0){
+    const implant = teethNumbersByName.find(te => te.name === "Implant")
+    const zircon = teethNumbersByName.find(t => t.name === "Zircon")
+    const veneer = teethNumbersByName.find(tee => tee.name === "Veneer")
+    const emax = teethNumbersByName.find(tee => tee.name === "E-Max / Inlay/ Onlay")
+    const emaxCrown = teethNumbersByName.find(tee => tee.name === "E-Max Crown")
+    const study = teethNumbersByName.find(tee => tee.name === "Study")
+    if(
+      (implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4  && !item.receptionPacking.status.isEnd) || 
+      (implant && implant?.count >= 7 && days >= 7 && !item.receptionPacking.status.isEnd) || 
+      ((zircon && zircon?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) || 
+      ((zircon && zircon?.count > 4 && days >= 7 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd)) || 
+      ((emax && emax?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emax && emax?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) ) || 
+      ((emaxCrown && emaxCrown?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emaxCrown && emaxCrown?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) || 
+      ((study && study?.count >= 1 && days >= 3 && !item.receptionPacking.status.isEnd))
+    
+    ) {
+      return item
+    }
+  }
+}
+  const checkCaseDate=(item)=>{
+    // console.log("groupTeethNumbersByName",groupTeethNumbersByName(item.teethNumbers))
+  let response = "" 
+  let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
+  const days = _global.getDaysfromTowDates(item.dateIn,new Date())
+  if(teethNumbersByName.length > 0){
+    const implant = teethNumbersByName.find(te => te.name === "Implant")
+    const zircon = teethNumbersByName.find(t => t.name === "Zircon")
+    const veneer = teethNumbersByName.find(tee => tee.name === "Veneer")
+    const emax = teethNumbersByName.find(tee => tee.name === "E-Max / Inlay/ Onlay")
+    const emaxCrown = teethNumbersByName.find(tee => tee.name === "E-Max Crown")
+    const study = teethNumbersByName.find(tee => tee.name === "Study")
+    if(implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4  && !item.receptionPacking.status.isEnd) {
+      response = "table-danger";
+      // addItemToDelayCases(item)
+    }
+    if(implant && implant?.count >= 7 && days >= 7 && !item.receptionPacking.status.isEnd) {
+      response = "table-danger";
+      // addItemToDelayCases(item)
+    }
+    if((zircon && zircon?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd) ) {
+      response = "table-danger";
+      // addItemToDelayCases(item)
+    }
+    if((zircon && zircon?.count > 4 && days >= 7 && !item.receptionPacking.status.isEnd ) || (veneer && veneer?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) ) {
+      response = "table-danger";
+      // addItemToDelayCases(item)
+    }
+    if((emax && emax?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emax && emax?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
+      response = "table-danger";
+      // addItemToDelayCases(item)
+    }
+    if((emaxCrown && emaxCrown?.count > 4 && days > 7 && !item.receptionPacking.status.isEnd) || (emaxCrown && emaxCrown?.count === 4 && days > 3 && !item.receptionPacking.status.isEnd)) {
+      response = "table-danger";
+      // addItemToDelayCases(item)
+    }
+    if((study && study?.count >= 1 && days >= 3 && !item.receptionPacking.status.isEnd)) {
+      response = "table-danger";
+      // addItemToDelayCases(item)
+    }
+  }
+  return response ; 
+  }
+  function groupTeethNumbersByName(teethNumbers) {
+    const result = {};
+    teethNumbers.forEach(teethNumber => {
+      const { name } = teethNumber;
+      if (!result[name]) {
+        result[name] = 0;
+      }
+  
+      result[name]++;
+    });
+    return Object.entries(result).map(([name, count]) => ({ name, count }));
+  }
+  const getReasonlate=(item)=>{
+  let msg = "" 
+  let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
+  const days = _global.getDaysfromTowDates(item.dateIn,new Date())
+  if(teethNumbersByName.length > 0){
+    const implant = teethNumbersByName.find(te => te.name === "Implant")
+    const zircon = teethNumbersByName.find(t => t.name === "Zircon")
+    const veneer = teethNumbersByName.find(tee => tee.name === "Veneer")
+    const emax = teethNumbersByName.find(tee => tee.name === "E-Max / Inlay/ Onlay")
+    const emaxCrown = teethNumbersByName.find(tee => tee.name === "E-Max Crown")
+    const study = teethNumbersByName.find(tee => tee.name === "Study")
+    if(implant && implant?.count >= 4 && implant?.count <= 5 && days >= 4  ) {
+      msg = "4,5 unites implants and more than 4 days";
+    }
+    if(implant && implant?.count >= 7 && days >= 7  ) {
+      msg = "more than 7 unites implants and more than 7 days";
+    }
+    if(zircon && zircon?.count === 4 && days > 3) {
+      msg = "4 unites Zircon and more than 3 days";
+    }
+    if(zircon && zircon?.count > 4 && days > 7) {
+      msg = "more than 4 unites Zircon and more than 7 days";
+    }
+    if(veneer && veneer?.count === 4 && days > 3) {
+      msg = "4 unites Veneer and more than 3 days";
+    }
+    if(veneer && veneer?.count > 4 && days > 7) {
+      msg = "more than 4 unites Veneer and more than 7 days";
+    }
+    if(emax && emax?.count === 4 && days > 3) {
+      msg = "4 unites E-Max / Inlay/ Onlay and more than 3 days";
+    }
+    if(emax && emax?.count > 4 && days > 7) {
+      msg = "more than 4 unites E-Max / Inlay/ Onlay and more than 7 days";
+    }
+    if(emaxCrown && emaxCrown?.count === 4 && days > 3) {
+      msg = "4 unites Emax Crown and more than 3 days";
+    }
+    if(emaxCrown && emaxCrown?.count > 4 && days > 7) {
+      msg = "more than 4 unites Emax Crown and more than 7 days";
+    }
+    if((study && study?.count >= 1 && days >= 3 )) {
+      msg = "study than 3 days";
+    }
+  }
+  return msg ; 
   }
   return (
     <div className="content">
@@ -371,6 +522,24 @@ const Cases = ()=>{
                 Finished <small>({finishedCases.length})</small>
               </button>
             </li>
+            <li
+              class="nav-item"
+              role="presentation"
+              onClick={() => setSearchText("")}
+            >
+              <button
+                class="nav-link bgc-danger"
+                id="delay-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#delay-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="delay-tab-pane"
+                aria-selected="false"
+              >
+                Delay <small>({delayCases.length})</small>
+              </button>
+            </li>
           </ul>
           <div
             class="tab-content"
@@ -411,16 +580,21 @@ const Cases = ()=>{
                   <tbody>
                     {allCases.map((item, index) => (
                       <tr
-                        className={item.isHold ? "table-danger" : ""}
+                        className={(item.isHold? "table-danger" : "" ) || checkCaseDate(item)}
                         key={item._id}
                       >
-                        <td>{item.caseNumber}</td>
+                        <td>
+                          <span data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title={getReasonlate(item)}>{item.caseNumber}
+                          </span></td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
                         <td  className={`${item.teethNumbers.length <=0 ? "bg-danger" : "bg-white"} td-phone`}>{item.teethNumbers.length}</td>
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
-                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
+                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)} 
+                        </td>
                         <td>
                           <div className="actions-btns">
                             <span
@@ -435,7 +609,6 @@ const Cases = ()=>{
                             >
                               <i class="fa-brands fa-squarespace"></i>
                             </span>
-                         
                             {/* <span onClick={(e) => deleteCase(item._id)}>
                                 <i className="fa-solid fa-trash-can"></i>
                               </span> */}
@@ -696,6 +869,76 @@ const Cases = ()=>{
               )}
               {finishedCases.length <= 0 && (
                 <div className="no-content">No Cases Finished yet!</div>
+              )}
+            </div>
+                {/* In Delay */}
+                <div
+              class="tab-pane fade"
+              id="delay-tab-pane"
+              role="tabpanel"
+              aria-labelledby="delay-tab"
+              tabIndex="0"
+            >
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="searchText"
+                  className="form-control"
+                  placeholder="Search by name | case number | case type "
+                  value={searchText}
+                  onChange={(e) => searchByName(e.target.value, "delay")}
+                />
+              </div>
+              {delayCases.length > 0 && (
+                <table className="table text-center table-bordered">
+                  <thead>
+                    <tr className="table-secondary">
+                      <th scope="col">#Case</th>
+                      <th scope="col">Doctor Name</th>
+                      <th scope="col">Patient Name</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {delayCases.map((item, index) => (
+                      <tr key={item._id} className={(item.isHold? "table-danger" : "" ) || checkCaseDate(item)}>
+                        <td data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          title={getReasonlate(item)}>{item.caseNumber}</td>
+                        <td>{item.dentistObj.name}</td>
+                        <td>{item.patientName}</td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
+                        <td>
+                          <div className="actions-btns">
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "view")}
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                            </span>
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "process")}
+                            >
+                              <i class="fa-brands fa-squarespace"></i>
+                            </span>
+                            {/* <span onClick={(e) => deleteCase(item._id)}>
+                              <i className="fa-solid fa-trash-can"></i>
+                            </span> */}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {delayCases.length <= 0 && (
+                <div className="no-content">No Cases Delay Cases yet!</div>
               )}
             </div>
           </div>
