@@ -87,6 +87,20 @@ const Sidebar = () => {
               
             />
             }
+          {/* {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception)  && 
+            <SubmenuItem
+              title="Shipments"
+              iconClass="bx bxs-user"
+              icon="fa-solid fa-user-doctor"
+              link="/layout/shipments"
+              sublinks={[
+                "Nav Sub Link 1",
+                "Nav Sub Link 2",
+                "Nav Sub Link 3",
+                "Nav Sub Link 4",
+              ]}
+            />
+            } */}
           </li>
           {/* <li>
             <a href="/users">users</a>

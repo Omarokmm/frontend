@@ -17,6 +17,7 @@ import UserProfile from "./components/Layout/UserProfile";
 import EditCase from "./components/Layout/Cases/EditCase";
 import NotesUser from "./components/NotesUser";
 import DocotrCases from "./components/Layout/DoctorCases.js";
+import Shipments from "./components/Layout/Shipments/Shipments.js";
 function App() {
   return (
     <div className="App">
@@ -38,6 +39,7 @@ function App() {
                 <Route path="process-case" element={<CaseProcess />} />
                 <Route path="user-notes" element={<NotesUser />} />
                 <Route path="cases-by-doctors" element={<DocotrCases />} />
+                <Route path="shipments" element={<Shipments />} />
               </Route>
             </Route>
           </Routes>
