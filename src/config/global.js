@@ -74,7 +74,7 @@ export const naturalOfWorks = [
   },
   {
     id: 14,
-    name: "Implant",
+    name: "pontic",
     color: "rgb(255 44 0)",
   },
 ];

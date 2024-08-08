@@ -110,7 +110,7 @@ const DocotrCases = ()=> {
       let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
       const days = _global.getDaysfromTowDates(item.dateIn,new Date())
       if(teethNumbersByName.length > 0){
-        const implant = teethNumbersByName.find(te => te.name === "Implant")
+        const implant = teethNumbersByName.find(te => te.name === "Screw Retain Crown")
         const zircon = teethNumbersByName.find(t => t.name === "Zircon")
         const veneer = teethNumbersByName.find(tee => tee.name === "Veneer")
         const emax = teethNumbersByName.find(tee => tee.name === "E-Max / Inlay/ Onlay")
@@ -158,7 +158,7 @@ const DocotrCases = ()=> {
       let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
       const days = _global.getDaysfromTowDates(item.dateIn,new Date())
       if(teethNumbersByName.length > 0){
-        const implant = teethNumbersByName.find(te => te.name === "Implant")
+        const implant = teethNumbersByName.find(te => te.name === "Screw Retain Crown")
         const zircon = teethNumbersByName.find(t => t.name === "Zircon")
         const veneer = teethNumbersByName.find(tee => tee.name === "Veneer")
         const emax = teethNumbersByName.find(tee => tee.name === "E-Max / Inlay/ Onlay")
