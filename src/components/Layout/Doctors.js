@@ -304,13 +304,12 @@ const Doctors = () => {
                       <td>{item?.address?.country} {`${item?.address?.city ? '(' + item?.address?.city+ ')' : ""}`}</td>
                       <td className="non-print">
                         <div className="actions-btns ">
-                        {user.roles[0] === _global.allRoles.Reception &&
                         <span
                             onClick={() => {viewCases(item) }}
                           >
                          <i class="fa-solid fa-eye c-success"></i>
                           </span>
-                          }
+                          
                           {user.roles[0] === _global.allRoles.admin &&
                           <>
                           <span

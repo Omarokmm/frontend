@@ -135,6 +135,41 @@ return (
           <div className="col-lg-12 mt-4">
             <strong>Case Status</strong>
             <div className="all-phases">
+            {caseData.caseType === "Physical" && (    
+              <div  className="phase-view">
+              <div
+                className="phaseName"
+                style={{
+                  backgroundColor: caseData?.plaster.status.isStart
+                    ? "rgb(255 63 63) "
+                    : caseData?.plaster.status.isPause
+                    ? "#2993df"
+                    : caseData?.plaster.status.isEnd
+                    ? "#2ba51c"
+                    : "red",
+                }}
+              >
+                <span className="tooltip-phase-name" >{getFinishedName(caseData?.plaster)}</span>
+                Plaster
+                <span className="tooltip-phase">
+                  {caseData?.plaster.status.isStart && (
+                    <i class="fa-solid fa-circle-xmark c-danger"></i>
+                  )}
+                  {caseData?.plaster.status.isPause && (
+                    <i class="fa-solid fa-hourglass-half c-primary"></i>
+                  )}
+                  {caseData?.plaster.status.isEnd && (
+                    <i class="fa-solid fa-circle-check c-success"></i>
+                  )}
+                </span>
+              </div>
+              <span class="arrow-right"></span>
+              <span class="arrow-right-phone">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              <span className="tooltip-phase-date" >{_global.getFormateDate( getFinishedDate(caseData?.plaster), true)}</span>
+              </div>
+            )}
               <div className="phase-view">
               <div
                 className="phaseName"
@@ -196,9 +231,14 @@ return (
                 </span>
               </div>
               <span class="arrow-right"></span>
-              <span class="arrow-right-phone">
+              {caseData.caseType === "Digital" && <span class="arrow-right-phone ">
               <i class="fa-solid fa-right-long"></i>
               </span>
+              } 
+            {caseData.caseType === "Physical" && <span class="arrow-right-phone t-90">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              } 
               <span className="tooltip-phase-date" >{_global.getFormateDate( getFinishedDate(caseData?.fitting), true)}</span>
               </div>
               <div  className="phase-view">
@@ -226,13 +266,17 @@ return (
                   {caseData?.ceramic.status.isEnd && (
                     <i class="fa-solid fa-circle-check c-success"></i>
                   )}
+            {caseData.caseType === "Digital" && <span class="arrow-right-phone t-90">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
+              } 
                 </span>
                 <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.ceramic), true)}</span>
               </div>
               <span class="arrow-right"></span>
-              <span class="arrow-right-phone t-90">
+              {/* <span class="arrow-right-phone t-90">
               <i class="fa-solid fa-right-long"></i>
-              </span>
+              </span> */}
               {/* <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.ceramic), true)}</span> */}
               </div>
               <div  className="phase-view">
@@ -261,11 +305,14 @@ return (
                     <i class="fa-solid fa-circle-check c-success"></i>
                   )}
                 </span>
+                <span class="arrow-right-phone t-180">
+              <i class="fa-solid fa-right-long"></i>
+              </span>
               </div>
               <span class="arrow-right"></span>
               <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.qualityControl), true)}</span>
               </div>
-              <div  className="phase-view">
+              {/* <div  className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -297,7 +344,7 @@ return (
               <i class="fa-solid fa-right-long"></i>
               </span>
               <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.designing), true)}</span>
-              </div>
+              </div> */}
               <div  className="phase-view">
               <div
                 className="phaseName"
