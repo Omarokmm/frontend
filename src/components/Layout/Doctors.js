@@ -286,7 +286,7 @@ const Doctors = () => {
                     <th scope="col">Name</th>
                     <th scope="col">Clinic Name</th>
                     <th scope="col">Country</th>
-                    {user.roles[0] === _global.allRoles.admin && <th scope="col" className="non-print">Actions</th> }
+                    {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception) && <th scope="col" className="non-print">Actions</th> }
                   </tr>
                 </thead>
                 <tbody>
@@ -302,13 +302,17 @@ const Doctors = () => {
                       </td>
                       <td>{item.clinicName}</td>
                       <td>{item?.address?.country} {`${item?.address?.city ? '(' + item?.address?.city+ ')' : ""}`}</td>
-                      {user.roles[0] === _global.allRoles.admin && <td className="non-print">
+                      <td className="non-print">
                         <div className="actions-btns ">
+                        {user.roles[0] === _global.allRoles.Reception &&
                         <span
                             onClick={() => {viewCases(item) }}
                           >
                          <i class="fa-solid fa-eye c-success"></i>
                           </span>
+                          }
+                          {user.roles[0] === _global.allRoles.admin &&
+                          <>
                           <span
                             data-bs-toggle="modal"
                             data-bs-target="#addNoteModal"
@@ -323,12 +327,13 @@ const Doctors = () => {
                           >
                          <i class="fa-solid fa-pen-to-square"></i>
                           </span>
+                          </>
+                         }
                           {/* <span onClick={(e) => deleteDoctor(item._id)}>
                               <i className="fa-solid fa-trash-can"></i>
                             </span> */}
                         </div>
                       </td>
-                      }
                     </tr>
                   ))}
                 </tbody>
