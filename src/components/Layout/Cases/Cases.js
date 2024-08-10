@@ -102,7 +102,7 @@ const Cases = ()=>{
         setAllCases(result);
         console.log(result);
         setBuffAllCases(result);
-        setFinishedCases(result.filter((r) => r.receptionPacking.status.isEnd === true));
+        setFinishedCases(result.filter((r) => r.delivering.status.isEnd === true));
         setInProcessCases(
           result.filter(
             (r) =>

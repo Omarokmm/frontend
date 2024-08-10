@@ -852,12 +852,16 @@ table th{
 }
 @page {
   size: auto;
-  margin: 20mm 10mm;
+  margin: 20mm 0;
 }
 @media print {
   .non-print{
     display: none;
   }
+  body,html {  
+    font-size: 10pt;
+    padding: 20px 10px;
+    }
 }
 .ml-auto{
   margin-left: auto;
