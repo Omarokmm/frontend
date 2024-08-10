@@ -112,17 +112,22 @@ const [dentistObj, setDentistObj] = useState({
   const searchByName = (searchText, name) => {
     setSearchText(searchText);
   };
-  const updateShipment = async()=>{
+  const updateShipment = async() => {
     let model = buffShipment
+    buffShipment.logs.push({
+      id: user._id,
+      name: `${user.firstName} ${user.lastName}`,
+      date: new Date(),
+      msg: `Update Shipment by ${user.firstName} ${user.lastName} to ${buffShipment.notes}`,
+  })
     const response = await fetch(`${_global.BASE_URL}shipments/${buffShipment._id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(response),
+        body: JSON.stringify(model),
       });
         if (response.ok) {
-            console.log(response)
             showToastMessage("Updated Shipment successfully", "success");
         }
         if (!response.ok) {
@@ -265,22 +270,8 @@ const AddShipment = async()=>{
         deliveryDate: shipmentModel.deliveryDate,
         status :shipmentModel.status,
         casesIds :  selectedOption,
-        remarks :  [
-        {
-            id: user._id,
-            name: `${user.firstName} ${user.lastName}`,
-            date: new Date(),
-            msg: shipmentModel.remarks,
-        }
-       ],
-        notes : [
-            {
-                id: user._id,
-                name: `${user.firstName} ${user.lastName}`,
-                date: new Date(),
-                msg: shipmentModel.notes,
-            }
-        ] ,
+        remarks :  shipmentModel.notes,
+        notes : shipmentModel.notes ,
         logs:  
         [
         {
@@ -467,14 +458,14 @@ const getLastItem = (arr)=> {
                      <td>{item.trackingNumber}</td>
                      <td>{_global.formatDateToYYYYMMDD(item.sentDate)}</td>
                      <td>{item.status}</td>
-                     <td> {item.notes.length > 0 ? item.notes[0].msg : 'No Notes'}</td>
+                     <td> {item.notes}</td>
                      <td>{_global.formatDateToYYYYMMDD(item.estimatedDeliveryDate) }</td>
-                     <td className={`${item.remarks.length <=0 ? 'non-print' : ''}`}> {item.remarks.length > 0 ? item.remarks[0].msg : 'No remarks'}</td>
+                     <td> {item.remarks}</td>
                      <td className="non-print">
                        <div className="actions-btns">
-                         <span className="c-success">
+                         {/* <span className="c-success">
                            <i class="fa-solid fa-eye"></i>
-                         </span>
+                         </span> */}
                          <span className="c-primary ml-3" data-bs-toggle="modal" data-bs-target="#updatShipmentModal" onClick={()=>editBuffShipment(item)}>
                          <i class="fas fa-edit"></i>
                          </span>
@@ -608,9 +599,9 @@ const getLastItem = (arr)=> {
                         <td className={`${item.remarks.length <=0 ? 'non-print' : ''}`}> {item.remarks.length > 0 ? item.remarks[0].msg : 'No remarks'}</td>
                         <td className="non-print">
                         <div className="actions-btns">
-                         <span className="c-success">
+                                {/* <span className="c-success">
                            <i class="fa-solid fa-eye"></i>
-                         </span>
+                         </span> */}
                          <span className="c-primary ml-3">
                          <i class="fas fa-edit"></i>
                          </span>
@@ -676,9 +667,9 @@ const getLastItem = (arr)=> {
                         <td className={`${item.remarks.length <=0 ? 'non-print' : ''}`}> {item.remarks.length > 0 ? item.remarks[0].msg : 'No remarks'}</td>
                         <td className="non-print">
                         <div className="actions-btns">
-                         <span className="c-success">
+                                {/* <span className="c-success">
                            <i class="fa-solid fa-eye"></i>
-                         </span>
+                         </span> */}
                        </div>
                         </td>
                     </tr>

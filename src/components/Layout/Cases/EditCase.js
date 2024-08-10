@@ -220,7 +220,7 @@ const handleChange = (event) => {
             label:event.label,
             _id: event._id,
         })
-       };
+   };
   const handleSubmit = async() => {
     setIsSubmit(true)
     console.log("dentistObj",dentistObj)
@@ -246,10 +246,10 @@ const handleChange = (event) => {
         occlusalStaining: occlusalStaining,
         texture: texture,
         jobDescription: caseModel.jobDescription,
-        isInvoice: false,
-        isEmail: false,
-        isPhoto: false,
-        isHold:false,
+        isInvoice: caseModel.isInvoice,
+        isEmail: caseModel.isEmail,
+        isPhoto: caseModel.isPhoto,
+        isHold:caseModel.isHold,
         teethNumbers: teethNumbers,
         naturalOfWorks: caseModel.naturalOfWorks,
         translucency: caseModel.translucency,

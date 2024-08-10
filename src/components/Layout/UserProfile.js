@@ -14,6 +14,7 @@ const UserProfile = ()=>{
   const [buffCasesUser, setBuffCasesUser] = useState([]);
    const [userData, setUserData] = useState(state ? state : user );
   const [searchText, setSearchText] = useState([]);
+  const [studyModel, setStudyModel] = useState({});
   const [startDate, setStartDat] = useState(new Date());
   console.log('User Data',userData)
 
@@ -29,14 +30,13 @@ const UserProfile = ()=>{
     // Add more roles as needed
   };
   useEffect(()=>{
-    
     axios
     .get(`${_global.BASE_URL}users/actions/${state ? state._id : user._id}`)
     .then((res) => {
       const result = res.data;
-      setCasesUser(result);
+      setCasesUser(sortCases(result));
       console.log('casesUser',result)
-      setBuffCasesUser(result);
+      setBuffCasesUser(sortCases(result));
     })
     .catch((error) => {
       console.error("Error fetching users:", error);
@@ -57,19 +57,16 @@ const UserProfile = ()=>{
   }
   function groupCasesTeethNumbersByName() {
     const result = {};
-  
     casesUser.forEach(singleCase => {
       singleCase.teethNumbers.forEach(teethNumber => {
         const { name } = teethNumber;
-    
         if (!result[name]) {
           result[name] = 0;
         }
-    
         result[name]++;
       });
     });
-    console.log("cases by name",Object.entries(result).map(([name, teethNumbers]) => ({ name, teethNumbers })))
+    console.log("cases by ", Object.entries(result).map(([name, count]) => ({ name, count })))
     return Object.entries(result).map(([name, count]) => ({ name, count }));
   }
   function sumOfTeethNumbersLength() {
@@ -203,29 +200,205 @@ const searchByEndDate = (e) => {
       setCasesUser(buffCasesUser);
   }
 }
+const sortCases = (result)=> {
+if (userData.isAdmin ? userData.departments[0].name === "CadCam" : departments[0].name === "CadCam") {
+   return result.sort((a, b) => {
+    // Find the latest `dateEnd` in `cadCam` actions for each case
+    const getDateEnd = (obj) => {
+        const actions = obj.cadCam.actions;
+        if (!actions || actions.length === 0) return null;
+        const endActions = actions.filter(action => action.dateEnd);
+        if (endActions.length === 0) return null;
+        return new Date(Math.max(...endActions.map(action => new Date(action.dateEnd))));
+    };
+    const dateEndA = getDateEnd(a);
+    const dateEndB = getDateEnd(b);
+    // Sort by `dateEnd`, descending (newest first)
+    if (dateEndA && dateEndB) {
+        return dateEndA - dateEndB;
+    } else if (dateEndA) {
+        return -1; // a should come before b
+    } else if (dateEndB) {
+        return 1; // b should come before a
+    } else {
+        return 0; // no dateEnd for both
+    }
+}
+  )
+}
+if (userData.isAdmin ? userData.departments[0].name === "Caramic" : departments[0].name === "Caramic") {
+  return result.sort((a, b) => {
+    // Find the latest `dateEnd` in `ceramic` actions for each case
+    const getDateEnd = (obj) => {
+        const actions = obj.ceramic.actions;
+        if (!actions || actions.length === 0) return null;
+        const endActions = actions.filter(action => action.dateEnd);
+        if (endActions.length === 0) return null;
+        return new Date(Math.max(...endActions.map(action => new Date(action.dateEnd))));
+    };
+    const dateEndA = getDateEnd(a);
+    const dateEndB = getDateEnd(b);
+    // Sort by `dateEnd`, descending (newest first)
+    if (dateEndA && dateEndB) {
+        return dateEndA - dateEndB;
+    } else if (dateEndA) {
+        return -1; // a should come before b
+    } else if (dateEndB) {
+        return 1; // b should come before a
+    } else {
+        return 0; // no dateEnd for both
+    }
+}
+  )
+}
+if (userData.isAdmin ? userData.departments[0].name === "Fitting" : departments[0].name === "Fitting") {
+  return result.sort((a, b) => {
+    // Find the latest `dateEnd` in `Fitting` actions for each case
+    const getDateEnd = (obj) => {
+        const actions = obj.fitting.actions;
+        if (!actions || actions.length === 0) return null;
+        const endActions = actions.filter(action => action.dateEnd);
+        if (endActions.length === 0) return null;
+        return new Date(Math.max(...endActions.map(action => new Date(action.dateEnd))));
+    };
+    const dateEndA = getDateEnd(a);
+    const dateEndB = getDateEnd(b);
+    // Sort by `dateEnd`, descending (newest first)
+    if (dateEndA && dateEndB) {
+        return dateEndA - dateEndB;
+    } else if (dateEndA) {
+        return -1; // a should come before b
+    } else if (dateEndB) {
+        return 1; // b should come before a
+    } else {
+        return 0; // no dateEnd for both
+    }
+}
+  )
+}
+if (userData.isAdmin ? userData.departments[0].name === "Plaster" : departments[0].name === "Plaster") {
+  return result.sort((a, b) => {
+    // Find the latest `dateEnd` in `plaster` actions for each case
+    const getDateEnd = (obj) => {
+        const actions = obj.plaster.actions;
+        if (!actions || actions.length === 0) return null;
+        const endActions = actions.filter(action => action.dateEnd);
+        if (endActions.length === 0) return null;
+        return new Date(Math.max(...endActions.map(action => new Date(action.dateEnd))));
+    };
+    const dateEndA = getDateEnd(a);
+    const dateEndB = getDateEnd(b);
+    // Sort by `dateEnd`, descending (newest first)
+    if (dateEndA && dateEndB) {
+        return dateEndA - dateEndB;
+    } else if (dateEndA) {
+        return -1; // a should come before b
+    } else if (dateEndB) {
+        return 1; // b should come before a
+    } else {
+        return 0; // no dateEnd for both
+    }
+}
+  )
+}
+if (userData.isAdmin ? userData.departments[0].name === "Reception" : departments[0].name === "Reception") {
+  return result.sort((a, b) => {
+    // Find the latest `dateEnd` in `Reception` actions for each case
+    const getDateEnd = (obj) => {
+        const actions = obj.receptionPacking.actions;
+        if (!actions || actions.length === 0) return null;
+        const endActions = actions.filter(action => action.dateEnd);
+        if (endActions.length === 0) return null;
+        return new Date(Math.max(...endActions.map(action => new Date(action.dateEnd))));
+    };
+    const dateEndA = getDateEnd(a);
+    const dateEndB = getDateEnd(b);
+    // Sort by `dateEnd`, descending (newest first)
+    if (dateEndA && dateEndB) {
+        return dateEndA - dateEndB;
+    } else if (dateEndA) {
+        return -1; // a should come before b
+    } else if (dateEndB) {
+        return 1; // b should come before a
+    } else {
+        return 0; // no dateEnd for both
+    }
+}
+  )
+}
+if (userData.isAdmin ? userData.departments[0].name === "Marketing" : departments[0].name === "Marketing") {
+  return result.sort((a, b) => {
+    // Find the latest `dateEnd` in `designing` actions for each case
+    const getDateEnd = (obj) => {
+        const actions = obj.designing.actions;
+        if (!actions || actions.length === 0) return null;
+        const endActions = actions.filter(action => action.dateEnd);
+        if (endActions.length === 0) return null;
+        return new Date(Math.max(...endActions.map(action => new Date(action.dateEnd))));
+    };
+    const dateEndA = getDateEnd(a);
+    const dateEndB = getDateEnd(b);
+    // Sort by `dateEnd`, descending (newest first)
+    if (dateEndA && dateEndB) {
+        return dateEndA - dateEndB;
+    } else if (dateEndA) {
+        return -1; // a should come before b
+    } else if (dateEndB) {
+        return 1; // b should come before a
+    } else {
+        return 0; // no dateEnd for both
+    }
+}
+  )
+}
+if (userData.isAdmin ? userData.departments[0].name === "Drivers" : departments[0].name === "Drivers") {
+  return result.sort((a, b) => {
+    // Find the latest `dateEnd` in `delivering` actions for each case
+    const getDateEnd = (obj) => {
+        const actions = obj.delivering.actions;
+        if (!actions || actions.length === 0) return null;
+        const endActions = actions.filter(action => action.dateEnd);
+        if (endActions.length === 0) return null;
+        return new Date(Math.max(...endActions.map(action => new Date(action.dateEnd))));
+    };
+    const dateEndA = getDateEnd(a);
+    const dateEndB = getDateEnd(b);
+    // Sort by `dateEnd`, descending (newest first)
+    if (dateEndA && dateEndB) {
+        return dateEndA - dateEndB;
+    } else if (dateEndA) {
+        return -1; // a should come before b
+    } else if (dateEndB) {
+        return 1; // b should come before a
+    } else {
+        return 0; // no dateEnd for both
+    }
+}
+  )
+}
+}
 const getFinisheingDate = (item) => {
   if (item) {
     let endDateStr = "";
-    if (userData.departments[0].name === "CadCam") {
+    if (userData.isAdmin ? userData.departments[0].name === "CadCam" : departments[0].name === "CadCam") {
         endDateStr = _global.formatDateToYYYYMMDD(item.cadCam.actions.find(i => i.dateEnd).dateEnd);
     }
-    if (userData.departments[0].name === "Caramic") {
+    if (userData.isAdmin ? userData.departments[0].name === "Caramic" : departments[0].name === "Caramic") {
         endDateStr = _global.formatDateToYYYYMMDD(item.ceramic.actions.find(i => i.dateEnd).dateEnd);
     }
-    if (userData.departments[0].name === "Fitting" && item.fitting.actions.length > 0) {
-      console.log(item.fitting.actions.find(i => i.dateEnd),item.caseNumber)
+    if ((userData.isAdmin ? userData.departments[0].name === "Fitting" : departments[0].name === "Fitting") && item.fitting.actions?.length > 0) {
         endDateStr = _global.formatDateToYYYYMMDD(item.fitting.actions.find(i => i.dateEnd).dateEnd);
     }
-    if (userData.departments[0].name === "Plaster") {
+    if (userData.isAdmin ? userData.departments[0].name === "Plaster" : departments[0].name === "Plaster") {
         endDateStr = _global.formatDateToYYYYMMDD(item.plaster.actions.find(i => i.dateEnd).dateEnd);
     }
-    if (userData.departments[0].name === "Reception") {
+    if (userData.isAdmin ? userData.departments[0].name === "Reception" : departments[0].name === "Reception") {
         endDateStr = _global.formatDateToYYYYMMDD(item.receptionPacking.actions.find(i => i.dateEnd).dateEnd);
     }
-    if (userData.departments[0].name === "Marketing") {
+    if (userData.isAdmin ? userData.departments[0].name === "Marketing" : departments[0].name === "Marketing") {
         endDateStr = _global.formatDateToYYYYMMDD(item.designing.actions.find(i => i.dateEnd).dateEnd);
     }
-    if (userData.departments[0].name === "Drivers") {
+    if (userData.isAdmin ? userData.departments[0].name === "Drivers" : departments[0].name === "Drivers") {
         endDateStr = _global.formatDateToYYYYMMDD(item.delivering.actions.find(i => i.dateEnd).dateEnd);
     }
      return endDateStr
@@ -233,13 +406,16 @@ const getFinisheingDate = (item) => {
     return '-';
   }
 };
-
   const handlePrint = useReactToPrint({
     content: () => userRef.current,
     documentTitle: `Name: ${userData.firstName}   ${userData.lastName}`,
   })
   const editCase = (id)=>{
     navigate(`/layout/edit-case/${id}`)
+  }
+  const getStudyCases = (data)=>{
+    console.log(data.find(r => r.name === 'Study'))
+     return data.find(r => r.name === 'Study').count
   }
     return (
     <div className="content user-profile">
@@ -249,7 +425,7 @@ const getFinisheingDate = (item) => {
      {/* <span className="back-step" onClick={() => navigate("/layout/users")}>
             <i class="fa-solid fa-arrow-left-long"></i>
      </span> */}
-    <small>{userData.firstName} {userData.lastName} ({casesUser.length })</small>
+    <small>{userData.firstName} {userData.lastName} ({casesUser?.length })</small>
      </span>
      <span >
         <small>Role:       
@@ -264,7 +440,7 @@ const getFinisheingDate = (item) => {
     </h6>
     <div className="card-body">
     <div className="row">
-    {casesUser.length > 0 && 
+    {casesUser?.length > 0 && 
     <div className="col-12 mb-3 print-btn">
         <button className="btn btn-sm btn-primary " onClick={()=>handlePrint()}> <i class="fas fa-print"></i> print</button>
       </div>
@@ -306,7 +482,7 @@ const getFinisheingDate = (item) => {
     </div>
     </div>
     <div ref={userRef} style={{width:"100%"}}>
-    {casesUser.length > 0 &&
+    {casesUser?.length > 0 &&
     <table className="table text-center table-bordered">
     <thead>
         <tr className="table-secondary">
@@ -366,9 +542,20 @@ const getFinisheingDate = (item) => {
             }</b> 
             </td>
         </tr>
+        {(userData.isAdmin &&  userData.departments[0].name === "CadCam" || userData.isAdmin &&  userData.departments[0].name === "Fitting" ) &&
         <tr>
-        <td   colSpan={5}>
-        
+        <td  className="f-bold c-success" colSpan={4}>
+            <b>Total Without Study</b>
+        </td>
+        <td className="bg-success p-2 text-dark bg-opacity-50">
+            <b>{
+            (sumOfTeethNumbersLength() - getStudyCases(groupCasesTeethNumbersByName()))
+            }</b> 
+            </td>
+        </tr>
+        }
+        <tr>
+        <td colSpan={5}>
             <div className="summary-teeth-cases">
             {groupCasesTeethNumbersByName()?.map((item)=>
                 <p className="mb-0">
@@ -378,7 +565,6 @@ const getFinisheingDate = (item) => {
             )}
             </div>
         </td>
-        
         </tr>
         </>
          }
@@ -387,7 +573,7 @@ const getFinisheingDate = (item) => {
     }
     </div>
     {
-    casesUser.length <= 0 && 
+    casesUser?.length <= 0 && 
     <div className="text-center">
     <h6>No have Cases </h6>
     </div>
