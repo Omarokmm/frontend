@@ -382,7 +382,7 @@ const DocotrCases = ()=> {
                 </thead>
                 <tbody>
                   {inProcessCases.map((item, index) => (
-                    <tr key={item._id}>
+                    <tr key={item._id}  className={(item.isHold? "table-danger" : "" ) }>
                       <td>{item.caseNumber}</td>
                       <td>{item.dentistObj.name}</td>
                       <td>{item.patientName}</td>

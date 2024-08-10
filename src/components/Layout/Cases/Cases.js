@@ -107,7 +107,7 @@ const Cases = ()=>{
           result.filter(
             (r) =>
               // r.cadCam.status.isStart === true &&
-              r.delivering.status.isEnd === false
+              r.delivering.status.isEnd === false && r.isHold === false
           )
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
