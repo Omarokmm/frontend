@@ -77,6 +77,11 @@ export const naturalOfWorks = [
     name: "pontic",
     color: "rgb(255 44 0)",
   },
+  {
+    id: 14,
+    name: "Temporary",
+    color: "rgb(89 103 255)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [
