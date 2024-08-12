@@ -414,8 +414,7 @@ const getFinisheingDate = (item) => {
     navigate(`/layout/edit-case/${id}`)
   }
   const getStudyCases = (data)=>{
-    console.log(data.find(r => r.name === 'Study'))
-     return data.find(r => r.name === 'Study').count
+     return data.find(r => r.name === 'Study') ? data.find(r => r.name === 'Study')?.count : 0
   }
     return (
     <div className="content user-profile">
