@@ -88,6 +88,7 @@ const Cases = ()=>{
   const [inProcessCases, setInProcessCases] = useState([]);
   const [holdingCases, setHoldingCases] = useState([]);
   const [finishedCases, setFinishedCases] = useState([]);
+  const [notStartCases, setNotStartCases] = useState([]);
   const [buffAllCases, setBuffAllCases] = useState([]);
   const [delayCases, setDelayCases] = useState([]);
   const [buffDelayCases, setBuffDelayCases] = useState([]);
@@ -103,11 +104,12 @@ const Cases = ()=>{
         console.log(result);
         setBuffAllCases(result);
         setFinishedCases(result.filter((r) => r.delivering.status.isEnd === true));
+        setNotStartCases(result.filter((r) => r.cadCam.actions.length <= 0 && r.isHold === false ) );
         setInProcessCases(
           result.filter(
             (r) =>
               // r.cadCam.status.isStart === true &&
-              r.delivering.status.isEnd === false && r.isHold === false
+              r.delivering.status.isEnd === false && r.isHold === false && r.cadCam.actions.length > 0
           )
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
@@ -387,6 +389,11 @@ const Cases = ()=>{
 
   return response ; 
   }
+  const checkNotStartDelay=(item)=>{
+    if(item.cadCam.actions.length <= 0 && item.delivering.status.isEnd === true){
+      return 'table-info'
+    }
+  }
   function groupTeethNumbersByName(teethNumbers) {
     const result = {};
     teethNumbers.forEach(teethNumber => {
@@ -482,6 +489,24 @@ const Cases = ()=>{
               onClick={() => setSearchText("")}
             >
               <button
+                class="nav-link  bgc-info"
+                id="notStart-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#notStart-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="notStart-tab-pane"
+                aria-selected="true"
+              >
+                Not Start <small>({notStartCases.length})</small>
+              </button>
+            </li>
+            <li
+              class="nav-item"
+              role="presentation"
+              onClick={() => setSearchText("")}
+            >
+              <button
                 class="nav-link  bgc-warning"
                 id="home-tab"
                 data-bs-toggle="tab"
@@ -530,6 +555,7 @@ const Cases = ()=>{
                 Finished <small>({finishedCases.length})</small>
               </button>
             </li>
+            {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" &&
             <li
               class="nav-item"
               role="presentation"
@@ -548,6 +574,7 @@ const Cases = ()=>{
                 Delay <small>({delayCases.length})</small>
               </button>
             </li>
+            }
           </ul>
           <div
             class="tab-content"
@@ -648,6 +675,79 @@ const Cases = ()=>{
               )}
               {allCases.length <= 0 && (
                 <div className="no-content">No Cases Added yet!</div>
+              )}
+            </div>
+            {/* In Not Start  */}
+            <div
+              class="tab-pane fade "
+              id="notStart-tab-pane"
+              role="tabpanel"
+              aria-labelledby="notStart-tab"
+              tabIndex="0"
+            >
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="searchText"
+                  className="form-control"
+                  placeholder="Search by name | case number | case type "
+                  value={searchText}
+                  onChange={(e) => searchByName(e.target.value, "notStart")}
+                />
+              </div>
+              {notStartCases.length > 0 && (
+                <table className="table text-center table-bordered">
+                  <thead>
+                    <tr className="table-secondary">
+                      <th scope="col">#Case</th>
+                      <th scope="col">Doctor Name</th>
+                      <th scope="col">Patient Name</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notStartCases.map((item, index) => (
+                      <tr key={item._id} className={checkNotStartDelay(item)}>
+                        <td>{item.caseNumber}</td>
+                        <td>{item.dentistObj.name}</td>
+                        <td>{item.patientName}</td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
+                        <td>
+                          <div className="actions-btns">
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "view")}
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                            </span>
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "process")}
+                            >
+                              <i class="fa-brands fa-squarespace"></i>
+                            </span>
+                           { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                            <span className="c-primary" onClick={(e) => editCase(item._id)}>
+                            <i class="fas fa-edit"></i>
+                            </span>
+                           }
+                            {/* <span onClick={(e) => deleteCase(item._id)}>
+                              <i className="fa-solid fa-trash-can"></i>
+                            </span> */}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {notStartCases.length <= 0 && (
+                <div className="no-content">No Cases Not Start yet!</div>
               )}
             </div>
             {/* In Process */}
@@ -879,8 +979,9 @@ const Cases = ()=>{
                 <div className="no-content">No Cases Finished yet!</div>
               )}
             </div>
-                {/* In Delay */}
-                <div
+              {/* In Delay */}
+            {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" && 
+            <div
               class="tab-pane fade"
               id="delay-tab-pane"
               role="tabpanel"
@@ -949,6 +1050,7 @@ const Cases = ()=>{
                 <div className="no-content">No Cases Delay Cases yet!</div>
               )}
             </div>
+             }
           </div>
         </div>
       </div>

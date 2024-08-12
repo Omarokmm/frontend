@@ -610,6 +610,9 @@ cursor: pointer;
 .bgc-warning{
        background: #ffc107;
 }
+.bgc-info{
+  background: #b8e0e7;
+}
 .bgc-primary{
        background:   rgb(163 197 246);
  
