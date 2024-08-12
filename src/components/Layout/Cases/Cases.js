@@ -104,7 +104,8 @@ const Cases = ()=>{
         console.log(result);
         setBuffAllCases(result);
         setFinishedCases(result.filter((r) => r.delivering.status.isEnd === true));
-        setNotStartCases(result.filter((r) => r.cadCam.actions.length <= 0 && r.isHold === false ) );
+        // && r.delivering.status.isEnd === false  
+        setNotStartCases(result.filter((r) => r.cadCam.actions.length <= 0 &&  r.delivering.status.isEnd === false && r.delivering.status.isEnd === false && r.isHold === false ) );
         setInProcessCases(
           result.filter(
             (r) =>
@@ -233,6 +234,22 @@ const Cases = ()=>{
         setAllCases(filteredAllCases);
       } else {
         setAllCases(buffAllCases);
+      }
+    }
+    if (name === "notStart") {
+      if (searchText !== "") {
+        const filteredAllCases = notStartCases.filter(
+          (item) =>
+            item.caseNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setNotStartCases(filteredAllCases);
+      } else {
+        setNotStartCases(buffAllCases);
       }
     }
     if (name === "inProccess") {

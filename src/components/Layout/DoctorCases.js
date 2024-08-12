@@ -12,6 +12,7 @@ const DocotrCases = ()=> {
     const [inProcessCases, setInProcessCases] = useState([]);
     const [finishedCases, setFinishedCases] = useState([]);
     const [buffAllCases, setBuffAllCases] = useState([]);
+    const [notStartCases, setNotStartCases] = useState([]);
     const [searchText, setSearchText] = useState([]);
     console.log(state)
     const [doctorCases,setDoctorCases] = useState()
@@ -26,11 +27,12 @@ const DocotrCases = ()=> {
             setAllCases(result);
             setBuffAllCases(result);
             setFinishedCases(result.filter((r) => r.delivering.status.isEnd === true));
+            setNotStartCases(result.filter((r) => r.cadCam.actions.length <= 0 &&  r.delivering.status.isEnd === false && r.delivering.status.isEnd === false && r.isHold === false ) );
             setInProcessCases(
               result.filter(
                 (r) =>
                   // r.cadCam.status.isStart === true &&
-                  r.delivering.status.isEnd === false
+                  r.delivering.status.isEnd === false && r.cadCam.actions.length > 0
               )
             );
           })
@@ -54,6 +56,23 @@ const DocotrCases = ()=> {
             setAllCases(filteredAllCases);
           } else {
             setAllCases(buffAllCases);
+          }
+        }
+        if (name === "notStart") {
+          console.log("notStart",searchText)
+          if (searchText !== "") {
+            const filteredAllCases = notStartCases.filter(
+              (item) =>
+                item.caseNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+                item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
+                item.dentistObj?.name
+                  .toLowerCase()
+                  .includes(searchText.toLowerCase()) ||
+                item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+            );
+            setNotStartCases(filteredAllCases);
+          } else {
+            setNotStartCases(buffAllCases);
           }
         }
         if (name === "inProccess") {
@@ -201,6 +220,11 @@ const DocotrCases = ()=> {
       console.log(item.caseNumber,msg)
       return msg ; 
       }
+      const checkNotStartDelay=(item)=>{
+        if(item.cadCam.actions.length <= 0 && item.delivering.status.isEnd === true){
+          return 'table-info'
+        }
+      }
     return (
     <div className="content cases-doctors">
     <div className="card">
@@ -221,6 +245,24 @@ const DocotrCases = ()=> {
               aria-selected="false"
             >
               All <small>({allCases.length})</small>
+            </button>
+          </li>
+          <li
+            class="nav-item"
+            role="presentation"
+            onClick={() => setSearchText("")}
+          >
+            <button
+              class="nav-link  bgc-info"
+              id="notStart-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#notStart-tab-pane"
+              type="button"
+              role="tab"
+              aria-controls="notStart-tab-pane"
+              aria-selected="true"
+            >
+             Not Start <small>({notStartCases.length})</small>
             </button>
           </li>
           <li
@@ -349,6 +391,68 @@ const DocotrCases = ()=> {
               <div className="no-content">No Cases Added yet!</div>
             )}
           </div>
+           {/* In Not Start  */}
+           <div
+              class="tab-pane fade "
+              id="notStart-tab-pane"
+              role="tabpanel"
+              aria-labelledby="notStart-tab"
+              tabIndex="0"
+            >
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="searchText"
+                  className="form-control"
+                  placeholder="Search by name | case number | case type "
+                  value={searchText}
+                  onChange={(e) => searchByName(e.target.value, "notStart")}
+                />
+              </div>
+              {notStartCases.length > 0 && (
+                <table className="table text-center table-bordered">
+                  <thead>
+                    <tr className="table-secondary">
+                      <th scope="col">#Case</th>
+                      <th scope="col">Doctor Name</th>
+                      <th scope="col">Patient Name</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notStartCases.map((item, index) => (
+                      <tr key={item._id} className={checkNotStartDelay(item)}>
+                        <td>{item.caseNumber}</td>
+                        <td>{item.dentistObj.name}</td>
+                        <td>{item.patientName}</td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
+                        <td>
+                          <div className="actions-btns">
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "view")}
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                            </span>
+                            {/* <span onClick={(e) => deleteCase(item._id)}>
+                              <i className="fa-solid fa-trash-can"></i>
+                            </span> */}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {notStartCases.length <= 0 && (
+                <div className="no-content">No Cases Not Start yet!</div>
+              )}
+            </div>
           {/* In Process */}
           <div
             class="tab-pane fade "

@@ -87,7 +87,7 @@ const Sidebar = () => {
               
             />
             }
-          {/* {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception)  && 
+          {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception)  && 
             <SubmenuItem
               title="Shipments"
               iconClass="bx bxs-user"
@@ -100,7 +100,7 @@ const Sidebar = () => {
                 "Nav Sub Link 4",
               ]}
             />
-            } */}
+            }
           </li>
           {/* <li>
             <a href="/users">users</a>

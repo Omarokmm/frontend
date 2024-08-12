@@ -587,7 +587,7 @@ cursor: pointer;
   gap: 10px;
 }
 .cases-doctors .nav-tabs{
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
 }
 .notes-user .nav-tabs{
   grid-template-columns: 1fr 1fr ;

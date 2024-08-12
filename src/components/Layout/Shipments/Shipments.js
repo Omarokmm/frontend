@@ -31,6 +31,7 @@ const departments = JSON.parse(localStorage.getItem("departments"))
 const user = JSON.parse(localStorage.getItem("user"))
 const [shipmentModel, setShipmentModel] = useState(initialData);
 const [allShipments, setAllShipments] = useState([]);
+const [buffAllShipments, setBuffAllShipments] = useState([]);
 const [onTheWayShipments, setOnTheWayShipments] = useState([]);
 const [holdShipments, setHoldShipments] = useState([]);
 const [deliveredShipments, setDeliveredShipments] = useState([]);
@@ -54,9 +55,10 @@ const [dentistObj, setDentistObj] = useState({
         const result = res.data;
         console.log("result Shipments",result);
         setAllShipments(result)
+        setBuffAllShipments(result)
         setOnTheWayShipments(result.filter(r=>r.status === "On The Way"))
         setHoldShipments(result.filter(r=>r.status === "Hold"))
-        setDeliveredShipments(result.filter(r=>r.status === "Delivery"))
+        setDeliveredShipments(result.filter(r=>r.status === "Delivered"))
       })
       .catch((error) => {
         console.error("Error fetching cases:", error);
@@ -111,6 +113,64 @@ const [dentistObj, setDentistObj] = useState({
   }; 
   const searchByName = (searchText, name) => {
     setSearchText(searchText);
+    if (name === "allShipments") {
+      if (searchText !== "") {
+        const filteredAllshipments = allShipments.filter(
+          (item) =>
+            item.trackingNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) 
+        );
+        setAllShipments(filteredAllshipments);
+      } else {
+        setAllShipments(buffAllShipments);
+      }
+    }
+    if (name === "onTheWay") {
+      if (searchText !== "") {
+        const filteredAllshipments = onTheWayShipments.filter(
+          (item) =>
+            item.trackingNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) 
+        );
+        setOnTheWayShipments(filteredAllshipments);
+      } else {
+        setOnTheWayShipments(buffAllShipments.filter(r=>r.status === "On The Way"));
+      }
+    }
+    if (name === "holding") {
+      if (searchText !== "") {
+        const filteredAllshipments = holdShipments.filter(
+          (item) =>
+            item.trackingNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) 
+        );
+        setHoldShipments(filteredAllshipments);
+      } else {
+        setHoldShipments(
+          buffAllShipments.filter(r=>r.status === "Hold")
+        );
+      }
+    }
+    if (name === "delivered") {
+      if (searchText !== "") {
+        const filteredAllshipments = deliveredShipments.filter(
+          (item) =>
+            item.trackingNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) 
+        );
+        setDeliveredShipments(filteredAllshipments);
+      } else {
+        setDeliveredShipments(buffAllShipments.filter(r=>r.status === "Delivered"));
+      }
+    }
   };
   const updateShipment = async() => {
     let model = buffShipment
@@ -155,7 +215,7 @@ const [dentistObj, setDentistObj] = useState({
 //     setSearchText(searchText);
 //     if (name === "allCases") {
 //       if (searchText !== "") {
-//         const filteredAllCases = allCases.filter(
+//         const filteredAllshipments = allCases.filter(
 //           (item) =>
 //             item.caseNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
 //             item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -164,14 +224,14 @@ const [dentistObj, setDentistObj] = useState({
 //               .includes(searchText.toLowerCase()) ||
 //             item?.patientName.toLowerCase().includes(searchText.toLowerCase())
 //         );
-//         setAllCases(filteredAllCases);
+//         setAllCases(filteredAllshipments);
 //       } else {
-//         setAllCases(buffAllCases);
+//         setAllCases(buffAllShipments);
 //       }
 //     }
 //     if (name === "inProccess") {
 //       if (searchText !== "") {
-//         const filteredAllCases = inProcessCases.filter(
+//         const filteredAllshipments = inProcessCases.filter(
 //           (item) =>
 //             item.caseNumber.toLowerCase().includes(searchText.toLowerCase()) ||
 //             item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -180,10 +240,10 @@ const [dentistObj, setDentistObj] = useState({
 //               .includes(searchText.toLowerCase()) ||
 //             item.patientName.toLowerCase().includes(searchText.toLowerCase())
 //         );
-//         setInProcessCases(filteredAllCases);
+//         setInProcessCases(filteredAllshipments);
 //       } else {
 //         setInProcessCases(
-//           buffAllCases.filter(
+//           buffAllShipments.filter(
 //             (r) =>
 //               r.cadCam.status.isStart === true &&
 //               r.ceramic.status.isEnd === false
@@ -193,7 +253,7 @@ const [dentistObj, setDentistObj] = useState({
 //     }
 //     if (name === "holing") {
 //       if (searchText !== "") {
-//         const filteredAllCases = holdingCases.filter(
+//         const filteredAllshipments = holdingCases.filter(
 //           (item) =>
 //             item.caseNumber.toLowerCase().includes(searchText.toLowerCase()) ||
 //             item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -202,14 +262,14 @@ const [dentistObj, setDentistObj] = useState({
 //               .includes(searchText.toLowerCase()) ||
 //             item.patientName.toLowerCase().includes(searchText.toLowerCase())
 //         );
-//         setHoldingCases(filteredAllCases);
+//         setHoldingCases(filteredAllshipments);
 //       } else {
-//         setHoldingCases(buffAllCases.filter((r) => r.isHold === true));
+//         setHoldingCases(buffAllShipments.filter((r) => r.isHold === true));
 //       }
 //     }
 //     if (name === "finished") {
 //       if (searchText !== "") {
-//         const filteredAllCases = finishedCases.filter(
+//         const filteredAllshipments = finishedCases.filter(
 //           (item) =>
 //             item?.caseNumber.toLowerCase().includes(searchText.toLowerCase()) ||
 //             item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -218,16 +278,16 @@ const [dentistObj, setDentistObj] = useState({
 //               .includes(searchText.toLowerCase()) ||
 //             item?.patientName.toLowerCase().includes(searchText.toLowerCase())
 //         );
-//         setFinishedCases(filteredAllCases);
+//         setFinishedCases(filteredAllshipments);
 //       } else {
 //         setFinishedCases(
-//           buffAllCases.filter((r) => r?.ceramic?.status?.isEnd === true)
+//           buffAllShipments.filter((r) => r?.ceramic?.status?.isEnd === true)
 //         );
 //       }
 //     }
 //     if (name === "delay") {
 //       if (searchText !== "") {
-//         const filteredAllCases = delayCases.filter(
+//         const filteredAllshipments = delayCases.filter(
 //           (item) =>
 //             item?.caseNumber.toLowerCase().includes(searchText.toLowerCase()) ||
 //             item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -236,7 +296,7 @@ const [dentistObj, setDentistObj] = useState({
 //               .includes(searchText.toLowerCase()) ||
 //             item?.patientName.toLowerCase().includes(searchText.toLowerCase())
 //         );
-//         setDelayCases(filteredAllCases);
+//         setDelayCases(filteredAllshipments);
 //       } else {
 //         setDelayCases(buffDelayCases);
 //       }
@@ -319,7 +379,6 @@ const getLastItem = (arr)=> {
         _id: item.dentistObj.id,
     })
   }
-  
   return (
     <div className="content shipments">
       <div className="card">
@@ -500,7 +559,7 @@ const getLastItem = (arr)=> {
                     className="form-control"
                     placeholder="Search by truck number "
                     value={searchText}
-                    onChange={(e) => searchByName(e.target.value, "onetheway")}
+                    onChange={(e) => searchByName(e.target.value, "onTheWay")}
                     />
                 </div>
                 {onTheWayShipments.length > 0 && (
@@ -526,9 +585,9 @@ const getLastItem = (arr)=> {
                         <td>{item.trackingNumber}</td>
                         <td>{_global.formatDateToYYYYMMDD(item.sentDate)}</td>
                         <td>{item.status}</td>
-                        <td> {item.notes.length > 0 ? item.notes[0].msg : 'No Notes'}</td>
+                        <td> {item.notes}</td>
                         <td>{_global.formatDateToYYYYMMDD(item.estimatedDeliveryDate) }</td>
-                        <td className={`${item.remarks.length <=0 ? 'non-print' : ''}`}> {item.remarks.length > 0 ? item.remarks[0].msg : 'No remarks'}</td>
+                        <td > {item.remarks}</td>
                         <td className="non-print">
                         <div className="actions-btns">
                             <span className="c-success">
@@ -568,7 +627,7 @@ const getLastItem = (arr)=> {
                     className="form-control"
                     placeholder="Search by truck number "
                     value={searchText}
-                    onChange={(e) => searchByName(e.target.value, "hold")}
+                    onChange={(e) => searchByName(e.target.value, "holding")}
                     />
                 </div>
                 {holdShipments.length > 0 && (
@@ -594,9 +653,9 @@ const getLastItem = (arr)=> {
                         <td>{item.trackingNumber}</td>
                         <td>{_global.formatDateToYYYYMMDD(item.sentDate)}</td>
                         <td>{item.status}</td>
-                        <td> {item.notes.length > 0 ? item.notes[0].msg : 'No Notes'}</td>
+                        <td> {item.notes}</td>
                         <td>{_global.formatDateToYYYYMMDD(item.estimatedDeliveryDate) }</td>
-                        <td className={`${item.remarks.length <=0 ? 'non-print' : ''}`}> {item.remarks.length > 0 ? item.remarks[0].msg : 'No remarks'}</td>
+                        <td > {item.remarks}</td>
                         <td className="non-print">
                         <div className="actions-btns">
                                 {/* <span className="c-success">
@@ -662,9 +721,9 @@ const getLastItem = (arr)=> {
                         <td>{item.trackingNumber}</td>
                         <td>{_global.formatDateToYYYYMMDD(item.sentDate)}</td>
                         <td>{item.status}</td>
-                        <td> {item.notes.length > 0 ? item.notes[0].msg : 'No Notes'}</td>
+                        <td> {item.notes}</td>
                         <td>{_global.formatDateToYYYYMMDD(item.estimatedDeliveryDate) }</td>
-                        <td className={`${item.remarks.length <=0 ? 'non-print' : ''}`}> {item.remarks.length > 0 ? item.remarks[0].msg : 'No remarks'}</td>
+                        <td > {item.remarks}</td>
                         <td className="non-print">
                         <div className="actions-btns">
                                 {/* <span className="c-success">
