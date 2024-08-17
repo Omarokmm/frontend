@@ -64,7 +64,7 @@ const Users = () => {
             console.log("result",result)
             setAllCases(result.map((c) => {
               return {
-                label: `${c.caseNumber}`,
+                label: `D:${c.dentistObj.name}, P:${c.patientName} (${c.caseNumber})`,
                 _id: c._id,
               };
             }));
@@ -310,12 +310,14 @@ const handleChangeSelect = (event) => {
             <span>
               Users <small>({users.length})</small>
             </span>
+            {user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager &&
             <span className="add-user-icon">
               <a data-bs-toggle="modal" data-bs-target="#exampleModal">
                 {" "}
                 <i class="fa-solid fa-circle-plus"></i>
               </a>
             </span>
+            }
           </h5>
           <div className="card-body">
             <div className="form-group">
@@ -387,7 +389,7 @@ const handleChangeSelect = (event) => {
                             <i class="fa-solid fa-eye c-success"></i>
 
                           </span>
-                         <span   
+                         {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager) && <span   
                          onClick={()=>navigate("/layout/user-profile", { state: { ...item, isAdmin:true } })}
                         //  data-bs-toggle="modal"
                         //     data-bs-target="#casesUserModal"
@@ -397,6 +399,7 @@ const handleChangeSelect = (event) => {
                               >
                             <i class="fa-solid fa-chart-column c-success"></i>
                           </span>
+                        }
                         </div>
                       </td>
                     </tr>
@@ -739,7 +742,7 @@ const handleChangeSelect = (event) => {
             </div>
             <div class="modal-body">
               <div className="row">
-                <div className="col-lg-6 mb-1">
+                <div className="col-lg-12 mb-1">
                   <div className="form-group">
                     <label>Case Number </label>
                       {/* <select class="form-select" aria-label="Default select example">
@@ -761,7 +764,7 @@ const handleChangeSelect = (event) => {
                      />
                   </div>
                 </div> 
-                <div className="col-lg-6 mb-1">
+                <div className="col-lg-12 mb-1">
                 <div className="form-group">
                     <label>Type </label>
                   <select class="form-select" onChange={(e)=>setNoteType(e.target.value)} aria-label="Default select example">
@@ -773,7 +776,7 @@ const handleChangeSelect = (event) => {
               </div> 
                 <div className="col-lg-12">
                   <div className="form-group">
-                    <label htmlFor="noteUser"> New Note </label>{" "}
+                    <label htmlFor="noteUser"> Note </label>{" "}
                     <textarea
                       type="text"
                       rows={3}

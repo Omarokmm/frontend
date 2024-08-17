@@ -1,8 +1,9 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as _global from "../../../config/global";
 import { useNavigate } from "react-router-dom";
 import { showToastMessage } from "../../../helper/toaster";
+import { useReactToPrint } from "react-to-print";
 const initialData = {
   caseNumber: "",
   name: "",
@@ -78,6 +79,7 @@ const initialData = {
 };
 
 const Cases = ()=>{
+  const userRef = useRef();
   const departments = JSON.parse(localStorage.getItem("departments"))
   const user = JSON.parse(localStorage.getItem("user"))
   const navigate = useNavigate();
@@ -357,7 +359,7 @@ const Cases = ()=>{
 }
   const checkCaseDate=(item)=>{
     let response = "" 
-    if(user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC"){
+    if(user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" || user.roles[0] ===  _global.allRoles.Reception){
       let teethNumbersByName = groupTeethNumbersByName(item.teethNumbers)
       const days = _global.getDaysfromTowDates(item.dateIn,new Date())
       if(teethNumbersByName.length > 0){
@@ -470,6 +472,10 @@ const Cases = ()=>{
   }
   return msg ; 
   }
+  const handlePrint = useReactToPrint({
+    content: () => userRef.current,
+    documentTitle: `Delay Cases`,
+  })
   return (
     <div className="content">
       <div className="card">
@@ -500,7 +506,8 @@ const Cases = ()=>{
                 All <small>({allCases.length})</small>
               </button>
             </li>
-            <li
+            {(user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" || user.roles[0] ===  _global.allRoles.Reception ) && 
+               <li
               class="nav-item"
               role="presentation"
               onClick={() => setSearchText("")}
@@ -518,6 +525,7 @@ const Cases = ()=>{
                 Not Start <small>({notStartCases.length})</small>
               </button>
             </li>
+         }
             <li
               class="nav-item"
               role="presentation"
@@ -572,7 +580,7 @@ const Cases = ()=>{
                 Finished <small>({finishedCases.length})</small>
               </button>
             </li>
-            {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" &&
+            
             <li
               class="nav-item"
               role="presentation"
@@ -591,7 +599,7 @@ const Cases = ()=>{
                 Delay <small>({delayCases.length})</small>
               </button>
             </li>
-            }
+            
           </ul>
           <div
             class="tab-content"
@@ -997,7 +1005,7 @@ const Cases = ()=>{
               )}
             </div>
               {/* In Delay */}
-            {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" && 
+            {(user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" || user.roles[0] ===  _global.allRoles.Reception ) && 
             <div
               class="tab-pane fade"
               id="delay-tab-pane"
@@ -1015,7 +1023,15 @@ const Cases = ()=>{
                   onChange={(e) => searchByName(e.target.value, "delay")}
                 />
               </div>
-              {delayCases.length > 0 && (
+               <div className="col-lg-12">
+            {delayCases?.length > 0 &&   user.roles[0] ===  _global.allRoles.Reception && 
+               <div className="col-12 mb-3 print-btn">
+                <button className="btn btn-sm btn-primary " onClick={()=>handlePrint()}> <i class="fas fa-print"></i> print</button>
+              </div>
+            }
+               </div>
+               <div ref={userRef} >
+              {delayCases.length > 0  && (
                 <table className="table text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
@@ -1030,7 +1046,7 @@ const Cases = ()=>{
                   </thead>
                   <tbody>
                     {delayCases.map((item, index) => (
-                      <tr key={item._id} className={(item.isHold? "table-danger" : "" ) || checkCaseDate(item)}>
+                      <tr key={item._id} className={checkCaseDate(item)}>
                         <td data-bs-toggle="tooltip"
                           data-bs-placement="top"
                           title={getReasonlate(item)}>{item.caseNumber}</td>
@@ -1040,7 +1056,7 @@ const Cases = ()=>{
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>{item.dateOut && _global.formatDateToYYYYMMDD(item.dateOut)}</td>
                         <td>
-                          <div className="actions-btns">
+                          <div className="actions-btns non-print">
                             <span
                               className="c-success"
                               onClick={() => viewCase(item, "view")}
@@ -1063,6 +1079,7 @@ const Cases = ()=>{
                   </tbody>
                 </table>
               )}
+              </div>
               {delayCases.length <= 0 && (
                 <div className="no-content">No Cases Delay Cases yet!</div>
               )}

@@ -391,12 +391,14 @@ return (
               </div> */}
             </div>
           </div>
-          <div className="col-lg-4">
+          {caseData?.cadCam.obj  &&
+          <div className="col-lg-12">
             <div className="case-item">
-              <strong>Address:</strong>
-              <span>{caseData.address}</span>
+              <strong>Block Name:</strong>
+              <span>{caseData.cadCam.obj?.zirconName} {caseData.cadCam.obj?.emaxName} {caseData.cadCam.obj?.implantName} {caseData.cadCam.obj?.study}</span>
             </div>
-          </div>
+          </div> 
+          }
           <div className="col-lg-4">
             <div className="case-item">
               <strong>Patient's Name:</strong>

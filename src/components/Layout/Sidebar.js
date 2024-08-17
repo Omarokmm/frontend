@@ -29,7 +29,7 @@ const Sidebar = () => {
                 "Nav Sub Link 4",
               ]}
             />
-            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager)  &&
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.technician && user.firstName === 'Mustafa' )  &&
             <SubmenuItem
               title="Users"
               iconClass="bx bxs-user"
