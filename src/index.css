@@ -16,6 +16,7 @@
 body {
   background-color: #e7f2fd;
   transition: all 0.5s ease;
+  zoom:90%
 }
 body.dark {
   background-color: #333;
@@ -459,6 +460,18 @@ padding: 10px 15px;
 .c-primary{
   color: rgb(41, 147, 223);
 }
+.bg-history-danger {
+  border: 1px solid #fff6f6;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background-color: #fff6f6;
+ }
+  .bg-history-success {
+    border: 1px solid #dcfedd;
+    padding: 5px 10px;
+    border-radius: 10px;
+    background-color: #dcfedd;
+ }
 .checks-box .form-check{
     margin: 1rem 1.5rem 1.5rem 0;
 }
@@ -686,6 +699,9 @@ td,
 .c-pointer{
   cursor: pointer;
 }
+.user-profile .nav-tabs {
+  grid-template-columns: 1fr 1fr 1fr;
+}
 @media (max-width:768px){
   .navbar{
     padding: 15px;
@@ -838,6 +854,10 @@ table th{
   flex-direction: column;
   gap: 10px;
 }
+
+.user-profile .nav-tabs {
+  grid-template-columns: 1fr;
+}
 }
 .delivering-icon{
   padding-left: 5px;
@@ -852,6 +872,10 @@ table th{
 .print-btn{
   text-align: right;
   margin-bottom: 1rem;
+}
+.modal-backdrop {
+  width: 100% !important;
+  height: 100% !important;
 }
 @page {
   size: auto;

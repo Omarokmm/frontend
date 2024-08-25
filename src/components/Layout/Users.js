@@ -310,7 +310,7 @@ const handleChangeSelect = (event) => {
             <span>
               Users <small>({users.length})</small>
             </span>
-            {user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager &&
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager) &&
             <span className="add-user-icon">
               <a data-bs-toggle="modal" data-bs-target="#exampleModal">
                 {" "}

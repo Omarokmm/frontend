@@ -41,7 +41,6 @@ const CaseProcess = () => {
     console.log(actionName);
     let model;
     let action;
-  
   if (actionName === "start") {
     action = {
       technicianName: `${user.firstName}, ${user.lastName}`,
@@ -227,12 +226,12 @@ console.log("newModel",newModel);
                  <>
                  <button
                     className="btn btn-sm btn-success"
-                    disabled={!caseData.cadCam.status.isStart}
+                    disabled={!caseData.cadCam.status.isStart || caseData.isHold}
                     onClick={() => changeStatus(state._id, "cadCam", "start")}
                   >
                     Start
                   </button>
-                  <button
+                  {/* <button
                     className="btn btn-sm btn-warning"
                       data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
@@ -243,12 +242,12 @@ console.log("newModel",newModel);
                      }}
                   >
                     Pause
-                  </button>
+                  </button> */}
                   <button
                     className="btn btn-sm btn-danger"
                      data-bs-toggle="modal"
                     data-bs-target="#cadCamObjModal"
-                    disabled={caseData.cadCam.status.isEnd}
+                    disabled={caseData.cadCam.status.isEnd || caseData.isHold}
                        onClick={() => {
                       setPhaseName('cadCam')
                       setBuffActionName('end')
@@ -258,7 +257,7 @@ console.log("newModel",newModel);
                   </button>
                   </>
                    }
-                  <button
+                <button
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
                     data-bs-target="#chooseNaturalModal"
@@ -611,7 +610,6 @@ console.log("newModel",newModel);
               ></button>
             </div>
             <div class="modal-body">
-              {console.log(historyData?.items)}
               {phaseModel?.actions.length <= 0 && (
                 <h6 className=" text-center m-3">No have history Yet!</h6>
               )}
@@ -624,11 +622,29 @@ console.log("newModel",newModel);
                     {item?.msg}
                   </span>
                 ))}
+               {caseData?.historyHolding.length > 0 && (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ) && <div className="mt-3"> 
+                <h6 className="mb-2">Holding History</h6>
+                {caseData?.historyHolding.map((item,index) =>
+                  <p key={index} className={
+                    item.isHold
+                  ? "bg-history-danger"
+                  : "bg-history-success"
+                 }>
+                    {item.isHold ? <span className="c-danger">Hold </span> : <span className="c-success"> UnHold  </span>}
+                     {item.name}  in 
+                     <span className={
+                      item.isHold
+                    ? "c-danger"
+                    : "c-success"
+                }>{_global.getFormateDate(item.date)}</span>, Because {item.msg} </p>
+                )}
+                
+              </div>
+             }
             </div>
           </div>
         </div>
       </div>
-
         {/* Modal Cad Cam Object */}
       <div
         class="modal fade"

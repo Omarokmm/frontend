@@ -14,6 +14,8 @@ const DocotrCases = ()=> {
     const [buffAllCases, setBuffAllCases] = useState([]);
     const [notStartCases, setNotStartCases] = useState([]);
     const [searchText, setSearchText] = useState([]);
+  const [buffCase, setBuffCase] = useState(null);
+
     console.log(state)
     const [doctorCases,setDoctorCases] = useState()
     useEffect(() => {
@@ -226,6 +228,7 @@ const DocotrCases = ()=> {
         }
       }
     return (
+      <>
     <div className="content cases-doctors">
     <div className="card">
       <h5 class="card-title">
@@ -365,6 +368,18 @@ const DocotrCases = ()=> {
                           >
                             <i class="fa-solid fa-eye"></i>
                           </span>
+                          {item?.historyHolding?.length > 0 && user.roles[0] === _global.allRoles.admin  && (
+                                <span
+                                className="c-primary"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#caseHoldHistoryModal"
+                                  onClick={() => {
+                                    setBuffCase(item);
+                                  }}
+                                >
+                                  <i class="fas fa-history"></i>
+                                </span>
+                              )}
                           {/* <span
                             className="c-success"
                             onClick={() => viewCase(item, "process")}
@@ -598,6 +613,53 @@ const DocotrCases = ()=> {
       </div>
     </div>
   </div>
+           {/* Modal Hold History Case */}
+           <div
+        class="modal fade"
+        id="caseHoldHistoryModal"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog ">
+          <div class="modal-content">
+            <div
+              class={`modal-header  text-white bg-primary`}
+            >
+              <h1 class="modal-title fs-5" id="exampleModalLabel">
+                Case History # {buffCase?.caseNumber}
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div>
+                {buffCase?.historyHolding.map((item,index)=>
+                  <p key={index} className={
+                    item.isHold
+                  ? "bg-history-danger"
+                  : "bg-history-success"
+              }>
+                    {item.isHold ? <span className="c-danger">Hold </span> : <span className="c-success"> UnHold  </span>}
+                     {item.name}  in 
+                     <span className={
+                      item.isHold
+                    ? "c-danger"
+                    : "c-success"
+                }>{_global.getFormateDate(item.date)}</span>, Because {item.msg} </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+</>
 );
 }
 

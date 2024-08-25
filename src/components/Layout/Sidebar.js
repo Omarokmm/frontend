@@ -91,7 +91,7 @@ const Sidebar = () => {
             <SubmenuItem
               title="Shipments"
               iconClass="bx bxs-user"
-              icon="fa-solid fa-user-doctor"
+              icon="fas fa-shipping-fast" 
               link="/layout/shipments"
               sublinks={[
                 "Nav Sub Link 1",

@@ -95,6 +95,7 @@ const Cases = ()=>{
   const [delayCases, setDelayCases] = useState([]);
   const [buffDelayCases, setBuffDelayCases] = useState([]);
   const [searchText, setSearchText] = useState([]);
+  const [holdText, setHoldText] = useState("");
 
   useEffect(() => {
     // get cases
@@ -116,6 +117,7 @@ const Cases = ()=>{
           )
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
+        console.log("Holding Cases",result.filter((r) => r.isHold === true))
         const delayCasesfilter =  result.filter(c => filterDaley(c))
         console.log(delayCasesfilter)
         setDelayCases(delayCasesfilter);
@@ -151,27 +153,61 @@ const Cases = ()=>{
   };
   // hold case
   const holdCase = (id) => {
-   let logs =  [
-       ...buffCase.logs,
-       {
-         id: user._id,
-         name: `${user.firstName}, ${user.lastName}`,
-         date: new Date(),
-         msg: isHoldCase ? 'Hold by ' : 'UnHold by'
-       },
-     ]
-   ;
+    let action;
+    let historyHolding =  [
+      ...buffCase.historyHolding ? buffCase.historyHolding   : [] ,
+      {
+        id: user._id,
+        name: `${user.firstName}, ${user.lastName}`,
+        date: new Date(),
+        isHold:isHoldCase,
+        msg: holdText
+      },
+    ]
+  ;
+    if (isHoldCase) {
+        action = {
+          technicianName: `${user.firstName}, ${user.lastName}`,
+          technicianId: user._id,
+          datePause: new Date(),
+          notes: "",
+          prfeix:"pause",
+         prfeixMsg : "Puase by  ",
+        msg: holdText
+        };
+        const logs = [...buffCase["cadCam"].actions];
+        let newModel = {
+          namePhase: "cadCam",
+          actions: logs,
+          status: {
+            isStart: true,
+            isPause:false,
+            isEnd:buffCase["cadCam"].status.isEnd,
+          },
+          obj: buffCase["cadCam"].buffObj,
+        };
+        axios
+        .put(`${_global.BASE_URL}cases/${buffCase._id}/cadCam`, newModel)
+        .then((res) => {
+        })
+        .catch((error) => {
+          showToastMessage("Error  Holding successfully", "error");
+        });
+      }
+
     axios
-      .put(`${_global.BASE_URL}cases/${buffCase._id}/hold/${isHoldCase}`, logs)
+      .put(`${_global.BASE_URL}cases/${buffCase._id}/hold/${isHoldCase}`, historyHolding)
       .then((res) => {
         const result = res.data;
+        setHoldText("")
         console.log(result);
           if(isHoldCase){
-              const filteredAllCases = allCases.map(item => {
+          const filteredAllCases = allCases.map(item => {
           if (item._id === result._id) {
             return {
               ...item,
-              isHold: true
+              isHold: true,
+              historyHolding:result.historyHolding
             };
           }
           return item;
@@ -182,20 +218,12 @@ const Cases = ()=>{
         showToastMessage("Held Case successfully", "success");
         }
         else{
-    //       const filteredAllCases = allCases.map(item => {
-    //   if (item._id === result._id) {
-    //     return {
-    //       ...item,
-    //       isHold: false
-    //     };
-    //   }
-    //   return item;
-    // });
     const filteredAllCases = allCases.map(item => {
       if (item._id === result._id) {
         return {
           ...item,
-          isHold: false
+          isHold: false,
+          historyHolding:result.historyHolding
         };
       }
       return item;
@@ -672,8 +700,8 @@ const Cases = ()=>{
                             {/* <span onClick={(e) => deleteCase(item._id)}>
                                 <i className="fa-solid fa-trash-can"></i>
                               </span> */}
-                            {!item.isHold &&
-                              user.roles[0] === _global.allRoles.admin && (
+                            {!item.isHold && !item.cadCam.status.isEnd &&
+                             (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ) && (
                                 <span
                                   data-bs-toggle="modal"
                                   data-bs-target="#caseHoldModal"
@@ -683,6 +711,19 @@ const Cases = ()=>{
                                   }}
                                 >
                                   <i class="fa-regular fa-circle-pause"></i>
+                                </span>
+                              )}
+                            { item?.historyHolding?.length > 0 && 
+                             (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ) && (
+                                <span
+                                className="c-primary"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#caseHoldHistoryModal"
+                                  onClick={() => {
+                                    setBuffCase(item);
+                                  }}
+                                >
+                                  <i class="fas fa-history"></i>
                                 </span>
                               )}
                             {/* { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& */}
@@ -912,7 +953,7 @@ const Cases = ()=>{
                               {/* <span onClick={(e) => deleteCase(item._id)}>
                                 <i className="fa-solid fa-trash-can"></i>
                               </span> */}
-                              {user.roles[0] === _global.allRoles.admin && (
+                              {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" )  && (
                                 <span
                                   data-bs-toggle="modal"
                                   data-bs-target="#caseHoldModal"
@@ -922,6 +963,19 @@ const Cases = ()=>{
                                   }}
                                 >
                                   <i class="fa-solid fa-arrow-rotate-left"></i>
+                                </span>
+                              )}
+                            {item?.historyHolding?.length > 0 &&
+                             (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ) && (
+                                <span
+                                className="c-primary"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#caseHoldHistoryModal"
+                                  onClick={() => {
+                                    setBuffCase(item);
+                                  }}
+                                >
+                                  <i class="fas fa-history"></i>
                                 </span>
                               )}
                             </div>
@@ -1116,12 +1170,20 @@ const Cases = ()=>{
               ></button>
             </div>
             <div class="modal-body">
-              <div className="text-center">
-                <h6>
+              <div >
+                <h6 className="mb-3">
                   Are you sure from{" "}
                   {isHoldCase ? <span>Hold</span> : <span> UnHold</span>} this
                   case?
                 </h6>
+                <input
+                  className="form-control"
+                  type="text"
+                  name="holdText"
+                  value={holdText}
+                  placeholder="Write a reason"
+                  onChange={(e)=>setHoldText(e.target.value)}
+                  />
               </div>
             </div>
             <div className="modal-footer">
@@ -1129,6 +1191,7 @@ const Cases = ()=>{
                 Cancel
               </button>
               <button
+              disabled={holdText === ""}
                 className={
                   isHoldCase
                     ? "btn btn-sm btn-danger"
@@ -1139,6 +1202,52 @@ const Cases = ()=>{
               >
                 {isHoldCase ? "Hold" : "UnHold"}
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+         {/* Modal Hold History Case */}
+         <div
+        class="modal fade"
+        id="caseHoldHistoryModal"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog ">
+          <div class="modal-content">
+            <div
+              class={`modal-header  text-white bg-primary`}
+            >
+              <h1 class="modal-title fs-5" id="exampleModalLabel">
+                Case History # {buffCase?.caseNumber}
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div>
+                {buffCase?.historyHolding?.map((item,index)=>
+                  <p key={index} className={
+                    item.isHold
+                  ? "bg-history-danger"
+                  : "bg-history-success"
+                 }>
+                    {item.isHold ? <span className="c-danger">Hold </span> : <span className="c-success"> UnHold  </span>}
+                     {item.name}  in 
+                     <span className={
+                      item.isHold
+                    ? "c-danger"
+                    : "c-success"
+                }>{_global.getFormateDate(item.date)}</span>, Because {item.msg} </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
