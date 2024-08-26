@@ -226,7 +226,7 @@ console.log("newModel",newModel);
                  <>
                  <button
                     className="btn btn-sm btn-success"
-                    disabled={!caseData.cadCam.status.isStart || caseData.isHold}
+                    disabled={!caseData.cadCam.status.isStart || caseData.isHold }
                     onClick={() => changeStatus(state._id, "cadCam", "start")}
                   >
                     Start
@@ -280,7 +280,7 @@ console.log("newModel",newModel);
                <>
                   <button
                     className="btn btn-sm btn-success"
-                    disabled={!caseData.fitting.status.isStart}
+                    disabled={!caseData.fitting.status.isStart || !caseData.cadCam.status.isEnd }
                     onClick={() => changeStatus(state._id, "fitting","start")}
                   >
                     Start
@@ -289,7 +289,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.fitting.status.isPause}
+                    disabled={!caseData.fitting.status.isPause || !caseData.cadCam.status.isEnd}
                      onClick={() => {
                       setPhaseName('fitting')
                       setBuffActionName('pause')
@@ -299,7 +299,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.fitting.status.isEnd}
+                    disabled={caseData.fitting.status.isEnd || !caseData.cadCam.status.isEnd}
                       onClick={() => changeStatus(state._id, "fitting","end")}
                   >
                     End
@@ -331,7 +331,7 @@ console.log("newModel",newModel);
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
-                      !caseData.ceramic.status.isStart
+                      !caseData.ceramic.status.isStart || !caseData.fitting.status.isEnd
                     }
                     onClick={() => changeStatus(state._id, "ceramic", "start")}
                   >
@@ -341,7 +341,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                       data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.ceramic.status.isPause}
+                    disabled={!caseData.ceramic.status.isPause || !caseData.fitting.status.isEnd}
                      onClick={() => {
                       setPhaseName('ceramic')
                       setBuffActionName('pause')
@@ -351,7 +351,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.ceramic.status.isEnd}
+                    disabled={caseData.ceramic.status.isEnd || !caseData.fitting.status.isEnd}
                     onClick={() => changeStatus(state._id, "ceramic", "end")}
                   >
                     End
@@ -368,7 +368,7 @@ console.log("newModel",newModel);
               </div>
               </div>
             </div>
-            <div className="col-lg-4">
+            {/* <div className="col-lg-4">
               <div  className={`card-case ${caseData.qualityControl.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                 <h6>Quality Control</h6>
                 {caseData?.qualityControl.status.isEnd && <span className="finished-date">
@@ -381,7 +381,7 @@ console.log("newModel",newModel);
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
-                      !caseData.qualityControl.status.isStart 
+                      !caseData.qualityControl.status.isStart || !caseData.ceramic.status.isEnd 
                     }
                     onClick={() =>
                       changeStatus(state._id, "qualityControl", "start")
@@ -393,7 +393,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                       data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.qualityControl.status.isPause}
+                    disabled={!caseData.qualityControl.status.isPause || !caseData.ceramic.status.isEnd}
                      onClick={() => {
                       setPhaseName('qualityControl')
                       setBuffActionName('pause')
@@ -403,7 +403,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.qualityControl.status.isEnd}
+                    disabled={caseData.qualityControl.status.isEnd || !caseData.ceramic.status.isEnd}
                     onClick={() =>
                       changeStatus(state._id, "qualityControl", "end")
                     }
@@ -421,7 +421,7 @@ console.log("newModel",newModel);
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
             {/* <div className="col-lg-4">
               <div className={`card-case ${caseData.designing.status.isEnd ? 'bgc-success':'bgc-danger'}`}>
                 <h6>Photographing</h6>
@@ -486,7 +486,7 @@ console.log("newModel",newModel);
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
-                      !caseData.receptionPacking.status.isStart
+                      !caseData.receptionPacking.status.isStart || !caseData.ceramic.status.isEnd
                     }
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "start")
@@ -498,7 +498,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.receptionPacking.status.isPause}
+                    disabled={!caseData.receptionPacking.status.isPause || !caseData.ceramic.status.isEnd}
                      onClick={() => {
                       setPhaseName('receptionPacking')
                       setBuffActionName('pause')
@@ -508,7 +508,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.receptionPacking.status.isEnd}
+                    disabled={caseData.receptionPacking.status.isEnd || !caseData.ceramic.status.isEnd}
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "end")
                     }
@@ -541,7 +541,7 @@ console.log("newModel",newModel);
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
-                      !caseData.delivering.status.isStart
+                      !caseData.delivering.status.isStart || !caseData.receptionPacking.status.isEnd
                     }
                     onClick={() =>
                       changeStatus(state._id, "delivering", "start")
@@ -553,7 +553,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.delivering.status.isPause}
+                    disabled={!caseData.delivering.status.isPause || !caseData.receptionPacking.status.isEnd}
                      onClick={() => {
                       setPhaseName('delivering')
                       setBuffActionName('pause')
@@ -563,7 +563,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.delivering.status.isEnd}
+                    disabled={caseData.delivering.status.isEnd || !caseData.receptionPacking.status.isEnd}
                     onClick={() =>
                       changeStatus(state._id, "delivering", "end")
                     }

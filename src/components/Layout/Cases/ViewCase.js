@@ -279,7 +279,7 @@ return (
               </span> */}
               {/* <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.ceramic), true)}</span> */}
               </div>
-              <div  className="phase-view">
+              {/* <div  className="phase-view">
               <div
                 className="phaseName"
                 style={{
@@ -311,7 +311,7 @@ return (
               </div>
               <span class="arrow-right"></span>
               <span className="tooltip-phase-date" >{_global.getFormateDate(getFinishedDate(caseData?.qualityControl), true)}</span>
-              </div>
+              </div> */}
               {/* <div  className="phase-view">
               <div
                 className="phaseName"
