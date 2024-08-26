@@ -311,7 +311,7 @@ const handleChangeSelect = (event) => {
             <span>
               Users <small>({users.length})</small>
             </span>
-            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager) &&
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] ===  _global.allRoles.super_admin) &&
             <span className="add-user-icon">
               <a data-bs-toggle="modal" data-bs-target="#exampleModal">
                 {" "}
@@ -390,7 +390,7 @@ const handleChangeSelect = (event) => {
                             <i class="fa-solid fa-eye c-success"></i>
 
                           </span>
-                         {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager) && <span   
+                         {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] ===  _global.allRoles.super_admin) && <span   
                          onClick={()=>navigate("/layout/user-profile", { state: { ...item, isAdmin:true } })}
                         //  data-bs-toggle="modal"
                         //     data-bs-target="#casesUserModal"

@@ -239,7 +239,7 @@ const Doctors = () => {
             <span>
               Doctors <small>({doctors.length})</small>
             </span>
-           {user.roles[0] === _global.allRoles.admin && <span className="add-user-icon">
+           {(user.roles[0] === _global.allRoles.admin || user.roles[0] ===  _global.allRoles.super_admin) && <span className="add-user-icon">
               <a data-bs-toggle="modal" data-bs-target="#exampleModal">
                 {" "}
                 <i class="fa-solid fa-circle-plus"></i>
@@ -286,7 +286,7 @@ const Doctors = () => {
                     <th scope="col">Name</th>
                     <th scope="col">Clinic Name</th>
                     <th scope="col">Country</th>
-                    {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception) && <th scope="col" className="non-print">Actions</th> }
+                    {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception || user.roles[0] ===  _global.allRoles.super_admin) && <th scope="col" className="non-print">Actions</th> }
                   </tr>
                 </thead>
                 <tbody>
@@ -310,7 +310,7 @@ const Doctors = () => {
                          <i class="fa-solid fa-eye c-success"></i>
                           </span>
                           
-                          {user.roles[0] === _global.allRoles.admin &&
+                          {(user.roles[0] === _global.allRoles.admin || user.roles[0] ===  _global.allRoles.super_admin) &&
                           <>
                           <span
                             data-bs-toggle="modal"

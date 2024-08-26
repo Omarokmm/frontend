@@ -385,7 +385,7 @@ const getLastItem = (arr)=> {
         <h5 class="card-title">
           <span>Shipments</span>
           <span className="add-user-icon">
-            {(user.roles[0] === _global.allRoles.admin) && 
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] ===  _global.allRoles.super_admin) && 
             <span   data-bs-toggle="modal"
               data-bs-target="#addNewShipmentModal">
               {" "}
