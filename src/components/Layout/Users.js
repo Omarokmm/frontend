@@ -35,7 +35,7 @@ const Users = () => {
   const [caseNumber, setCaseNumber] = useState("");
   const [noteType, setNoteType] = useState("");
   const navigate = useNavigate();
-  const roles = [0, 1, 2, 3, 4, 5, 6,7];
+  const roles = [0, 1, 2, 3, 4, 5, 6,7,8];
   const Roles = {
     0: "admin",
     1: "manager",
@@ -44,7 +44,8 @@ const Users = () => {
     4: "Reception",
     5: "Driver",
     6: "Graphic Design",
-    7: "Software Engineer"
+    7: "Software Engineer",
+    8: "Super Admin"
     // Add more roles as needed
   };
   useEffect(() => {
@@ -623,6 +624,7 @@ const handleChangeSelect = (event) => {
                         <option value="5">Driver</option>
                         <option value="6">Graphic Design</option>
                         <option value="7">Software Engineer</option>
+                        <option value="8">Super Admin</option>
                       </select>
                     </div>{" "}
                   </div>

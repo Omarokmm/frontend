@@ -18,7 +18,8 @@ const [negativeNotes,setNegativeNotes] = useState(userData.notes.filter(n =>n.no
     4: "Reception",
     5: "Driver",
     6: "graphic_design",
-    7: "software_Engineer"
+    7: "software_Engineer",
+    8: "Super Admin"
     // Add more roles as needed
   };
   const handlePrint = useReactToPrint({

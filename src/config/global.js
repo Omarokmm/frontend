@@ -5,7 +5,7 @@ export const BASE_URL_WiTHOUT_API = "https://backend-pr1m.onrender.com/";
 // export const BASE_URL = "http://localhost:3000/api/";
 // export const BASE_URL_WiTHOUT_API = "http://localhost:3000/";
 // 
-export const Roles = [0,1,2,3,4,5,6,7];
+export const Roles = [0,1,2,3,4,5,6,7,8];
 export const naturalOfWorks = [
   {
     id: 1,
@@ -291,6 +291,7 @@ export const allRoles= {
     Driver: 5,
     graphic_design: 6,
     software_Engineer: 7,
+    super_admin: 8,
 }
  export const getFormateDate = (timestamp, isTime) => {
    if (timestamp) {

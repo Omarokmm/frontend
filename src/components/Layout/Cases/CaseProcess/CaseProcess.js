@@ -168,7 +168,7 @@ console.log("newModel",newModel);
                     </span>
                   }
                    <div className="btn-actions">
-                   {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Plaster" ) &&
+                   {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Plaster" || user.roles[0] ===  _global.allRoles.super_admin  ) &&
                    <>
                     <button
                       className="btn btn-sm btn-success"
@@ -222,7 +222,7 @@ console.log("newModel",newModel);
                 </span>
                 }
                 <div className="btn-actions">
-                {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous")&& 
+                {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ||  user.roles[0] ===  _global.allRoles.super_admin)&& 
                  <>
                  <button
                     className="btn btn-sm btn-success"
@@ -276,7 +276,7 @@ console.log("newModel",newModel);
                 </span>
                 }
                <div className="btn-actions">
-               {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Fitting") &&  
+               {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Fitting" || user.roles[0] ===  _global.allRoles.super_admin) &&  
                <>
                   <button
                     className="btn btn-sm btn-success"
@@ -326,7 +326,7 @@ console.log("newModel",newModel);
                 }
               
               <div className="btn-actions">
-              {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Caramic" ) &&
+              {(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "Caramic" || user.roles[0] ===  _global.allRoles.super_admin ) &&
               <>
                   <button
                     className="btn btn-sm btn-success"
@@ -376,7 +376,7 @@ console.log("newModel",newModel);
                 </span>
                }
                  <div className="btn-actions">
-                 {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" &&
+                 {user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" || user.roles[0] ===  _global.allRoles.super_admin &&
                  <>
                   <button
                     className="btn btn-sm btn-success"
@@ -481,7 +481,7 @@ console.log("newModel",newModel);
                 </span>
                 }
                 <div className="btn-actions">
-                {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception")&&
+                {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.super_admin )&&
                 <>
                   <button
                     className="btn btn-sm btn-success"
@@ -536,7 +536,7 @@ console.log("newModel",newModel);
                 </span>
                 }
                 <div className="btn-actions">
-                {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception")&&
+                {(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" || user.roles[0] ===  _global.allRoles.super_admin)&&
                 <>
                   <button
                     className="btn btn-sm btn-success"

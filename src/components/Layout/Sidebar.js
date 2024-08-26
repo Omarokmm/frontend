@@ -29,7 +29,7 @@ const Sidebar = () => {
                 "Nav Sub Link 4",
               ]}
             />
-            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.technician && user.firstName === 'Mustafa' )  &&
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.technician && user.firstName === 'Mustafa' || user.roles[0] ===  _global.allRoles.super_admin )  &&
             <SubmenuItem
               title="Users"
               iconClass="bx bxs-user"
@@ -43,7 +43,7 @@ const Sidebar = () => {
               ]}
             />
              }
-              {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager)  &&
+              {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] ===  _global.allRoles.super_admin)  &&
             <SubmenuItem
               title="Departments"
               iconClass="bx bxs-user"
@@ -57,7 +57,7 @@ const Sidebar = () => {
               ]}
             />
             }
-            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception)  && 
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception || user.roles[0] ===  _global.allRoles.super_admin)  && 
             <SubmenuItem
               title="Doctors"
               iconClass="bx bxs-user"
@@ -72,7 +72,7 @@ const Sidebar = () => {
               
             />
             }
-          {(user.roles[0] !== _global.allRoles.admin || user.roles[0] !== _global.allRoles.manager)  && 
+          {(user.roles[0] !== _global.allRoles.admin || user.roles[0] !== _global.allRoles.manager || user.roles[0] ===  _global.allRoles.super_admin)  && 
             <SubmenuItem
               title="My Work"
               iconClass="bx bxs-user"
@@ -87,7 +87,7 @@ const Sidebar = () => {
               
             />
             }
-          {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception)  && 
+          {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception || user.roles[0] ===  _global.allRoles.super_admin)  && 
             <SubmenuItem
               title="Shipments"
               iconClass="bx bxs-user"

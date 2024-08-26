@@ -26,7 +26,7 @@ const Navbar = () => {
               <Link class="dropdown-item" to="/layout/cases">
               Cases
               </Link>
-              {(user.roles[0] !== _global.allRoles.admin || user.roles[0] !== _global.allRoles.manager)  && <Link class="dropdown-item" to="/layout/user-profile">
+              {(user.roles[0] !== _global.allRoles.admin || user.roles[0] !== _global.allRoles.manager || user.roles[0] ===  _global.allRoles.super_admin)  && <Link class="dropdown-item" to="/layout/user-profile">
                 My Work
               </Link>
               }
@@ -40,7 +40,7 @@ const Navbar = () => {
               </Link>
           </>
           }
-           {(user.roles[0] ===  _global.allRoles.admin || user.roles[0] ===  _global.allRoles.Reception ) && 
+           {(user.roles[0] ===  _global.allRoles.admin || user.roles[0] ===  _global.allRoles.Reception || user.roles[0] ===  _global.allRoles.super_admin) && 
              <Link class="dropdown-item" to="/layout/doctors">
                Doctors
               </Link>
@@ -56,7 +56,7 @@ const Navbar = () => {
         <div className="c-pointer mr-2" onClick={()=>navigate("/layout/cases")}>
           <img src="/images/logo.png" alt=""  />
           <span>Arak</span>
-          <sup>1.1.1</sup>
+          <sup>1.1.2</sup>
         </div>
       </div>
       {/* <div className="search_bar">

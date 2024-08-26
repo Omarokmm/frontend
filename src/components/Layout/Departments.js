@@ -12,11 +12,15 @@ const Departments = () => {
   const [users, setUsers] = useState([]);
   const [buffDepartment, setBuffDepartment] = useState([]);
  const Roles = {
-   0: "admin",
-   1: "manager",
-   2: "teamleader",
-   3: "technician",
-   // Add more roles as needed
+  0: "admin",
+  1: "manager",
+  2: "teamleader",
+  3: "technician",
+  4: "Reception",
+  5: "Driver",
+  6: "graphic_design",
+  7: "software_Engineer",
+  8: "Super Admin"
  };
   useEffect(() => {
     axios

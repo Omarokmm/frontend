@@ -701,7 +701,7 @@ const Cases = ()=>{
                                 <i className="fa-solid fa-trash-can"></i>
                               </span> */}
                             {!item.isHold && !item.cadCam.status.isEnd &&
-                             (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ) && (
+                             (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.super_admin ) && (
                                 <span
                                   data-bs-toggle="modal"
                                   data-bs-target="#caseHoldModal"
@@ -714,7 +714,7 @@ const Cases = ()=>{
                                 </span>
                               )}
                             { item?.historyHolding?.length > 0 && 
-                             (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ) && (
+                             (user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam" || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous"  || user.roles[0] ===  _global.allRoles.super_admin ) && (
                                 <span
                                 className="c-primary"
                                   data-bs-toggle="modal"
@@ -727,7 +727,7 @@ const Cases = ()=>{
                                 </span>
                               )}
                             {/* { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&& */}
-                            { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
+                            { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC" || user.roles[0] ===  _global.allRoles.super_admin)&&
                             <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
                             <i class="fas fa-edit"></i>
                             </span>
