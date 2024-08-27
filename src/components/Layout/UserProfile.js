@@ -803,7 +803,7 @@ const getHoldingreason = (item) => {
       tabIndex="0"
       >
       <div className="row">
-        <div className="col-7 mb-3 " >
+        <div className="col-lg-7 mb-3 " >
         <input
             type="text"
             name="searchTextStart"
@@ -824,7 +824,7 @@ const getHoldingreason = (item) => {
             />
             </div>
         </div>
-        <div className="col-2 mb-3 print-btn" >
+        <div className="col-lg-2 mb-3 print-btn" >
         <button className="btn btn-sm btn-primary " onClick={() => {handleClick("Starting Cases");handlePrint1(); }}> <i class="fas fa-print"></i> print</button>
       </div>
       </div> 
@@ -837,6 +837,7 @@ const getHoldingreason = (item) => {
             <th scope="col">StartedAt</th>
             <th scope="col">Doctor</th>
             <th scope="col">Patient</th>
+            <th>Actions</th>
             {userData.isAdmin &&
             <th scope="col">#teeth</th>
             }
@@ -845,7 +846,7 @@ const getHoldingreason = (item) => {
         </thead>
         <tbody>
             {startCases.map((item) => (
-            <tr key={item._id} className="c-pointer"  onClick={() => viewCase(item, "view")}>
+            <tr key={item._id} className="c-pointer">
                 <td>
                 {item.caseNumber}
                 </td>
@@ -875,6 +876,22 @@ const getHoldingreason = (item) => {
                     </span>
                 }
                 </td> */}
+                  <td> 
+                  <div className="actions-btns">
+                  <span
+                  className="c-success"
+                  onClick={() => viewCase(item, "process")}
+                >
+                  <i class="fa-brands fa-squarespace"></i>
+                </span>
+                <span
+                  className="c-success"
+                  onClick={() => viewCase(item, "view")}
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </span>
+                </div>
+              </td>
             </tr>
             ))}
             {userData.isAdmin &&

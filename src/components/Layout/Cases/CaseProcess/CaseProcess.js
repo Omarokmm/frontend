@@ -486,7 +486,7 @@ console.log("newModel",newModel);
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
-                      !caseData.receptionPacking.status.isStart || !caseData.ceramic.status.isEnd
+                      !caseData.receptionPacking.status.isStart 
                     }
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "start")
@@ -498,7 +498,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.receptionPacking.status.isPause || !caseData.ceramic.status.isEnd}
+                    disabled={!caseData.receptionPacking.status.isPause }
                      onClick={() => {
                       setPhaseName('receptionPacking')
                       setBuffActionName('pause')
@@ -508,7 +508,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.receptionPacking.status.isEnd || !caseData.ceramic.status.isEnd}
+                    disabled={caseData.receptionPacking.status.isEnd }
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "end")
                     }
