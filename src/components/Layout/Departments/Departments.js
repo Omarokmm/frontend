@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { showToastMessage } from "../../helper/toaster";
+import { showToastMessage } from "../../../helper/toaster";
 // import { Roles } from "../../config/global";
-import * as _global from "../../config/global";
+import * as _global from "../../../config/global";
 const Departments = () => {
+  const navigate = useNavigate()
   const [departments, setDepartments] = useState([]);
   const [emptyFields, setEmptyFields] = useState([]);
   const [name, setName] = useState("");
@@ -81,6 +82,9 @@ const Departments = () => {
       showToastMessage("Error in add department, Please try agin", "error");
     }
   };
+  const viewCases = (item)=>{ 
+    navigate("/layout/cases-in-departments",{ state: {...item, isAdmin:true } })
+  }
   const getUsersByDepartment = (department)=>{
     setBuffDepartment(department)
  axios
@@ -152,6 +156,12 @@ const Departments = () => {
                     <td>{item.description}</td>
                     <td>
                       <div className="actions-btns">
+                      {/* <span
+                              className="c-success"
+                              onClick={() => viewCases(item)}
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                        </span> */}
                         <span
                           data-bs-toggle="modal"
                           data-bs-target="#userInDepartmentModal"

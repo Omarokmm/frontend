@@ -5,7 +5,7 @@ import Home from "./pages/home/home";
 import Login from "./pages/Login/Login";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Departments from "./components/Layout/Departments";
+import Departments from "./components/Layout/Departments/Departments.js";
 import Users from "./components/Layout/Users";
 import Doctors from "./components/Layout/Doctors";
 import RequireAuth from "./actions/RequiredAuth";
@@ -18,6 +18,7 @@ import EditCase from "./components/Layout/Cases/EditCase";
 import NotesUser from "./components/NotesUser";
 import DocotrCases from "./components/Layout/DoctorCases.js";
 import Shipments from "./components/Layout/Shipments/Shipments.js";
+import CasesInDepartments from "./components/Layout/Departments/CasesInDepartments.js";
 function App() {
   return (
     <div className="App">
@@ -31,6 +32,7 @@ function App() {
                 <Route path="users" element={<Users />} />
                 <Route path="user-profile" element={<UserProfile />} />
                 <Route path="departments" element={<Departments />} />
+                <Route path="cases-in-departments" element={<CasesInDepartments />} />
                 <Route path="doctors" element={<Doctors />} />
                 <Route path="cases" element={<Cases />} />
                 <Route path="view-case" element={<ViewCase />} />

@@ -82,6 +82,11 @@ export const naturalOfWorks = [
     name: "Temporary",
     color: "rgb(89 103 255)",
   },
+  {
+    id: 15,
+    name: "Cantilever Bridge",
+    color: "rgb(245 153 222)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [

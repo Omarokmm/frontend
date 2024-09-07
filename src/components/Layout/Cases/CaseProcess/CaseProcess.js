@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import './CaseProcess.css'
@@ -23,7 +23,6 @@ const getFormateDateToday = () => {
 const CaseProcess = () => {
   const user = JSON.parse(localStorage.getItem("user"))
   const departments = JSON.parse(localStorage.getItem("departments"))
-  console.log('departments',departments)
    const { state } = useLocation();
    console.log(state);
   const navigate = useNavigate();
@@ -37,6 +36,7 @@ const CaseProcess = () => {
   const [implantName, setImplantName] = useState("");
   const [study, setStudy] = useState("");
   const [notePause, setNotePause] = useState("");
+  const [isStudy, setIsStudy] = useState(false);
   const changeStatus = (id, type, actionName) => {
     console.log(actionName);
     let model;
@@ -125,6 +125,11 @@ console.log("newModel",newModel);
         console.error("Error Updating  case:", error);
       });
   };
+  useEffect(()=>{
+    setIsStudy(getStudyCases(groupCasesTeethNumbersByName()) > 0 ? true : false)
+    console.log("Study",getStudyCases(groupCasesTeethNumbersByName()))
+    console.log(isStudy)
+  },[])
   const getFinishedDate = (item)=>{
     if(item){
       if(item.status.isEnd) {
@@ -136,6 +141,23 @@ console.log("newModel",newModel);
     } 
     return ""
   }
+  function groupCasesTeethNumbersByName() {
+    const result = {};
+      state.teethNumbers.forEach((teethNumber) => {
+      const { name } = teethNumber;
+      if (!result[name]) {
+        result[name] = 0;
+      }
+      result[name]++;
+    });
+    return Object.entries(result).map(([name, count]) => ({ name, count }));
+  }
+    const  getStudyCases = (data) => {
+    console.log("data111111111111111",data)
+    return data.find((r) => r.name === "Study")
+      ? data.find((r) => r.name === "Study")?.count
+      : 0;
+  };
   return (
     <div className="content view-case">
       <div className="card">
@@ -486,7 +508,7 @@ console.log("newModel",newModel);
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
-                      !caseData.receptionPacking.status.isStart 
+                      !caseData.receptionPacking.status.isStart  || (!caseData.ceramic.status.isEnd && !isStudy) 
                     }
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "start")
@@ -498,7 +520,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.receptionPacking.status.isPause }
+                    disabled={!caseData.receptionPacking.status.isPause ||  (!caseData.ceramic.status.isEnd && !isStudy) }
                      onClick={() => {
                       setPhaseName('receptionPacking')
                       setBuffActionName('pause')
@@ -508,7 +530,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.receptionPacking.status.isEnd }
+                    disabled={caseData.receptionPacking.status.isEnd  || (!caseData.ceramic.status.isEnd && !isStudy) }
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "end")
                     }
@@ -563,7 +585,7 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.delivering.status.isEnd || !caseData.receptionPacking.status.isEnd}
+                    disabled={caseData.delivering.status.isEnd || !caseData.receptionPacking.status.isEnd }
                     onClick={() =>
                       changeStatus(state._id, "delivering", "end")
                     }
