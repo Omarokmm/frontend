@@ -211,7 +211,6 @@ const UserProfile = () => {
     }
   };
   const searchByDate = (e) => {
-    console.log("userData.departments[0]", userData.departments[0]);
     const date = e.target.value;
     setStartDat(date);
     if (date != "") {
@@ -1277,7 +1276,7 @@ const UserProfile = () => {
           <span>
             {/* <span className="back-step" onClick={() => navigate("/layout/users")}>
             <i class="fa-solid fa-arrow-left-long"></i>
-     </span> */}
+             </span> */}
             <small>
               {userData.firstName} {userData.lastName} ({casesUser?.length})
             </small>

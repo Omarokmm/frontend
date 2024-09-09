@@ -156,12 +156,12 @@ const Departments = () => {
                     <td>{item.description}</td>
                     <td>
                       <div className="actions-btns">
-                      {/* <span
+                      <span
                               className="c-success"
                               onClick={() => viewCases(item)}
                             >
                               <i class="fa-solid fa-eye"></i>
-                        </span> */}
+                        </span>
                         <span
                           data-bs-toggle="modal"
                           data-bs-target="#userInDepartmentModal"

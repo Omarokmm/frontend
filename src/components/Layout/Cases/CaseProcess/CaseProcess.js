@@ -37,6 +37,7 @@ const CaseProcess = () => {
   const [study, setStudy] = useState("");
   const [notePause, setNotePause] = useState("");
   const [isStudy, setIsStudy] = useState(false);
+  const [isTemporary, setIsTemporary] = useState(false);
   const changeStatus = (id, type, actionName) => {
     console.log(actionName);
     let model;
@@ -127,8 +128,8 @@ console.log("newModel",newModel);
   };
   useEffect(()=>{
     setIsStudy(getStudyCases(groupCasesTeethNumbersByName()) > 0 ? true : false)
-    console.log("Study",getStudyCases(groupCasesTeethNumbersByName()))
-    console.log(isStudy)
+    setIsTemporary(getTemporaryCases(groupCasesTeethNumbersByName()) > 0 ? true : false)
+    console.log(isTemporary)
   },[])
   const getFinishedDate = (item)=>{
     if(item){
@@ -153,9 +154,13 @@ console.log("newModel",newModel);
     return Object.entries(result).map(([name, count]) => ({ name, count }));
   }
     const  getStudyCases = (data) => {
-    console.log("data111111111111111",data)
     return data.find((r) => r.name === "Study")
       ? data.find((r) => r.name === "Study")?.count
+      : 0;
+  };
+  const  getTemporaryCases = (data) => {
+    return data.find((r) => r.name === "Temporary")
+      ? data.find((r) => r.name === "Temporary")?.count
       : 0;
   };
   return (
@@ -508,7 +513,7 @@ console.log("newModel",newModel);
                   <button
                     className="btn btn-sm btn-success"
                     disabled={
-                      !caseData.receptionPacking.status.isStart  || (!caseData.ceramic.status.isEnd && !isStudy) 
+                      !caseData.receptionPacking.status.isStart   
                     }
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "start")
@@ -520,7 +525,7 @@ console.log("newModel",newModel);
                     className="btn btn-sm btn-warning"
                     data-bs-toggle="modal"
                     data-bs-target="#notePauseModal"
-                    disabled={!caseData.receptionPacking.status.isPause ||  (!caseData.ceramic.status.isEnd && !isStudy) }
+                    disabled={!caseData.receptionPacking.status.isPause }
                      onClick={() => {
                       setPhaseName('receptionPacking')
                       setBuffActionName('pause')
@@ -530,7 +535,8 @@ console.log("newModel",newModel);
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={caseData.receptionPacking.status.isEnd  || (!caseData.ceramic.status.isEnd && !isStudy) }
+                    // || (!caseData.ceramic.status.isEnd && !isStudy) 
+                    disabled={caseData.receptionPacking.status.isEnd  }
                     onClick={() =>
                       changeStatus(state._id, "receptionPacking", "end")
                     }

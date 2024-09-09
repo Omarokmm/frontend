@@ -20,6 +20,8 @@ const CasesInDepartments = () => {
   const [department, setdepartment] = useState(state);
   const [startDate, setStartDate] = useState(new Date());
   const [pauseDate, setPauseDate] = useState(new Date());
+  const [startFinishDate, setStartFinishDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [buffCasesUser, setBuffCasesUser] = useState([]);
   const [buffCasesStartingUser, setBuffStartingCasesUser] = useState([]);
   const [buffCasesHoldingUser, setBuffCasesHoldingUser] = useState([]);
@@ -406,11 +408,7 @@ const CasesInDepartments = () => {
     setStartDate(date);
     if (date != "") {
       console.log("date");
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "CadCam"
-          : departments[0].name === "CadCam"
-      ) {
+      if (department.name === "CadCam") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -420,11 +418,7 @@ const CasesInDepartments = () => {
         });
         setStartCases(filteredCases);
       }
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "Caramic"
-          : departments[0].name === "Caramic"
-      ) {
+      if (department.name ==="Caramic") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -434,11 +428,7 @@ const CasesInDepartments = () => {
         });
         setStartCases(filteredCases);
       }
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "Fitting"
-          : departments[0].name === "Fitting"
-      ) {
+      if (department.name  === "Fitting") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           if (item.fitting.actions.length > 0)
             return (
@@ -450,11 +440,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "Plaster"
-          : departments[0].name === "Plaster"
-      ) {
+      if (department.name  === "Plaster") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -465,11 +451,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "Reception"
-          : departments[0].name === "Reception"
-      ) {
+      if (department.name ==="Reception") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -482,11 +464,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "Marketing"
-          : departments[0].name === "Marketing"
-      ) {
+      if (department.name === "Marketing") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -498,11 +476,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "QC"
-          : departments[0].name === "QC"
-      ) {
+      if (department.name === "QC") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -515,11 +489,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (
-        userData.isAdmin
-          ? userData.departments[0].name === "Drivers"
-          : departments[0].name === "Drivers"
-      ) {
+      if (department.name ==="Drivers") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -535,18 +505,295 @@ const CasesInDepartments = () => {
       setStartCases(buffCasesStartingUser);
     }
   };
+  const searchPauseByDate = (e) => {
+    const date = e.target.value;
+    setPauseDate(date);
+    if (date != "") {
+      console.log("date");
+      if (department.name ===  "CadCam") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+        setPauseCases(filteredCases);
+      }
+      if (department.name ===  "Caramic") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+        setPauseCases(filteredCases);
+      }
+      if (department.name ===  "Fitting") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          if (item.fitting.actions.length > 0)
+            return (
+              _global.formatDateToYYYYMMDD(
+                item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+              ) === date
+            );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Plaster") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name ===  "Reception") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.receptionPacking.actions[
+                item.receptionPacking.actions.length - 1
+              ]?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Marketing") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.designing.actions[item.designing.actions.length - 1]
+                ?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "QC") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.qualityControl.actions[
+                item.qualityControl.actions.length - 1
+              ]?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Drivers") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.delivering.actions[item.delivering.actions.length - 1]
+                ?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+    } else {
+      setPauseCases(buffCasesStartingUser);
+    }
+  };
+  const searchByEndDate = (e) => {
+    const date = e.target.value;
+    const start = _global.formatDateToYYYYMMDD(startFinishDate);
+    const end = _global.formatDateToYYYYMMDD(date);
+    setEndDate(date)
+    if (date != "") {
+      const filteredCases = buffCasesUser.filter((item) => {
+        let endDateStr = "";
+        if (department.name === "CadCam") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.cadCam.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name ==="Caramic") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.ceramic.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name ==="Fitting") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.fitting.actions.find((i) => i.dateEnd)?.dateEnd
+          );
+        }
+        if (department.name === "Plaster") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.plaster.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name ==="Reception") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name ==="Marketing") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.designing.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name ==="QC") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name ==="Drivers") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.delivering.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        return endDateStr >= start && endDateStr <= end;
+      });
+      setFinishedCases(filteredCases);
+    } else {
+      setFinishedCases(buffCasesUser);
+    }
+  };
+  const searchByDate = (e) => {
+    const date = e.target.value;
+    setStartFinishDate(date);
+    if (date != "") {
+      console.log("date");
+      if (department.name ==="CadCam") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.cadCam.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+        setFinishedCases(filteredCases);
+      }
+      if (department.name ==="Caramic") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.ceramic.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Fitting") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          if (item.fitting.actions.length > 0)
+            return (
+              _global.formatDateToYYYYMMDD(
+                item.fitting.actions.find((i) => i.dateEnd).dateEnd
+              ) === date
+            );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name ==="Plaster") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.plaster.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Reception") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name ==="Marketing") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.designing.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "QC") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Drivers") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.delivering.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+    } else {
+      setFinishedCases(buffCasesUser);
+    }
+  };
   const handlePrint = useReactToPrint({
     content: () => userRef.current,
-    documentTitle: ` ${userData.firstName}   ${userData.lastName} (Finished Cases)`,
+    documentTitle: ` ${department.name} (Finished Cases)`,
   });
   const handlePrint1 = useReactToPrint({
     content: () => userRef1.current,
-    documentTitle: ` ${userData.firstName}   ${userData.lastName} (Starting Cases)`,
+    documentTitle: ` ${department.name} (Starting Cases)`,
   });
   const handlePrint2 = useReactToPrint({
     content: () => userRef2.current,
-    documentTitle: `${userData.firstName}   ${userData.lastName} (Holding Cases)`,
+    documentTitle: `${department.name} (Holding Cases)`,
   });
+  function sortCasesByTechnacianName(cases,type) {
+    const sortingCases= [...cases].sort((a, b) => {
+        const nameA = getTechnicainName(a).toLowerCase(); // Convert names to lower case for case-insensitive comparison
+        const nameB = getTechnicainName(b).toLowerCase(); // Convert names to lower case for case-insensitive comparison
+
+        if (nameA < nameB) {
+            return -1; // a should come before b
+        }
+        if (nameA > nameB) {
+            return 1; // b should come before a
+        }
+        return 0; // names are equal
+    });
+    const deepClonedCases = JSON.parse(JSON.stringify(sortingCases));
+    if(type === "Start"){
+      setStartCases(deepClonedCases)
+    }
+    if(type === "Hold"){
+      setPauseCases(deepClonedCases)
+    }
+    if(type === "End"){
+     setFinishedCases(deepClonedCases)
+    }
+}
   return (
     <div className="content user-profile">
       <div className="card">
@@ -566,7 +813,10 @@ const CasesInDepartments = () => {
                 role="tab"
                 aria-controls="startCases-tab-pane"
                 aria-selected="false"
-                //   onClick={() => (searchByName("", "Start"))}
+                onClick={() => {
+                  searchByName("", "Start")
+                  setStartDate("")
+                  }}
               >
                 Start <small>({startCases.length})</small>
               </button>
@@ -584,6 +834,10 @@ const CasesInDepartments = () => {
                 type="button"
                 role="tab"
                 aria-controls="holdCases-tab-pane"
+                onClick={() => {
+                  searchByName("", "Pause")
+                  setPauseDate("")
+                  }}
                 aria-selected="true"
               >
                 Hold <small>({pauseCases.length})</small>
@@ -602,6 +856,11 @@ const CasesInDepartments = () => {
                 type="button"
                 role="tab"
                 aria-controls="endCases-tab-pane"
+                onClick={() => {
+                  searchByName("", "End")
+                  setStartFinishDate("")
+                  setEndDate("")
+                  }}
                 aria-selected="true"
               >
                 End <small>({FinishedCases?.length})</small>
@@ -627,7 +886,7 @@ const CasesInDepartments = () => {
               tabIndex="0"
             >
               {/* Starting  */}
-              <div ref={userRef1} style={{ width: "100%" }}>
+              <div >
               <div className="row">
                 <div className="col-lg-7 mb-3 ">
                   <input
@@ -646,6 +905,7 @@ const CasesInDepartments = () => {
                       type="date"
                       className="form-control"
                       placeholder="Select Date"
+                      value={startDate}
                       onChange={(e) => searchStartByDate(e)}
                     />
                   </div>
@@ -661,12 +921,12 @@ const CasesInDepartments = () => {
                 </div>
               </div>
                 {startCases?.length > 0 && (
-                  <table className="table text-center table-bordered">
+                  <table ref={userRef1} style={{ width: "100%" }} className="table text-center table-bordered">
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">StartedAt</th>
-                        <th scope="col">Technacian</th>
+                        <th scope="col" onClick={ () => sortCasesByTechnacianName(startCases,"Start")}>Technacian</th>
                         <th scope="col">Doctor</th>
                         <th scope="col">Patient</th>
                         {/* <th>Actions</th> */}
@@ -775,14 +1035,47 @@ const CasesInDepartments = () => {
             aria-labelledby="holdCases-tab"
             tabIndex="0"
           >
-             <div ref={userRef2} style={{ width: "100%" }}>
+             <div >
+             <div className="row">
+                <div className="col-lg-7 mb-3 ">
+                  <input
+                    type="text"
+                    name="searchTextStart"
+                    className="form-control"
+                    placeholder="Search by name | case number | case type "
+                    value={searchTextHold}
+                    onChange={(e) => searchByName(e.target.value, "Pause")}
+                  />
+                </div>
+                {/* Paus Date */}
+                <div className="col-lg-3 ">
+                  <div className="form-group">
+                    <input
+                      type="date"
+                      className="form-control"
+                      placeholder="Select Date"
+                      value={pauseDate}
+                      onChange={(e) => searchPauseByDate(e)}
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-2 mb-3 print-btn">
+                  <button
+                    className="btn btn-sm btn-primary "
+                    onClick={() => {handlePrint2()}}
+                  >
+                    {" "}
+                    <i class="fas fa-print"></i> print
+                  </button>
+                </div>
+              </div>
                 {pauseCases?.length > 0 && (
-                  <table className="table text-center table-bordered">
+                  <table ref={userRef2} style={{ width: "100%" }} className="table text-center table-bordered">
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">HeldAt</th>
-                        <th scope="col">Technacian</th>
+                        <th scope="col" onClick={ () => sortCasesByTechnacianName(pauseCases,"Hold")}>Technacian</th>
                         <th scope="col">Doctor</th>
                         <th scope="col">Patient</th>
                         <th scope="col">Reason</th>
@@ -887,14 +1180,59 @@ const CasesInDepartments = () => {
             aria-labelledby="endCases-tab"
             tabIndex="0"
           >
-            <div ref={userRef} style={{ width: "100%" }}>
+            <div >
+            <div className="row">
+                <div className="col-lg-6 mb-3 ">
+                  <input
+                    type="text"
+                    name="searchTextStart"
+                    className="form-control"
+                    placeholder="Search by name | case number | case type "
+                    value={searchText}
+                    onChange={(e) => searchByName(e.target.value, "End")}
+                  />
+                </div>
+            {/* Start Date */}
+            <div className="col-lg-3 ">
+                  <div className="form-group">
+                    <input
+                      type="date"
+                      className="form-control"
+                      placeholder="Start Date"
+                      value={startFinishDate}
+                      onChange={(e) => searchByDate(e)}
+                    />
+                  </div>
+                </div>
+                {/* End Date */}
+                <div className="col-lg-3 ">
+                  <div className="form-group">
+                    <input
+                      type="date"
+                      className="form-control"
+                      placeholder=" End Date"
+                      value={endDate}
+                      onChange={(e) => searchByEndDate(e)}
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-12 mb-3 print-btn">
+                  <button
+                    className="btn btn-sm btn-primary "
+                    onClick={() => {handlePrint()}}
+                  >
+                    {" "}
+                    <i class="fas fa-print"></i> print
+                  </button>
+                </div>
+              </div>
                 {FinishedCases?.length > 0 && (
-                  <table className="table text-center table-bordered">
+                  <table ref={userRef} style={{ width: "100%" }} className="table text-center table-bordered">
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">FinishedAt</th>
-                        <th scope="col">Technacian</th>
+                        <th scope="col" onClick={ () => sortCasesByTechnacianName(FinishedCases,"End")}>Technacian</th>
                         <th scope="col">Doctor</th>
                         <th scope="col">Patient</th>
                         <th scope="col">#teeth</th>
