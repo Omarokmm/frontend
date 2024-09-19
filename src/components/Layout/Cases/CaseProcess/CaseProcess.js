@@ -117,7 +117,7 @@ console.log("newModel",newModel);
         setZirconName("")
         console.log(buffActionName)
         if(actionName === 'end'){
-          navigate('/layout/cases')
+          window.history.back()
         }
         showToastMessage("Updated Case successfully", "success");
       })

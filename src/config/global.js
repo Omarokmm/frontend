@@ -87,6 +87,11 @@ export const naturalOfWorks = [
     name: "Cantilever Bridge",
     color: "rgb(245 153 222)",
   },
+  {
+    id: 16,
+    name: "Endo Crown",
+    color: "rgb(67 203 255)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [

@@ -430,6 +430,9 @@ const Cases = ()=>{
     else if(user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" && !item.cadCam.status.isEnd){
       response = "table-warning"
     }
+    else if(user.roles[0] ===  _global.allRoles.super_admin && !item.delivering.status.isEnd && item.receptionPacking.status.isEnd){
+      response = "table-success"
+    }
     else if(user.roles[0] ===  _global.allRoles.Reception && departments[0].name === "Reception" && item.receptionPacking.status.isEnd && !item.delivering.status.isEnd){
       response = "table-success"
     }
@@ -849,7 +852,8 @@ const Cases = ()=>{
                   </thead>
                   <tbody>
                     {inProcessCases.map((item, index) => (
-                      <tr key={item._id}>
+                      // className={checkCaseDate(item)}
+                      <tr key={item._id} >
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>

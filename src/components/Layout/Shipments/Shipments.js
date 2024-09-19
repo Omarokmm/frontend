@@ -12,10 +12,7 @@ const initialData = {
     trackingNumber: "",
     shipmentType: "",
     sentDate: "",
-    dentistObj: {
-        id: "",
-        name: "",
-    },
+    dentistObj: [],
     estimatedDeliveryDate: "",
     deliveryDate: "",
     status :"",
@@ -27,6 +24,7 @@ const initialData = {
 
 const Shipments = ()=>{
 const userRef = useRef();
+const userRefShipping = useRef();
 const departments = JSON.parse(localStorage.getItem("departments"))
 const user = JSON.parse(localStorage.getItem("user"))
 const [shipmentModel, setShipmentModel] = useState(initialData);
@@ -47,6 +45,7 @@ const [dentistObj, setDentistObj] = useState({
     name: "",
 });
  const [selectedOption, setSelectedOption] = useState([]);
+ const [selectedOptionDentists, setSelectedOptionDentists] = useState([]);
   useEffect(() => {
     // get Shipments
     axios
@@ -73,8 +72,10 @@ const [dentistObj, setDentistObj] = useState({
           setDoctorsOptions(
             res.data.map((c) => {
               return {
+                // label: `${c.firstName} ${c.lastName}(${c.clinicName})`,
+                // _id: c._id,
                 label: `${c.firstName} ${c.lastName}(${c.clinicName})`,
-                _id: c._id,
+                value: c._id,
               };
             })
           );
@@ -303,12 +304,15 @@ const [dentistObj, setDentistObj] = useState({
 //     }
 //   };
 const handleChangeSelect = (event) => {
-    const doctor = doctors.find((d) => d._id === event._id);
-    setDentistObj((prevFormData) => ({
-    ...prevFormData,
-    id: event._id,
-    name:event.label
-    }));
+    // const doctor = doctors.find((d) => d._id === event._id);
+    // setDentistObj((prevFormData) => ({
+    // ...prevFormData,
+    // id: event._id,
+    // name:event.label
+    // }));
+    console.log("event,",event)
+    setSelectedOptionDentists(event)
+    console.log("selectdentists,",selectedOptionDentists)
   };
 const handleChangeCases = (selected) => {
     setSelectedOption(selected); // 'selected' is an array when 'isMulti' is true
@@ -319,13 +323,11 @@ const handleUpdateChangeCases = (selected) => {
 const AddShipment = async()=>{
     let model = {
         courierCompany: shipmentModel.courierCompany,
+        shippingName: shipmentModel.shippingName,
         trackingNumber:shipmentModel.trackingNumber,
         shipmentType: shipmentModel.shipmentType,
         sentDate: shipmentModel.sentDate,
-        dentistObj: {
-            id: dentistObj.id,
-            name: dentistObj.name,
-        },
+        dentistObj: selectedOptionDentists,
         estimatedDeliveryDate: shipmentModel.estimatedDeliveryDate,
         deliveryDate: shipmentModel.deliveryDate,
         status :shipmentModel.status,
@@ -341,7 +343,8 @@ const AddShipment = async()=>{
             msg: `Create Shipment by`,
         }]
     }
-    if(dentistObj.id !== ""){
+    console.log(model)
+    if(selectedOptionDentists.length  > 0){
     const response = await fetch(`${_global.BASE_URL}shipments`, {
         method: "POST",
         headers: {
@@ -372,6 +375,10 @@ const getLastItem = (arr)=> {
     content: () => userRef.current,
     documentTitle: `Name:`,
   })
+  const handlePrintShipping = useReactToPrint({
+    content: () => userRefShipping.current,
+    documentTitle: `Shipping Number: # ${buffShipment.trackingNumber}, Shipping Company:  ${buffShipment.courierCompany}`,
+  })
   const editBuffShipment = (item)=>{
     setBuffShipment(item)
     setDefaultValueDoctor({
@@ -379,6 +386,17 @@ const getLastItem = (arr)=> {
         _id: item.dentistObj.id,
     })
   }
+ const  groupCasesByDentist =(dentistId,casesIds)=>{
+  
+  // Convert casesIds to a Set of _id values for efficient lookup
+  const caseIdsSet = new Set(casesIds.map(caseItem => caseItem.value));
+  // Filter and group cases based on the given conditions
+  const groupedCases = cases.filter(caseItem => 
+      caseIdsSet.has(caseItem._id) && dentistId === caseItem.dentistObj.id
+  );
+  console.log("groupedCases", groupedCases);
+  return groupedCases;
+ } 
   return (
     <div className="content shipments">
       <div className="card">
@@ -499,7 +517,7 @@ const getLastItem = (arr)=> {
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">Courier</th>
-                      <th scope="col">Doctor </th>
+                      <th scope="col">Name </th>
                       <th scope="col">#Trucking</th>
                       <th  scope="col">Sent</th>
                       <th scope="col">Status</th>
@@ -513,7 +531,7 @@ const getLastItem = (arr)=> {
                    {allShipments.map((item, index) => (
                      <tr key={item._id}>
                      <td> {item.courierCompany}</td>
-                     <td>{item.dentistObj.name}</td>
+                     <td>{item.shippingName}</td>
                      <td>{item.trackingNumber}</td>
                      <td>{_global.formatDateToYYYYMMDD(item.sentDate)}</td>
                      <td>{item.status}</td>
@@ -522,9 +540,9 @@ const getLastItem = (arr)=> {
                      <td> {item.remarks}</td>
                      <td className="non-print">
                        <div className="actions-btns">
-                         {/* <span className="c-success">
+                         <span className="c-success" data-bs-toggle="modal" data-bs-target="#viewModal" onClick={()=>editBuffShipment(item)}>
                            <i class="fa-solid fa-eye"></i>
-                         </span> */}
+                         </span>
                          <span className="c-primary ml-3" data-bs-toggle="modal" data-bs-target="#updatShipmentModal" onClick={()=>editBuffShipment(item)}>
                          <i class="fas fa-edit"></i>
                          </span>
@@ -779,20 +797,29 @@ const getLastItem = (arr)=> {
                             <option disabled selected>Select Courier</option>
                             <option value="DHL">DHL</option>
                             <option value="UPS">UPS</option>
+                            <option value="Aramex">Aramex</option>
                           </select>
                         </div>
                     </div>
                     <div className="col-lg-8">
                         <div className="form-group">
+                          <label htmlFor="shippingName">Shipping Name  </label>
+                          <input type="text" id="shippingName" name="shippingName" onChange={handleChange}  className="form-control" />
+                        </div>
+                    </div>
+                    <div className="col-lg-12">
+                        <div className="form-group">
                           <label htmlFor="trackingNumber">Doctor Name </label>
                           <Select
+                            isMulti
+                            name="dentistObj"
                             className="basic-single"
                             classNamePrefix="select"
                             isLoading={true}
+                            value={selectedOptionDentists}
                             // isClearable={true}
                             onChange={(e) => handleChangeSelect(e)}
                             isSearchable={true}
-                            name="color"
                             options={doctorsOptions}
                             />
                         </div>
@@ -1008,6 +1035,56 @@ const getLastItem = (arr)=> {
               onClick={(e) => updateShipment()}
               >
                 Update
+              </button>
+            </div>
+          </div>
+        </div>
+     </div>
+     {/* View Shipping  */}
+     <div
+        class="modal fade"
+        id="viewModal"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div
+              class={`modal-header  text-white bg-primary`}
+            >
+              <h1 class="modal-title fs-5" id="exampleModalLabel">
+                   Shipment ({buffShipment.trackingNumber})
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+               {/* <div className="text-right">
+               <button className="btn btn-sm btn-primary " onClick={()=>handlePrintShipping()}> <i class="fas fa-print"></i> print</button>
+               </div> */}
+              <div ref={userRefShipping}>
+              {buffShipment?.dentistObj?.map((item,index)=>
+              <div className="doctor-item" >
+               <strong key={index}>{item.label}</strong>
+               <span>{groupCasesByDentist(item.value,buffShipment.casesIds).map(item=>
+                <ul className="mt-2">
+                  <li> <i>PT </i> . {item.patientName}</li>
+                  </ul>
+               )}</span>
+               </div>
+              )}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-sm bg-light" data-bs-dismiss="modal">
+                Cancel
               </button>
             </div>
           </div>

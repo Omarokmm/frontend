@@ -880,6 +880,7 @@ table th{
 @page {
   size: auto;
   margin: 20mm 0;
+  
 }
 @media print {
   .non-print{
@@ -889,7 +890,11 @@ table th{
     font-size: 10pt;
     padding: 20px 10px;
     }
+    @page :footer {
+      display: none
+  }
 }
+
 .ml-auto{
   margin-left: auto;
 }

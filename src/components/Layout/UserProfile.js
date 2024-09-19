@@ -962,7 +962,7 @@ const UserProfile = () => {
           : departments[0].name === "Reception"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
+          item.receptionPacking.actions.find((i) => i.dateEnd)?.dateEnd
         );
       }
       if (
@@ -1045,9 +1045,7 @@ const UserProfile = () => {
           : departments[0].name === "Reception"
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.receptionPacking.actions[
-            item.receptionPacking.actions.length - 1
-          ]?.dateStart
+          item.receptionPacking.actions[item.receptionPacking.actions.length - 1]?.dateStart
         );
       }
       if (
