@@ -92,6 +92,11 @@ export const naturalOfWorks = [
     name: "Endo Crown",
     color: "rgb(67 203 255)",
   },
+  {
+    id: 16,
+    name: "ESSIX RETAINER",
+    color: "rgb(13 110 253 / 69%)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [

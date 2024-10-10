@@ -56,7 +56,7 @@ const Navbar = () => {
         <div className="c-pointer mr-2" onClick={()=>navigate("/layout/cases")}>
           <img src="/images/logo.png" alt=""  />
           <span>Arak</span>
-          <sup>1.1.5</sup>
+          <sup>1.1.6</sup>
         </div>
       </div>
       {/* <div className="search_bar">
