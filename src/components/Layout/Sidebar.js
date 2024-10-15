@@ -57,7 +57,7 @@ const Sidebar = () => {
               ]}
             />
             }
-            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception || user.roles[0] ===  _global.allRoles.super_admin)  && 
+            {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.Reception || user.roles[0] === _global.allRoles.technician && user.lastName === 'Jamous' || user.roles[0] ===  _global.allRoles.super_admin)  && 
             <SubmenuItem
               title="Doctors"
               iconClass="bx bxs-user"

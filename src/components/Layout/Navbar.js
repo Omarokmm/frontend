@@ -40,7 +40,7 @@ const Navbar = () => {
               </Link>
           </>
           }
-           {(user.roles[0] ===  _global.allRoles.admin || user.roles[0] ===  _global.allRoles.Reception || user.roles[0] ===  _global.allRoles.super_admin) && 
+           {(user.roles[0] ===  _global.allRoles.admin || user.roles[0] ===  _global.allRoles.Reception || user.roles[0] ===  _global.allRoles.super_admin || user.roles[0] === _global.allRoles.technician && user.lastName === 'Jamous' ) && 
              <Link class="dropdown-item" to="/layout/doctors">
                Doctors
               </Link>
