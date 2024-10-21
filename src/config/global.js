@@ -97,6 +97,11 @@ export const naturalOfWorks = [
     name: "ESSIX RETAINER",
     color: "rgb(13 110 253 / 69%)",
   },
+  {
+    id: 17,
+    name: "Mereland Bridge",
+    color: "rgb(91 91 91 / 33%)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [
