@@ -97,13 +97,13 @@ const Cases = () => {
   const [buffAllCases, setBuffAllCases] = useState([]);
   const [delayCases, setDelayCases] = useState([]);
   const [buffDelayCases, setBuffDelayCases] = useState([]);
-  const [searchText, setSearchText] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [holdText, setHoldText] = useState("");
   const [filterBy, setFilterBy] = useState(SEARCH_FIELDS.CASE_NUMBER);
   const [values, setValues] = useState([
     new DateObject().subtract(0, "days"),
-    new DateObject().add(0, "days")
-  ])
+    new DateObject().add(0, "days"),
+  ]);
 
   useEffect(() => {
     // get cases
@@ -299,17 +299,19 @@ const Cases = () => {
               .includes(searchText.toLowerCase()) ||
             item?.patientName.toLowerCase().includes(searchText.toLowerCase())
         );
-        console.log("filteredAllNotStartCases")
+        console.log("filteredAllNotStartCases");
         setNotStartCases(filteredAllNotStartCases);
       } else {
-        console.log("notStartCases")
-        setNotStartCases(buffAllCases.filter(
-          (r) =>
-            r.cadCam.actions.length <= 0 &&
-            r.delivering.status.isEnd === false &&
-            r.delivering.status.isEnd === false &&
-            r.isHold === false
-        ));
+        console.log("notStartCases");
+        setNotStartCases(
+          buffAllCases.filter(
+            (r) =>
+              r.cadCam.actions.length <= 0 &&
+              r.delivering.status.isEnd === false &&
+              r.delivering.status.isEnd === false &&
+              r.isHold === false
+          )
+        );
       }
     }
     if (name === "inProccess") {
@@ -325,13 +327,15 @@ const Cases = () => {
         );
         setInProcessCases(filteredAllInPrgreesCases);
       } else {
-        setInProcessCases(buffAllCases.filter(
-          (r) =>
-            // r.cadCam.status.isStart === true &&
-            r.delivering.status.isEnd === false &&
-            r.isHold === false &&
-            r.cadCam.actions.length > 0
-        ));
+        setInProcessCases(
+          buffAllCases.filter(
+            (r) =>
+              // r.cadCam.status.isStart === true &&
+              r.delivering.status.isEnd === false &&
+              r.isHold === false &&
+              r.cadCam.actions.length > 0
+          )
+        );
       }
     }
     if (name === "holing") {
@@ -392,6 +396,12 @@ const Cases = () => {
       searchByNameOrNumber(searchText, "allCases");
     }
   };
+  const searchbyIcon = () => {
+    if (searchText !== "") {
+      // Only trigger search on "Enter" key
+      searchByNameOrNumber(searchText, "allCases");
+    }
+  };
   const searchByNameOrNumber = (searchText, type) => {
     if (searchText !== "") {
       axios
@@ -407,9 +417,15 @@ const Cases = () => {
       setAllCases(buffAllCases);
     }
   };
-  const getCasesByRangeDate=()=>{
+  const getCasesByRangeDate = () => {
     axios
-      .get(`${_global.BASE_URL}cases/cases-by-month?startDate=${values[0].format()}&endDate=${values[1] ? values[1].format(): values[0].format()}`)
+      .get(
+        `${
+          _global.BASE_URL
+        }cases/cases-by-month?startDate=${values[0].format()}&endDate=${
+          values[1] ? values[1].format() : values[0].format()
+        }`
+      )
       .then((res) => {
         const result = res.data.cases;
         setAllCases(result);
@@ -450,7 +466,7 @@ const Cases = () => {
       .catch((error) => {
         console.error("Error fetching cases:", error);
       });
-  }
+  };
   const editCase = (id) => {
     navigate(`/layout/edit-case/${id}`);
   };
@@ -765,11 +781,9 @@ const Cases = () => {
                 class="nav-item"
                 role="presentation"
                 onClick={() => {
-                  setSearchText("")
-                  setAllCases(buffAllCases)
-                }
-
-                }
+                  setSearchText("");
+                  setAllCases(buffAllCases);
+                }}
               >
                 <button
                   class="nav-link  bgc-info"
@@ -872,18 +886,28 @@ const Cases = () => {
               aria-labelledby="allCases-tab"
               tabIndex="0"
             >
-              <div className="row">
+              <div className="row ">
                 <div className="col-md-6">
-                  <div className="form-group">
+                  <div className=""></div>
+
+                  <div class="input-group mb-3">
                     <input
                       type="text"
                       name="searchText"
                       className="form-control"
                       placeholder="Search by name | case number | case type "
-                      value={searchText}
+                     
                       onKeyDown={handleKeyDown} // Trigger search on Enter key
                       onChange={(e) => setSearchText(e.target.value)}
                     />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      id="button-addon2"
+                      onClick={()=>searchbyIcon()}
+                    >
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
                   </div>
                 </div>
                 <div className="col-md-3 mb-3">
@@ -894,8 +918,8 @@ const Cases = () => {
                     plugins={[<DatePanel />]}
                   /> */}
                   <DatePicker
-                  className="form-control"
-                  range
+                    className="form-control"
+                    range
                     value={values}
                     onChange={setValues}
                     plugins={[<DatePanel />]}
