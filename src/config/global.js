@@ -102,6 +102,11 @@ export const naturalOfWorks = [
     name: "Mereland Bridge",
     color: "rgb(91 91 91 / 33%)",
   },
+  {
+    id: 18,
+    name: "Metal",
+    color: "rgb(149 62 4 / 33%)",
+  },
 ];
 export const numOfTeeth = {
   teeth_top_left: [
