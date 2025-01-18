@@ -1201,7 +1201,7 @@ const Cases = () => {
                                 <i class="fas fa-edit"></i>
                               </span>
                             )}
-                            {(!item.isUrgent && 
+                            {(!item.isUrgent && !item?.delivering?.status?.isEnd &&
                                (
                                 // user.roles[0] === _global.allRoles.admin ||
                                 (user.roles[0] === _global.allRoles.Reception ||

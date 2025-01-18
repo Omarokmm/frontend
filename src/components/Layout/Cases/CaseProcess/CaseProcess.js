@@ -5,6 +5,7 @@ import './CaseProcess.css'
 import * as _global from "../../../../config/global";
 import axios from "axios";
 import { showToastMessage } from "../../../../helper/toaster";
+import { is } from "date-fns/locale";
 const getFormateDateToday = () => {
   let date = new Date();
   // Extract year, month, day, and hour
@@ -40,6 +41,7 @@ const CaseProcess = () => {
   const [isTemporary, setIsTemporary] = useState(false);
   const changeStatus = (id, type, actionName) => {
     console.log(actionName);
+    let isUrgent = caseData.isUrgent
     let model;
     let action;
   if (actionName === "start") {
@@ -85,6 +87,9 @@ logs.push(action);
      buffObj.implantName = implantName 
      buffObj.study = study 
     }
+    if(caseData[type].namePhase === 'Delivering' &&  actionName === "end" ) {
+      isUrgent = false
+     }
 let newModel = {
   namePhase: caseData[type].namePhase,
   actions: logs,
@@ -104,6 +109,7 @@ let newModel = {
     isEnd: actionName === "end" ? true : caseData[type].status.isEnd,
   },
   obj: buffObj,
+  isUrgent : isUrgent
 };
 console.log("newModel",newModel);
     axios
