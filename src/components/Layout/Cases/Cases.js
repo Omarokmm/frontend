@@ -2057,11 +2057,12 @@ const Cases = () => {
         </div>
       </div>
 
+      {/* Print Cases */}
       <div ref={userRef1}>
         <div className="row mt-0 pt-0 row-gap-1 page-cases  " id="casesPrint">
           {selectedItems.map((item, index) => (
             <div key={index} className="  ">
-              <div className=" box card px-3 min-vh-50">
+              <div className=" box card px-3 min-vh-50 mb-2">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div>
                     <b>Contry: </b>{" "}
@@ -2070,6 +2071,11 @@ const Cases = () => {
                   {/* <div> */}
                   <img src="../images/arak-2.png" className=" w-25" />
                   {/* </div> */}
+                </div>
+                <div className="d-flex justify-content-center align-items-center mb-4">
+                  <h5 className="border p-2 border-success  rounded">
+                    {item.caseNumber}
+                  </h5>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div>
@@ -2095,20 +2101,87 @@ const Cases = () => {
                   <b>Pt. Name: </b> <span> {item.patientName}</span>
                 </div>
                 <div className="mb-3">
-                  <b>Shad: </b> <span> {item?.shadeCase?.shade}</span>
+                  <b>Shade: </b>{" "}
+                  <span className="border border-danger rounded p-1">
+                    {" "}
+                    {item.shadeCase.shade !== ""
+                      ? item.shadeCase.shade
+                      : "None"}
+                  </span>
                 </div>
-                {/* <div className="mb-3">
-                <b>Cad Cam: </b> <span> __________________________</span>
-              </div>
-              <div className="mb-3">
-                <b>Fitting: </b> <span> ___________________________</span>
-              </div>
-              <div className="mb-3">
-                <b>Ceramic: </b> <span> ___________________________</span>
-              </div> */}
-                <div className="mb-3 p-2 h-100 border border border-warning-subtle">
+                <div className="mb-3">
+                  <b>Cad Cam: </b> <span> __________________________</span>
+                </div>
+                <div className="mb-3">
+                  <b>Fitting: </b> <span> ___________________________</span>
+                </div>
+                <div className="mb-3">
+                  <b>Ceramic: </b> <span> ___________________________</span>
+                </div>
+                <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle">
                   <b>Notes/ Details: </b>
                   <small>{item.jobDescription}</small>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  <br/>
+                  {/* <small>
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  </small> */}
+                </div>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="photo"
+                    />
+                    <label class="form-check-label" for="photo">Photo</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="Invoice"
+                    />
+                    <label class="form-check-label" for="Invoice">Invoice</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="Email"
+                    />
+                    <label class="form-check-label" for="Email">Email</label>
+                  </div>
                 </div>
               </div>
             </div>
