@@ -885,6 +885,11 @@ table th{
   margin: 20mm 0;
   
 }
+/* #casesPrint{
+  @page  {margin:0 !important;}
+} */
+
+
 @media print {
   .non-print{
     display: none;

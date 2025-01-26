@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import * as _global from "../../../config/global";
+import "./Cases.css";
 import { useNavigate } from "react-router-dom";
 import { showToastMessage } from "../../../helper/toaster";
 import { useReactToPrint } from "react-to-print";
@@ -83,6 +84,7 @@ const initialData = {
 
 const Cases = () => {
   const userRef = useRef();
+  const userRef1 = useRef();
   const casesRefUrgent = useRef();
   const departments = JSON.parse(localStorage.getItem("departments"));
   const user = JSON.parse(localStorage.getItem("user"));
@@ -103,6 +105,7 @@ const Cases = () => {
   const [buffDelayCases, setBuffDelayCases] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [holdText, setHoldText] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
   const [filterBy, setFilterBy] = useState(SEARCH_FIELDS.CASE_NUMBER);
   const [values, setValues] = useState([
     new DateObject().subtract(0, "days"),
@@ -115,9 +118,9 @@ const Cases = () => {
       .get(`${_global.BASE_URL}cases/cases-by-month`)
       .then((res) => {
         const result = res.data.cases;
-        const holdingCases = res.data.holdingCases
-        const urgentCases = res.data.urgentCases
-        setBuffUrgentCases(urgentCases)
+        const holdingCases = res.data.holdingCases;
+        const urgentCases = res.data.urgentCases;
+        setBuffUrgentCases(urgentCases);
         setAllCases(result);
         console.log(result);
         setBuffAllCases(result);
@@ -144,12 +147,12 @@ const Cases = () => {
           )
         );
         setHoldingCases(holdingCases);
-        setUrgentCases(urgentCases)
-        console.log('Urgeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeent Cases',urgentCases)
+        setUrgentCases(urgentCases);
         console.log(
-          "Holding Cases",
-          result.holdingCases
+          "Urgeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeent Cases",
+          urgentCases
         );
+        console.log("Holding Cases", result.holdingCases);
         const delayCasesfilter = result.filter((c) => filterDaley(c));
         console.log(delayCasesfilter);
         setDelayCases(delayCasesfilter);
@@ -164,6 +167,7 @@ const Cases = () => {
       .then((res) => {
         const result = res.data;
         seDoctors(result);
+        console.log("seDoctors", docotrs);
       })
       .catch((error) => {});
   }, []);
@@ -272,94 +276,94 @@ const Cases = () => {
         console.error("Error fetching cases:", error);
       });
   };
-    // hold case
-    const urgentCase = (id) => {
-      // let action;
-      let historyUrgent = [
-        ...(buffCase.historyUrgent ? buffCase.historyUrgent : []),
-        {
-          id: user._id,
-          name: `${user.firstName}, ${user.lastName}`,
-          date: new Date(),
-          isUrgent: isUrgentCase,
-          msg: ' Case is marked as urgent',
-        },
-      ];
-      // if (isHoldCase) {
-      //   action = {
-      //     technicianName: `${user.firstName}, ${user.lastName}`,
-      //     technicianId: user._id,
-      //     datePause: new Date(),
-      //     notes: "",
-      //     prfeix: "pause",
-      //     prfeixMsg: "Puase by  ",
-      //     msg: holdText,
-      //   };
-      //   const logs = [...buffCase["cadCam"].actions];
-      //   let newModel = {
-      //     namePhase: "cadCam",
-      //     actions: logs,
-      //     status: {
-      //       isStart: true,
-      //       isPause: false,
-      //       isEnd: buffCase["cadCam"].status.isEnd,
-      //     },
-      //     obj: buffCase["cadCam"].buffObj,
-      //   };
-      //   axios
-      //     .put(`${_global.BASE_URL}cases/${buffCase._id}/cadCam`, newModel)
-      //     .then((res) => {})
-      //     .catch((error) => {
-      //       showToastMessage("Error  Holding successfully", "error");
-      //     });
-      // }
-  
-      axios
-        .put(
-          `${_global.BASE_URL}cases/${buffCase._id}/urgent/${isUrgentCase}`,
-          historyUrgent
-        )
-        .then((res) => {
-          const result = res.data;
-          console.log(result);
-          if (isUrgentCase) {
-            const filteredAllCases = allCases.map((item) => {
-              if (item._id === result._id) {
-                return {
-                  ...item,
-                  isUrgent: true,
-                  historyHolding: result.historyUrgent,
-                };
-              }
-              return item;
-            });
-            const filteredUrgentCases = [result, ...urgentCases];
-            setAllCases(filteredAllCases);
-            setUrgentCases(filteredUrgentCases);
-            showToastMessage("Case marked as urgent successfully", "success");
-          } else {
-            const filteredAllCases = allCases.map((item) => {
-              if (item._id === result._id) {
-                return {
-                  ...item,
-                  isUrgent: false,
-                  historyUrgent: result.historyUrgent,
-                };
-              }
-              return item;
-            });
-            const filteredUrgentCases = urgentCases.filter(
-              (user) => user._id !== result._id
-            );
-            setAllCases(filteredAllCases);
-            setUrgentCases(filteredUrgentCases);
-            showToastMessage("Case marked as Non-Urgent successfully", "success");
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching cases:", error);
-        });
-    };
+  // hold case
+  const urgentCase = (id) => {
+    // let action;
+    let historyUrgent = [
+      ...(buffCase.historyUrgent ? buffCase.historyUrgent : []),
+      {
+        id: user._id,
+        name: `${user.firstName}, ${user.lastName}`,
+        date: new Date(),
+        isUrgent: isUrgentCase,
+        msg: " Case is marked as urgent",
+      },
+    ];
+    // if (isHoldCase) {
+    //   action = {
+    //     technicianName: `${user.firstName}, ${user.lastName}`,
+    //     technicianId: user._id,
+    //     datePause: new Date(),
+    //     notes: "",
+    //     prfeix: "pause",
+    //     prfeixMsg: "Puase by  ",
+    //     msg: holdText,
+    //   };
+    //   const logs = [...buffCase["cadCam"].actions];
+    //   let newModel = {
+    //     namePhase: "cadCam",
+    //     actions: logs,
+    //     status: {
+    //       isStart: true,
+    //       isPause: false,
+    //       isEnd: buffCase["cadCam"].status.isEnd,
+    //     },
+    //     obj: buffCase["cadCam"].buffObj,
+    //   };
+    //   axios
+    //     .put(`${_global.BASE_URL}cases/${buffCase._id}/cadCam`, newModel)
+    //     .then((res) => {})
+    //     .catch((error) => {
+    //       showToastMessage("Error  Holding successfully", "error");
+    //     });
+    // }
+
+    axios
+      .put(
+        `${_global.BASE_URL}cases/${buffCase._id}/urgent/${isUrgentCase}`,
+        historyUrgent
+      )
+      .then((res) => {
+        const result = res.data;
+        console.log(result);
+        if (isUrgentCase) {
+          const filteredAllCases = allCases.map((item) => {
+            if (item._id === result._id) {
+              return {
+                ...item,
+                isUrgent: true,
+                historyHolding: result.historyUrgent,
+              };
+            }
+            return item;
+          });
+          const filteredUrgentCases = [result, ...urgentCases];
+          setAllCases(filteredAllCases);
+          setUrgentCases(filteredUrgentCases);
+          showToastMessage("Case marked as urgent successfully", "success");
+        } else {
+          const filteredAllCases = allCases.map((item) => {
+            if (item._id === result._id) {
+              return {
+                ...item,
+                isUrgent: false,
+                historyUrgent: result.historyUrgent,
+              };
+            }
+            return item;
+          });
+          const filteredUrgentCases = urgentCases.filter(
+            (user) => user._id !== result._id
+          );
+          setAllCases(filteredAllCases);
+          setUrgentCases(filteredUrgentCases);
+          showToastMessage("Case marked as Non-Urgent successfully", "success");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching cases:", error);
+      });
+  };
   const viewCase = (item, type) => {
     if (type === "view") {
       navigate("/layout/view-case", { state: { ...item, type: "cases" } });
@@ -859,7 +863,26 @@ const Cases = () => {
   const handlePrintUrgentCases = useReactToPrint({
     content: () => casesRefUrgent.current,
     documentTitle: `Urgent Cases`,
-  })
+  });
+  const handleCheckboxChange = (e, item) => {
+    if (e.target.checked) {
+      // Add the item to the array
+      setSelectedItems((prev) => [...prev, item]);
+    } else {
+      // Remove the item from the array
+      setSelectedItems((prev) =>
+        prev.filter((selectedItem) => selectedItem._id !== item._id)
+      );
+    }
+  };
+  const printSelectedItems = useReactToPrint({
+    content: () => userRef1.current,
+    documentTitle: `Cases`,
+  });
+
+  const getDoctorCountry = (id) => {
+    return docotrs.find((doctor) => doctor._id === id).address.country;
+  };
   return (
     <div className="content">
       <div className="card">
@@ -1030,7 +1053,6 @@ const Cases = () => {
                       name="searchText"
                       className="form-control"
                       placeholder="Search by name | case number | case type "
-                     
                       onKeyDown={handleKeyDown} // Trigger search on Enter key
                       onChange={(e) => setSearchText(e.target.value)}
                     />
@@ -1038,7 +1060,7 @@ const Cases = () => {
                       class="btn btn-outline-secondary"
                       type="button"
                       id="button-addon2"
-                      onClick={()=>searchbyIcon()}
+                      onClick={() => searchbyIcon()}
                     >
                       <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
@@ -1079,6 +1101,14 @@ const Cases = () => {
                 <table className="table text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
+                      {(user.roles[0] === _global.allRoles.admin ||
+                        user.lastName === "Jamous") && (
+                        <th scope="col">
+                          <span onClick={() => printSelectedItems()}>
+                            <i class="fas fa-print"></i>
+                          </span>
+                        </th>
+                      )}
                       <th scope="col">#</th>
                       <th scope="col">Doctor </th>
                       <th scope="col">Patient</th>
@@ -1092,14 +1122,34 @@ const Cases = () => {
                   </thead>
                   <tbody>
                     {allCases.map((item, index) => (
-                      <tr role="alert"
-                        className={ 
-                          (item.isHold ? "table-danger" : "") || (item.isUrgent ? "urgent-case animate-me" : "") ||
+                      <tr
+                        role="alert"
+                        className={
+                          (item.isHold ? "table-danger" : "") ||
+                          (item.isUrgent ? "urgent-case animate-me" : "") ||
                           checkCaseDate(item)
                         }
                         key={item._id}
                       >
-                        <td >
+                        {(user.roles[0] === _global.allRoles.admin ||
+                          user.lastName === "Jamous") && (
+                          <td>
+                            <div class="form-check">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                value=""
+                                id={item._id}
+                                onChange={(e) => handleCheckboxChange(e, item)}
+                              />
+                              <label
+                                class="form-check-label"
+                                for={item._id}
+                              ></label>
+                            </div>
+                          </td>
+                        )}
+                        <td>
                           <span
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
@@ -1201,14 +1251,16 @@ const Cases = () => {
                                 <i class="fas fa-edit"></i>
                               </span>
                             )}
-                            {(!item.isUrgent && !item?.delivering?.status?.isEnd &&
-                               (
-                                // user.roles[0] === _global.allRoles.admin ||
-                                (user.roles[0] === _global.allRoles.Reception ||
-                                  (user.roles[0] === _global.allRoles.technician && user.lastName === "Jamous")) ||
+                            {!item.isUrgent &&
+                              !item?.delivering?.status?.isEnd &&
+                              // user.roles[0] === _global.allRoles.admin ||
+                              (user.roles[0] === _global.allRoles.Reception ||
+                                (user.roles[0] ===
+                                  _global.allRoles.technician &&
+                                  user.lastName === "Jamous") ||
                                 user.roles[0] ===
-                                  _global.allRoles.receptionPacking) && 
-                                       <span
+                                  _global.allRoles.receptionPacking) && (
+                                <span
                                   data-bs-toggle="modal"
                                   data-bs-target="#caseUrgentModal"
                                   onClick={() => {
@@ -1216,11 +1268,11 @@ const Cases = () => {
                                     setBuffCase(item);
                                   }}
                                 >
-                                  <span className="c-danger" >
-                                 <i class="far fa-calendar-check"></i>
+                                  <span className="c-danger">
+                                    <i class="far fa-calendar-check"></i>
                                   </span>
                                 </span>
-                            )}
+                              )}
                           </div>
                         </td>
                       </tr>
@@ -1431,8 +1483,8 @@ const Cases = () => {
                         <th scope="col">Patient Name</th>
                         {/* <th scope="col">Type</th> */}
                         <th className="td-phone" scope="col">
-                        #tooth
-                      </th>
+                          #tooth
+                        </th>
                         <th scope="col">In</th>
                         <th scope="col">Due</th>
                         <th scope="col">Actions</th>
@@ -1446,14 +1498,14 @@ const Cases = () => {
                           <td>{item.patientName}</td>
                           {/* <td>{item.caseType}</td> */}
                           <td
-                          className={`${
-                            item.teethNumbers.length <= 0
-                              ? "bg-danger"
-                              : "bg-white"
-                          } td-phone`}
-                        >
-                          {item.teethNumbers.length}
-                        </td>
+                            className={`${
+                              item.teethNumbers.length <= 0
+                                ? "bg-danger"
+                                : "bg-white"
+                            } td-phone`}
+                          >
+                            {item.teethNumbers.length}
+                          </td>
                           <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                           <td>
                             {item.dateOut &&
@@ -1691,45 +1743,55 @@ const Cases = () => {
               </div>
             )}
             {/* Urgent Cases */}
-              <div
+            <div
               class="tab-pane fade"
               id="urgent-tab-pane"
               role="tabpanel"
               aria-labelledby="urgent-tab"
               tabIndex="0"
             >
-             {urgentCases.length > 0 && <div className="row">
-              <div class="col-lg-10">
-              <div className="form-group">
-                <input
-                  type="text"
-                  name="searchText"
-                  className="form-control"
-                  placeholder="Search by name | case number | case type "
-                  value={searchText}
-                  onChange={(e) => searchByName(e.target.value, "urgent")}
-                />
-              </div>
-              </div>
-              <div className="col-lg-2">
-              <button className="btn btn-sm btn-primary w-100 p-2" onClick={()=>handlePrintUrgentCases()}> <i class="fas fa-print"></i> print</button>
-              </div>
-              </div>
-            }
               {urgentCases.length > 0 && (
-                <table className="table text-center table-bordered" ref={casesRefUrgent}>
+                <div className="row">
+                  <div class="col-lg-10">
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        name="searchText"
+                        className="form-control"
+                        placeholder="Search by name | case number | case type "
+                        value={searchText}
+                        onChange={(e) => searchByName(e.target.value, "urgent")}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-lg-2">
+                    <button
+                      className="btn btn-sm btn-primary w-100 p-2"
+                      onClick={() => handlePrintUrgentCases()}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                  </div>
+                </div>
+              )}
+              {urgentCases.length > 0 && (
+                <table
+                  className="table text-center table-bordered"
+                  ref={casesRefUrgent}
+                >
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor Name</th>
                       <th scope="col">Patient Name</th>
-                      <th  scope="col">
-                        #tooth
-                      </th>
+                      <th scope="col">#tooth</th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col">In</th>
                       <th scope="col">Due</th>
-                      <th scope="col" className="td-phone">Actions</th>
+                      <th scope="col" className="td-phone">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1770,9 +1832,11 @@ const Cases = () => {
                             {
                               // user.roles[0] === _global.allRoles.admin ||
                               (user.roles[0] === _global.allRoles.Reception ||
-                                (user.roles[0] === _global.allRoles.technician && user.lastName === "Jamous"))&& (
+                                (user.roles[0] ===
+                                  _global.allRoles.technician &&
+                                  user.lastName === "Jamous")) && (
                                 <span
-                                className="c-success "
+                                  className="c-success "
                                   data-bs-toggle="modal"
                                   data-bs-target="#caseUrgentModal"
                                   onClick={() => {
@@ -1782,7 +1846,8 @@ const Cases = () => {
                                 >
                                   <i class="far fa-calendar-times"></i>
                                 </span>
-                              )}
+                              )
+                            }
                           </div>
                         </td>
                       </tr>
@@ -1794,7 +1859,6 @@ const Cases = () => {
                 <div className="no-content">No Cases Urgent yet!</div>
               )}
             </div>
-
           </div>
         </div>
       </div>
@@ -1862,8 +1926,8 @@ const Cases = () => {
           </div>
         </div>
       </div>
-           {/* Modal Urgent Case */}
-           <div
+      {/* Modal Urgent Case */}
+      <div
         class="modal fade"
         id="caseUrgentModal"
         data-bs-backdrop="static"
@@ -1892,8 +1956,13 @@ const Cases = () => {
             <div class="modal-body">
               <div>
                 <h6 className="mb-3 mt-2 text-center">
-                Are you sure this case is marked as {" "} 
-                  {isUrgentCase ? <span>Urgent</span> : <span> Non-Urgent</span>} ?
+                  Are you sure this case is marked as{" "}
+                  {isUrgentCase ? (
+                    <span>Urgent</span>
+                  ) : (
+                    <span> Non-Urgent</span>
+                  )}{" "}
+                  ?
                 </h6>
               </div>
               <div>
@@ -1910,8 +1979,7 @@ const Cases = () => {
                     ) : (
                       <span className="c-success"> Non-Urgent </span>
                     )}
-                    Case By {" "}
-                    {item.name} in {" "}
+                    Case By {item.name} in{" "}
                     <span className={item.isUrgent ? "c-danger" : "c-success"}>
                       {_global.getFormateDate(item.date)}
                     </span>
@@ -1986,6 +2054,65 @@ const Cases = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div ref={userRef1}>
+        <div className="row mt-0 pt-0 row-gap-1 page-cases  " id="casesPrint">
+          {selectedItems.map((item, index) => (
+            <div key={index} className="  ">
+              <div className=" box card px-3 min-vh-50">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <div>
+                    <b>Contry: </b>{" "}
+                    <span> {getDoctorCountry(item.dentistObj.id)}</span>
+                  </div>
+                  {/* <div> */}
+                  <img src="../images/arak-2.png" className=" w-25" />
+                  {/* </div> */}
+                </div>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <div>
+                    <b>Date In</b>{" "}
+                    <span>{_global.formatDateToYYYYMMDD(item.dateIn)}</span>
+                  </div>
+                  <div>
+                    <b>Due Date</b>{" "}
+                    <span>
+                      {" "}
+                      <span>
+                        {item.dateOut
+                          ? _global.formatDateToYYYYMMDD(item.dateOut)
+                          : "Unknown"}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <b>Dr. Name: </b> <p> {item.dentistObj.name}</p>
+                </div>
+                <div className="mb-3">
+                  <b>Pt. Name: </b> <span> {item.patientName}</span>
+                </div>
+                <div className="mb-3">
+                  <b>Shad: </b> <span> {item?.shadeCase?.shade}</span>
+                </div>
+                {/* <div className="mb-3">
+                <b>Cad Cam: </b> <span> __________________________</span>
+              </div>
+              <div className="mb-3">
+                <b>Fitting: </b> <span> ___________________________</span>
+              </div>
+              <div className="mb-3">
+                <b>Ceramic: </b> <span> ___________________________</span>
+              </div> */}
+                <div className="mb-3 p-2 h-100 border border border-warning-subtle">
+                  <b>Notes/ Details: </b>
+                  <small>{item.jobDescription}</small>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
