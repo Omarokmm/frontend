@@ -2121,11 +2121,6 @@ const Cases = () => {
                 <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle">
                   <b>Notes/ Details: </b>
                   <small>{item.jobDescription}</small>
-                  <br/>
-                  <br/>
-                  <br/>
-                  <br/>
-                  <br/>
                   {/* <small>
                     lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -2153,6 +2148,9 @@ const Cases = () => {
                     lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   </small> */}
+                  <br/>
+                  <br/>
+                  <br/>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div class="form-check">
