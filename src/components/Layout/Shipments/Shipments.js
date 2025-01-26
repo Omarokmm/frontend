@@ -336,7 +336,7 @@ const Shipments = () => {
       status: shipmentModel.status,
       casesIds: selectedOption,
       remarks: shipmentModel.notes,
-      notes: shipmentModel.notes,
+      notes: shipmentModel.remarks,
       logs:
         [
           {
@@ -388,7 +388,7 @@ const Shipments = () => {
       label: item.dentistObj.name,
       _id: item.dentistObj.id,
     })
-    console.log('DEFULT', item)
+    console.log('DEFULT', item.dentistObj)
 
   }
   const groupCasesByDentist = (dentistId, casesIds) => {
@@ -1058,12 +1058,14 @@ const Shipments = () => {
                           isMulti={true} // Enables multi-select
                           value={buffShipment.dentistObj}
                           onChange={(e) => {
-                            setDefaultValueDoctor({
-                              label: e.label,
-                              _id: e._id,
-                            })
-                            buffShipment.dentistObj.id = e._id
-                            buffShipment.dentistObj.name = e.label
+                            console.log(e.label,e._id,e)
+                            // setDefaultValueDoctor({
+                            //   label: e.label,
+                            //   value: e._id,
+                            // })
+                            buffShipment.dentistObj = e
+                            // buffShipment.dentistObj.id = e._id
+                            // buffShipment.dentistObj.name = e.label
                           }}
                           isSearchable={true}
                           options={doctorsOptions}

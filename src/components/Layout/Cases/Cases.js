@@ -8,6 +8,7 @@ import { useReactToPrint } from "react-to-print";
 import SEARCH_FIELDS from "../../../enum/searchFieldEnum";
 import DatePicker, { Calendar, DateObject } from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel";
+
 const initialData = {
   caseNumber: "",
   name: "",
@@ -2061,30 +2062,81 @@ const Cases = () => {
       <div ref={userRef1}>
         <div className="row mt-0 pt-0 row-gap-1 page-cases  " id="casesPrint">
           {selectedItems.map((item, index) => (
-            <div key={index} className="  ">
-              <div className=" box card px-3 min-vh-50 mb-2">
+            <div key={index} className=" ">
+              {/* <div className=" box card px-3 min-vh-50 "> */}
+              {/* <div className="box card px-3 min-vh-50"> */}
+              <div  className={`box card px-3 min-vh-50 ${item.isUrgent ? 'bgc-print-danger' : ''}`}>
+                {/* <div className="d-flex justify-content-center align-items-center mb-0 mt-2">
+                  <h5 className="border p-2 border-success  rounded">
+                    {item.caseNumber}
+                  </h5>
+              </div> */}
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div>
                     <b>Contry: </b>{" "}
                     <span> {getDoctorCountry(item.dentistObj.id)}</span>
                   </div>
+                  <h5 className="border p-2 border-success  rounded">
+                    {item.caseNumber}
+                  </h5>
                   {/* <div> */}
                   <img src="../images/arak-2.png" className=" w-25" />
                   {/* </div> */}
                 </div>
-                <div className="d-flex justify-content-center align-items-center mb-4">
-                  <h5 className="border p-2 border-success  rounded">
-                    {item.caseNumber}
-                  </h5>
+                <div className="d-flex justify-content-end gap-3 align-items-center mb-2">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="zoho"
+                    />
+                    <label class="form-check-label " for="zoho">
+                      Zoho
+                    </label>
+                  </div>
+                  <div class="form-check ">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="alameen"
+                    />
+                    <label class="form-check-label" for="alameen">
+                      Al Ameen
+                    </label>
+                  </div>
+                </div>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="have-photo"
+                    />
+                    <label class="form-check-label c-success" for="have-photo">
+                      Have Photo
+                    </label>
+                  </div>
+                  <div>
+                    <b>Received Date:</b>{" "}
+                    <span>
+                      {" "}
+                      {item.dateIn
+                        ? _global.formatDateToYYYYMMDD(item.dateReceivedInEmail)
+                        : "-"}
+                    </span>
+                  </div>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div>
-                    <b>Date In</b>{" "}
+                    <b>Date In: </b>{" "}
                     <span>{_global.formatDateToYYYYMMDD(item.dateIn)}</span>
                   </div>
                   <div>
-                    <b>Due Date</b>{" "}
-                    <span>
+                    <b>Due Date: </b>{" "}
+                    <span className={`${item.isUrgent ? 'border border-danger rounded p-1' : ''}`}>
                       {" "}
                       <span>
                         {item.dateOut
@@ -2094,63 +2146,54 @@ const Cases = () => {
                     </span>
                   </div>
                 </div>
-                <div className="mb-3">
+                <div className="mb-2">
                   <b>Dr. Name: </b> <p> {item.dentistObj.name}</p>
                 </div>
                 <div className="mb-3">
                   <b>Pt. Name: </b> <span> {item.patientName}</span>
                 </div>
+                <div className=" d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <b>Shade: </b>{" "}
+                    <span className="border border-danger rounded p-1">
+                      {" "}
+                      {item.shadeCase.shade !== ""
+                        ? item.shadeCase.shade
+                        : "None"}
+                    </span>
+                  </div>
+                  <div class="form-check ">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="have-photo"
+                    />
+                    <label class="form-check-label" for="have-photo">
+                      Dark Die
+                    </label>
+                  </div>
+                </div>
                 <div className="mb-3">
-                  <b>Shade: </b>{" "}
-                  <span className="border border-danger rounded p-1">
+                  <b>Cad Cam: </b>{" "}
+                  <span>
                     {" "}
-                    {item.shadeCase.shade !== ""
-                      ? item.shadeCase.shade
-                      : "None"}
+                    _____________ <b>Date</b>_______________
                   </span>
                 </div>
                 <div className="mb-3">
-                  <b>Cad Cam: </b> <span> __________________________</span>
+                  <b>Fitting: </b>{" "}
+                  <span>
+                    {" "}
+                    _______________ <b>Date</b>_______________
+                  </span>
                 </div>
                 <div className="mb-3">
-                  <b>Fitting: </b> <span> ___________________________</span>
-                </div>
-                <div className="mb-3">
-                  <b>Ceramic: </b> <span> ___________________________</span>
-                </div>
-                <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle">
-                  <b>Notes/ Details: </b>
-                  <small>{item.jobDescription}</small>
-                  {/* <small>
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  </small> */}
-                  <br/>
-                  <br/>
-                  <br/>
+                  <b>Ceramic: </b>{" "}
+                  <span>
+                    {" "}
+                    _____________ <b>Date</b>_______________
+                  </span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div class="form-check">
@@ -2158,9 +2201,86 @@ const Cases = () => {
                       class="form-check-input"
                       type="checkbox"
                       value=""
+                      id="email"
+                    />
+                    <label class="form-check-label" for="email">
+                      Email
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="whatsapp"
+                    />
+                    <label class="form-check-label" for="whatsapp">
+                      Whatsapp
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="telgram"
+                    />
+                    <label class="form-check-label" for="telgram">
+                      Telgram
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="itero"
+                    />
+                    <label class="form-check-label" for="itero">
+                      Other
+                    </label>
+                  </div>
+                </div>
+                <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle">
+                  <b>Notes/ Details: </b>
+                  <small>{item.jobDescription}</small>
+                  {/* <small>
+                    Patient Name: Yaimet Prieto Doctor: Dr. Laura Pérez Case
+                    Type: Lower Final Impression & Upper and Lower Provisionals
+                    Please use the following shade selection: Cervical OM3 and
+                    Body OM2. Please Incorporate high translucency for a very
+                    natural and refined look. Ensure well-defined mamelons with
+                    detailed surface textures. Maintain open embrasures for a
+                    clean and elegant finish. For the lowers, ensure the 4
+                    central incisors are slightly longer than the canines.
+                    Alternatively, adjust to make the central incisors just
+                    slightly shorter, or match the length of the canines evenly,
+                    depending on the final aesthetics. Pay close attention to
+                    adjustments made from the mock-up to provisionals for
+                    symmetry, adjustments, and proper sizing to match the
+                    desired look. Additionally, tooth #9 has an unfavorable prep
+                    shade, so please block out the color during porcelain
+                    application. Prioritize natural transitions and harmony with
+                    the mock-up. The overall style preference is Duval-style
+                    embrassures, translucency and natural design. Thank you for
+                    your attention to detail and craftsmanship. Let me know if
+                    you have any questions! Dr. Laura Perez
+                  </small> */}
+                  <br />
+                  <br />
+                  <br />
+                </div>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
                       id="photo"
                     />
-                    <label class="form-check-label" for="photo">Photo</label>
+                    <label class="form-check-label" for="photo">
+                      Photo
+                    </label>
                   </div>
                   <div class="form-check">
                     <input
@@ -2169,7 +2289,9 @@ const Cases = () => {
                       value=""
                       id="Invoice"
                     />
-                    <label class="form-check-label" for="Invoice">Invoice</label>
+                    <label class="form-check-label" for="Invoice">
+                      Invoice
+                    </label>
                   </div>
                   <div class="form-check">
                     <input
@@ -2178,7 +2300,9 @@ const Cases = () => {
                       value=""
                       id="Email"
                     />
-                    <label class="form-check-label" for="Email">Email</label>
+                    <label class="form-check-label" for="Email">
+                      Email
+                    </label>
                   </div>
                 </div>
               </div>

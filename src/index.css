@@ -617,6 +617,9 @@ cursor: pointer;
 .bgc-danger{
        background: rgb(226 0 0 / 41%);
 }
+.bgc-print-danger{
+  background: rgba(226, 0, 0, 0.103)
+}
 .bgc-success{
        background: rgb(141 225 131);
 }

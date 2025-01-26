@@ -3,8 +3,8 @@
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     height: 100vh;
-    margin: 0;
-    padding: 0;
+    /* margin: 0;
+    padding: 0; */
     page-break-after: always; /* Force page break after each grid */
 
     /* page-break-inside: avoid */
@@ -14,9 +14,9 @@
     display: flex;
     /* justify-content: center;
     align-items: center; */
-    height: 50vh;
+    height: 100%;
     width: 100%;
-    border-bottom: 0;
+    /* border-bottom: 0; */
     /* border-left: 0;
     border-right: 0; */
     page-break-inside: avoid; /* Prevent box from splitting across pages */
