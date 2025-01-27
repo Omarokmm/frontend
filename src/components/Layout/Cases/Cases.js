@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import * as _global from "../../../config/global";
 import "./Cases.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { showToastMessage } from "../../../helper/toaster";
 import { useReactToPrint } from "react-to-print";
 import SEARCH_FIELDS from "../../../enum/searchFieldEnum";
@@ -112,7 +112,8 @@ const Cases = () => {
     new DateObject().subtract(0, "days"),
     new DateObject().add(0, "days"),
   ]);
-
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(0);
   useEffect(() => {
     // get cases
     axios
@@ -172,6 +173,19 @@ const Cases = () => {
       })
       .catch((error) => {});
   }, []);
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const tabIndex = parseInt(queryParams.get("tab"), 10);
+    if (!isNaN(tabIndex)) {
+      setActiveTab(tabIndex);
+    }
+  }, [location.search]);
+    // Handle tab change and update URL
+    const handleTabChange = (index, callback) => {
+      setActiveTab(index);
+      navigate(`?tab=${index}`); // Update the URL with the active tab index
+      if (callback) callback();
+    };
   // delete case
   const deleteCase = (id) => {
     axios
@@ -903,15 +917,15 @@ const Cases = () => {
           <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
               <button
-                class="nav-link active bgc-primary"
+                className={`nav-link bgc-primary ${activeTab === 0 ? "active " : ""}`}      
                 id="allCases-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#allCases-tab-pane"
                 type="button"
                 role="tab"
                 aria-controls="allCases-tab-pane"
-                aria-selected="false"
-              >
+                aria-selected={activeTab === 0}
+                onClick={() => handleTabChange(0)}              >
                 All <small>({allCases.length})</small>
               </button>
             </li>
@@ -927,14 +941,16 @@ const Cases = () => {
                 }}
               >
                 <button
-                  class="nav-link  bgc-info"
+                  // class="nav-link  bgc-info"
+                  className={`nav-link bgc-info ${activeTab === 1 ? "active " : ""}`}   
                   id="notStart-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#notStart-tab-pane"
                   type="button"
                   role="tab"
                   aria-controls="notStart-tab-pane"
-                  aria-selected="true"
+                  aria-selected={activeTab === 1}
+                  onClick={() => handleTabChange(1)} 
                 >
                   Not Start <small>({notStartCases.length})</small>
                 </button>
@@ -946,14 +962,15 @@ const Cases = () => {
               onClick={() => setSearchText("")}
             >
               <button
-                class="nav-link  bgc-warning"
                 id="home-tab"
+                className={`nav-link bgc-warning ${activeTab === 2 ? "active bgc-warning" : ""}`}
                 data-bs-toggle="tab"
                 data-bs-target="#home-tab-pane"
                 type="button"
                 role="tab"
                 aria-controls="home-tab-pane"
-                aria-selected="true"
+                aria-selected={activeTab === 2}
+                onClick={() => handleTabChange(2)}
               >
                 In Progress <small>({inProcessCases.length})</small>
               </button>
@@ -964,14 +981,15 @@ const Cases = () => {
               onClick={() => setSearchText("")}
             >
               <button
-                class="nav-link bgc-danger"
+                className={`nav-link bgc-danger ${activeTab === 3 ? "active " : ""}`}
                 id="profile-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#profile-tab-pane"
                 type="button"
                 role="tab"
                 aria-controls="profile-tab-pane"
-                aria-selected="false"
+                aria-selected={activeTab === 3}
+                onClick={() => handleTabChange(3)}
               >
                 Holding <small>({holdingCases?.length})</small>
               </button>
@@ -982,14 +1000,15 @@ const Cases = () => {
               onClick={() => setSearchText("")}
             >
               <button
-                class="nav-link bgc-success"
+                className={`nav-link bgc-success ${activeTab === 4 ? "active " : ""}`}
                 id="contact-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#contact-tab-pane"
                 type="button"
                 role="tab"
                 aria-controls="contact-tab-pane"
-                aria-selected="false"
+                aria-selected={activeTab === 4}
+                onClick={() => handleTabChange(4)}
               >
                 Finished <small>({finishedCases.length})</small>
               </button>
@@ -1000,14 +1019,16 @@ const Cases = () => {
               onClick={() => setSearchText("")}
             >
               <button
-                class="nav-link bgc-danger"
+                // class="nav-link bgc-danger"
+                className={`nav-link bgc-danger ${activeTab === 5 ? "active " : ""}`}
                 id="delay-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#delay-tab-pane"
                 type="button"
                 role="tab"
                 aria-controls="delay-tab-pane"
-                aria-selected="false"
+                aria-selected={activeTab === 5}
+                onClick={() => handleTabChange(5)}
               >
                 Delay <small>({delayCases.length})</small>
               </button>
@@ -1018,14 +1039,15 @@ const Cases = () => {
               onClick={() => setSearchText("")}
             >
               <button
-                class="nav-link bgc-danger_1 animate-me"
+                className={`nav-link animate-me bgc-danger_1 ${activeTab === 6 ? "active  " : ""}`}
                 id="urgent-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#urgent-tab-pane"
                 type="button"
                 role="tab"
                 aria-controls="urgent-tab-pane"
-                aria-selected="false"
+                aria-selected={activeTab === 6}
+                onClick={() => handleTabChange(6)}
               >
                 Urgent <small>({urgentCases?.length})</small>
               </button>
@@ -1038,7 +1060,8 @@ const Cases = () => {
           >
             {/* All Cases */}
             <div
-              class="tab-pane fade show active"
+              // class="tab-pane fade show active"
+              className={`tab-pane fade ${activeTab === 0 ? "show active" : ""}`}
               id="allCases-tab-pane"
               role="tabpanel"
               aria-labelledby="allCases-tab"
@@ -1285,13 +1308,15 @@ const Cases = () => {
                 <div className="no-content">No Cases Added yet!</div>
               )}
             </div>
+            
             {/* In Not Start  */}
-            <div
-              class="tab-pane fade "
+           <div
+              // class="tab-pane fade "
+              className={`tab-pane fade ${activeTab === 1 ? "show active" : ""}`}
               id="notStart-tab-pane"
               role="tabpanel"
               aria-labelledby="notStart-tab"
-              tabIndex="0"
+              tabIndex="1"
             >
               <div className="form-group">
                 <input
@@ -1369,11 +1394,12 @@ const Cases = () => {
             </div>
             {/* In Process */}
             <div
-              class="tab-pane fade "
+              // class="tab-pane fade "
+              className={`tab-pane fade ${activeTab === 2 ? "show active" : ""}`}
               id="home-tab-pane"
               role="tabpanel"
               aria-labelledby="home-tab"
-              tabIndex="0"
+              tabIndex="1"
             >
               <div className="form-group">
                 <input
@@ -1451,12 +1477,13 @@ const Cases = () => {
               )}
             </div>
             {/* In Holding */}
-            <div
-              class="tab-pane fade"
+          <div
+              // class="tab-pane fade"
+              className={`tab-pane fade ${activeTab === 3 ? "show active" : ""}`}
               id="profile-tab-pane"
               role="tabpanel"
               aria-labelledby="profile-tab"
-              tabIndex="0"
+              tabIndex="2"
             >
               <div
                 class="tab-pane fade show active"
@@ -1581,10 +1608,11 @@ const Cases = () => {
             {/* In Finished */}
             <div
               class="tab-pane fade"
+              className={`tab-pane fade ${activeTab === 4 ? "show active" : ""}`}
               id="contact-tab-pane"
               role="tabpanel"
               aria-labelledby="contact-tab"
-              tabIndex="0"
+              tabIndex="3"
             >
               <div className="form-group">
                 <input
@@ -1654,11 +1682,12 @@ const Cases = () => {
               departments[0].name === "QC") ||
               user.roles[0] === _global.allRoles.Reception) && (
               <div
-                class="tab-pane fade"
+                // class="tab-pane fade"
+                className={`tab-pane fade ${activeTab === 5 ? "show active" : ""}`}
                 id="delay-tab-pane"
                 role="tabpanel"
                 aria-labelledby="delay-tab"
-                tabIndex="0"
+                tabIndex="4"
               >
                 <div className="form-group">
                   <input
@@ -1745,13 +1774,13 @@ const Cases = () => {
             )}
             {/* Urgent Cases */}
             <div
-              class="tab-pane fade"
+              // class="tab-pane fade"
+              className={`tab-pane fade ${activeTab === 6 ? "show active" : ""}`}
               id="urgent-tab-pane"
               role="tabpanel"
               aria-labelledby="urgent-tab"
-              tabIndex="0"
+              tabIndex="5"
             >
-              {urgentCases.length > 0 && (
                 <div className="row">
                   <div class="col-lg-10">
                     <div className="form-group">
@@ -1775,7 +1804,6 @@ const Cases = () => {
                     </button>
                   </div>
                 </div>
-              )}
               {urgentCases.length > 0 && (
                 <table
                   className="table text-center table-bordered"
@@ -2240,6 +2268,17 @@ const Cases = () => {
                       Other
                     </label>
                   </div>
+                </div>
+                <div className=" d-flex justify-content-between align-items-center mb-3">
+                  {/* <div className=" d-flex justify-content-between align-items-center ">
+                    <b>#Unites: </b>{" "}
+                    <p className="border border-danger rounded w-25">
+                      {" "}
+                      {item.teethNumbers.length > 0
+                        ? item.teethNumbers.length
+                        : "0"}
+                    </p>
+                  </div> */}
                 </div>
                 <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle">
                   <b>Notes/ Details: </b>

@@ -351,11 +351,14 @@ const handleChange = (event) => {
      setTeethNumbers(afterUpdatedTeethNumbers);
      console.log(teethNumbers);
   }
+  const backHistory = ()=>{
+    window.history.back()
+  }
   return (
     <div className="content ">
       <div className="card">
         <h5 class="card-title edit-case-title">
-            <span className="back-step" onClick={() => navigate("/layout/cases")}>
+            <span className="back-step" onClick={() => backHistory()}>
             <i class="fa-solid fa-arrow-left-long"></i>
         </span>
             <span>Edit Case <b>#{caseModel.caseNumber} </b>

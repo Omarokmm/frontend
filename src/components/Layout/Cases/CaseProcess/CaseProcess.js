@@ -169,6 +169,9 @@ console.log("newModel",newModel);
       ? data.find((r) => r.name === "Temporary")?.count
       : 0;
   };
+  const backHistory = ()=>{
+    window.history.back()
+  }
   return (
     <div className="content view-case">
       <div className="card">
@@ -176,7 +179,8 @@ console.log("newModel",newModel);
           <span>
             <span
               className="back-step"
-              onClick={() => navigate("/layout/cases")}
+              onClick={() => backHistory()}
+              // onClick={() => navigate("/layout/cases")}
             >
               <i class="fa-solid fa-arrow-left-long"></i>
             </span>

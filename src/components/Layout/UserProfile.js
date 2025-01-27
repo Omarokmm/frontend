@@ -1045,7 +1045,9 @@ const UserProfile = () => {
           : departments[0].name === "Reception"
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.receptionPacking.actions[item.receptionPacking.actions.length - 1]?.dateStart
+          item.receptionPacking.actions[
+            item.receptionPacking.actions.length - 1
+          ]?.dateStart
         );
       }
       if (
@@ -1408,7 +1410,7 @@ const UserProfile = () => {
                         <th scope="col">StartedAt</th>
                         <th scope="col">Doctor</th>
                         <th scope="col">Patient</th>
-                       <th scope="col">#teeth</th>
+                        <th scope="col">#teeth</th>
                         <th>Actions</th>
                         {/* <th scope="col">Actions</th> */}
                       </tr>
@@ -1420,18 +1422,18 @@ const UserProfile = () => {
                           <td>{getStartingDate(item)}</td>
                           <td>{item?.dentistObj?.name}</td>
                           <td>{item.patientName}</td>
-                            <td className="teeth-pieces">
-                              {groupTeethNumbersByName(item.teethNumbers)?.map(
-                                (item) => (
-                                  <p className="teeth-piece">
-                                    <span>{item.name}:</span>
-                                    <b className="badge text-bg-light">
-                                      {item.count}
-                                    </b>
-                                  </p>
-                                )
-                              )}
-                            </td>
+                          <td className="teeth-pieces">
+                            {groupTeethNumbersByName(item.teethNumbers)?.map(
+                              (item) => (
+                                <p className="teeth-piece">
+                                  <span>{item.name}:</span>
+                                  <b className="badge text-bg-light">
+                                    {item.count}
+                                  </b>
+                                </p>
+                              )
+                            )}
+                          </td>
                           {/* <td>
                 { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
                     <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
@@ -1463,7 +1465,10 @@ const UserProfile = () => {
                             <td className="f-bold c-success" colSpan={4}>
                               <b>Total of Pieces</b>
                             </td>
-                            <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
+                            <td
+                              className="bg-success p-2 text-dark bg-opacity-50"
+                              colSpan={2}
+                            >
                               <b>{sumOfTeethNumbersLength("Start")}</b>
                             </td>
                           </tr>
@@ -1475,7 +1480,10 @@ const UserProfile = () => {
                               <td className="f-bold c-success" colSpan={4}>
                                 <b>Total Without Study</b>
                               </td>
-                              <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
+                              <td
+                                className="bg-success p-2 text-dark bg-opacity-50"
+                                colSpan={2}
+                              >
                                 <b>
                                   {sumOfTeethNumbersLength("Start") -
                                     getStudyCases(
@@ -1567,7 +1575,7 @@ const UserProfile = () => {
                         <th scope="col">Patient</th>
                         <th scope="col">Reason</th>
                         <th scope="col">#teeth</th>
-                        {/* <th scope="col">Actions</th> */}
+                        <th scope="col">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1582,25 +1590,34 @@ const UserProfile = () => {
                           <td>{item?.dentistObj?.name}</td>
                           <td>{item.patientName}</td>
                           <td>{getHoldingreason(item)}</td>
-                            <td className="teeth-pieces">
-                              {groupTeethNumbersByName(item.teethNumbers)?.map(
-                                (item) => (
-                                  <p className="teeth-piece">
-                                    <span>{item.name}:</span>
-                                    <b className="badge text-bg-light">
-                                      {item.count}
-                                    </b>
-                                  </p>
-                                )
-                              )}
-                            </td>
-                          {/* <td>
-                { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
-                    <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
-                    <i class="fas fa-edit"></i>
-                    </span>
-                }
-                </td> */}
+                          <td className="teeth-pieces">
+                            {groupTeethNumbersByName(item.teethNumbers)?.map(
+                              (item) => (
+                                <p className="teeth-piece">
+                                  <span>{item.name}:</span>
+                                  <b className="badge text-bg-light">
+                                    {item.count}
+                                  </b>
+                                </p>
+                              )
+                            )}
+                          </td>
+                          <td>
+                            <div className="actions-btns">
+                              <span
+                                className="c-success"
+                                onClick={() => viewCase(item, "process")}
+                              >
+                                <i class="fa-brands fa-squarespace"></i>
+                              </span>
+                              <span
+                                className="c-success"
+                                onClick={() => viewCase(item, "view")}
+                              >
+                                <i class="fa-solid fa-eye"></i>
+                              </span>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                       {userData.isAdmin && (
@@ -1609,7 +1626,7 @@ const UserProfile = () => {
                             <td className="f-bold c-success" colSpan={5}>
                               <b>Total of Pieces</b>
                             </td>
-                            <td className="bg-success p-2 text-dark bg-opacity-50">
+                            <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
                               <b>{sumOfTeethNumbersLength("Pause")}</b>
                             </td>
                           </tr>
@@ -1621,7 +1638,7 @@ const UserProfile = () => {
                               <td className="f-bold c-success" colSpan={5}>
                                 <b>Total Without Study</b>
                               </td>
-                              <td className="bg-success p-2 text-dark bg-opacity-50">
+                              <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
                                 <b>
                                   {sumOfTeethNumbersLength("Pause") -
                                     getStudyCases(
@@ -1632,7 +1649,7 @@ const UserProfile = () => {
                             </tr>
                           )}
                           <tr>
-                            <td colSpan={6}>
+                            <td colSpan={7}>
                               <div className="summary-teeth-cases">
                                 {groupCasesTeethNumbersByName("Pause")?.map(
                                   (item) => (
