@@ -2093,7 +2093,7 @@ const Cases = () => {
             <div key={index} className=" ">
               {/* <div className=" box card px-3 min-vh-50 "> */}
               {/* <div className="box card px-3 min-vh-50"> */}
-              <div  className={`box card px-3 min-vh-50 ${item.isUrgent ? 'bgc-print-danger' : ''}`}>
+              <div  className={`box border border-black card px-3 min-vh-50 ${item.isUrgent ? 'bgc-print-danger' : ''}`}>
                 {/* <div className="d-flex justify-content-center align-items-center mb-0 mt-2">
                   <h5 className="border p-2 border-success  rounded">
                     {item.caseNumber}
@@ -2147,7 +2147,8 @@ const Cases = () => {
                       Have Photo
                     </label>
                   </div>
-                  <div>
+                  {item.caseType === "Digital" &&
+                   <div>
                     <b>Received Date:</b>{" "}
                     <span>
                       {" "}
@@ -2156,6 +2157,7 @@ const Cases = () => {
                         : "-"}
                     </span>
                   </div>
+                  }
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <div>
@@ -2223,7 +2225,7 @@ const Cases = () => {
                     _____________ <b>Date</b>_______________
                   </span>
                 </div>
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="d-flex justify-content-between align-items-center mb-2">
                   <div class="form-check">
                     <input
                       class="form-check-input"
@@ -2269,16 +2271,16 @@ const Cases = () => {
                     </label>
                   </div>
                 </div>
-                <div className=" d-flex justify-content-between align-items-center mb-3">
-                  {/* <div className=" d-flex justify-content-between align-items-center ">
+                <div className="mb-1" >
+                  <div >
                     <b>#Unites: </b>{" "}
-                    <p className="border border-danger rounded w-25">
+                    <span className="border border-danger rounded-circle  p-2">
                       {" "}
                       {item.teethNumbers.length > 0
                         ? item.teethNumbers.length
                         : "0"}
-                    </p>
-                  </div> */}
+                    </span>
+                  </div>
                 </div>
                 <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle">
                   <b>Notes/ Details: </b>
