@@ -3,6 +3,7 @@
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     height: 100vh;
+    gap: 2px;
     /* margin: 0;
     padding: 0; */
     page-break-after: always; /* Force page break after each grid */
@@ -20,4 +21,18 @@
     /* border-left: 0;
     border-right: 0; */
     page-break-inside: avoid; /* Prevent box from splitting across pages */
+  }
+
+  .border-customized{
+    padding: 5px 10px;
+    font-size: 20px;
+    font-weight: 600;
+
+  }
+
+  .f-20{
+    font-size: 18px;
+  }
+  .f-18 {
+    font-size: 18px;
   }

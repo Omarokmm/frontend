@@ -2099,43 +2099,62 @@ const Cases = () => {
                     {item.caseNumber}
                   </h5>
               </div> */}
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <div>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div className="f-18">
                     <b>Contry: </b>{" "}
                     <span> {getDoctorCountry(item.dentistObj.id)}</span>
                   </div>
-                  <h5 className="border p-2 border-success  rounded">
+                  <h5 className="border p-2 border-success  rounded f-20">
                     {item.caseNumber}
                   </h5>
                   {/* <div> */}
                   <img src="../images/arak-2.png" className=" w-25" />
                   {/* </div> */}
                 </div>
-                <div className="d-flex justify-content-end gap-3 align-items-center mb-2">
-                  <div class="form-check">
+                <div className="mb-2">
+                  <h2 className="c-success">Doctor Name: </h2> 
+                  <h3> {item.dentistObj.name}</h3>
+                </div>
+                <div className="mb-4">
+                  <div className=" d-flex justify-content-between align-items-center ">
+                   <h2 className="c-success">Patient Name: </h2>
+                  <div class="form-check  text-right">
                     <input
                       class="form-check-input"
                       type="checkbox"
                       value=""
-                      id="zoho"
+                      id="have-photo"
                     />
-                    <label class="form-check-label " for="zoho">
-                      Zoho
+                    <label class="form-check-label f-18" for="have-photo">
+                      Dark Die
                     </label>
                   </div>
-                  <div class="form-check ">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value=""
-                      id="alameen"
-                    />
-                    <label class="form-check-label" for="alameen">
-                      Al Ameen
-                    </label>
+                  </div>
+                   <h3> {item.patientName}</h3>
+                </div>
+                <div className=" d-flex justify-content-between align-items-center mb-4">
+                  <div>
+                    <b className="f-18">Shade: </b>{" "}
+                    <span className="border border-danger rounded border-customized p-1">
+                      {" "}
+                      {item.shadeCase.shade !== ""
+                        ? item.shadeCase.shade
+                        : "None"}
+                    </span>
+                  </div>
+                  <div className="mb-1" >
+                  <div >
+                    <b className="f-18">#Unites: </b>{" "}
+                    <span className="border border-danger rounded  border-customized">
+                      {" "}
+                      {item.teethNumbers.length > 0
+                        ? item.teethNumbers.length
+                        : "0"}
+                    </span>
                   </div>
                 </div>
-                <div className="d-flex justify-content-between align-items-center mb-2">
+                </div>
+                {/* <div className="d-flex justify-content-between align-items-center mb-2">
                   <div class="form-check">
                     <input
                       class="form-check-input"
@@ -2158,8 +2177,8 @@ const Cases = () => {
                     </span>
                   </div>
                   }
-                </div>
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                </div> */}
+                <div className="d-flex justify-content-between align-items-center mb-4 f-18">
                   <div>
                     <b>Date In: </b>{" "}
                     <span>{_global.formatDateToYYYYMMDD(item.dateIn)}</span>
@@ -2176,56 +2195,28 @@ const Cases = () => {
                     </span>
                   </div>
                 </div>
-                <div className="mb-2">
-                  <b>Dr. Name: </b> <p> {item.dentistObj.name}</p>
-                </div>
-                <div className="mb-3">
-                  <b>Pt. Name: </b> <span> {item.patientName}</span>
-                </div>
-                <div className=" d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <b>Shade: </b>{" "}
-                    <span className="border border-danger rounded p-1">
-                      {" "}
-                      {item.shadeCase.shade !== ""
-                        ? item.shadeCase.shade
-                        : "None"}
-                    </span>
-                  </div>
-                  <div class="form-check ">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value=""
-                      id="have-photo"
-                    />
-                    <label class="form-check-label" for="have-photo">
-                      Dark Die
-                    </label>
-                  </div>
-                </div>
-                <div className="mb-3">
+                <div className="mb-3 f-18">
                   <b>Cad Cam: </b>{" "}
                   <span>
                     {" "}
-                    _____________ <b>Date</b>_______________
+                    _________ <span>Date</span>____________
                   </span>
                 </div>
-                <div className="mb-3">
+                <div className="mb-3 f-18">
                   <b>Fitting: </b>{" "}
                   <span>
                     {" "}
-                    _______________ <b>Date</b>_______________
+                    ___________ <span>Date</span>____________
                   </span>
                 </div>
-                <div className="mb-3">
+                <div className="mb-3 f-18">
                   <b>Ceramic: </b>{" "}
                   <span>
                     {" "}
-                    _____________ <b>Date</b>_______________
+                    _________ <span>Date</span>____________
                   </span>
                 </div>
-                <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="d-flex justify-content-between align-items-center mb-2 f-18">
                   <div class="form-check">
                     <input
                       class="form-check-input"
@@ -2271,20 +2262,9 @@ const Cases = () => {
                     </label>
                   </div>
                 </div>
-                <div className="mb-1" >
-                  <div >
-                    <b>#Unites: </b>{" "}
-                    <span className="border border-danger rounded-circle  p-2">
-                      {" "}
-                      {item.teethNumbers.length > 0
-                        ? item.teethNumbers.length
-                        : "0"}
-                    </span>
-                  </div>
-                </div>
-                <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle">
+                <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle f-18">
                   <b>Notes/ Details: </b>
-                  <small>{item.jobDescription}</small>
+                  <small className="">{item.jobDescription}</small>
                   {/* <small>
                     Patient Name: Yaimet Prieto Doctor: Dr. Laura Pérez Case
                     Type: Lower Final Impression & Upper and Lower Provisionals
@@ -2311,7 +2291,31 @@ const Cases = () => {
                   <br />
                   <br />
                 </div>
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex justify-content-between gap-3 align-items-center mb-2 f-18">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="zoho"
+                    />
+                    <label class="form-check-label " for="zoho">
+                      Zoho
+                    </label>
+                  </div>
+                  <div class="form-check ">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="alameen"
+                    />
+                    <label class="form-check-label" for="alameen">
+                      Al Ameen
+                    </label>
+                  </div>
+                </div>
+                <div className="d-flex justify-content-between align-items-center f-18">
                   <div class="form-check">
                     <input
                       class="form-check-input"
