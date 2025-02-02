@@ -98,10 +98,12 @@ const Cases = () => {
   const [inProcessCases, setInProcessCases] = useState([]);
   const [holdingCases, setHoldingCases] = useState([]);
   const [urgentCases, setUrgentCases] = useState([]);
+  const [studyCases, setStudyCases] = useState([]);
   const [finishedCases, setFinishedCases] = useState([]);
   const [notStartCases, setNotStartCases] = useState([]);
   const [buffAllCases, setBuffAllCases] = useState([]);
   const [buffUrgentCases, setBuffUrgentCases] = useState([]);
+  const [buffStudyCases, setBuffStudyCases] = useState([]);
   const [delayCases, setDelayCases] = useState([]);
   const [buffDelayCases, setBuffDelayCases] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -122,7 +124,9 @@ const Cases = () => {
         const result = res.data.cases;
         const holdingCases = res.data.holdingCases;
         const urgentCases = res.data.urgentCases;
+        const studyCases = res.data.studyCases;
         setBuffUrgentCases(urgentCases);
+        setBuffStudyCases(studyCases);
         setAllCases(result);
         console.log(result);
         setBuffAllCases(result);
@@ -150,10 +154,7 @@ const Cases = () => {
         );
         setHoldingCases(holdingCases);
         setUrgentCases(urgentCases);
-        console.log(
-          "Urgeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeent Cases",
-          urgentCases
-        );
+        setStudyCases(studyCases);
         console.log("Holding Cases", result.holdingCases);
         const delayCasesfilter = result.filter((c) => filterDaley(c));
         console.log(delayCasesfilter);
@@ -518,6 +519,22 @@ const Cases = () => {
         setUrgentCases(filteredAllUrgentCases);
       } else {
         setUrgentCases(buffUrgentCases);
+      }
+    }
+    if (name === "study") {
+      if (searchText !== "") {
+        const filteredAllStudyCases = studyCases.filter(
+          (item) =>
+            item?.caseNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.dentistObj.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setStudyCases(filteredAllStudyCases);
+      } else {
+        setStudyCases(buffStudyCases);
       }
     }
   };
@@ -1052,6 +1069,25 @@ const Cases = () => {
                 Urgent <small>({urgentCases?.length})</small>
               </button>
             </li>
+            <li
+              class="nav-item"
+              role="presentation"
+              onClick={() => setSearchText("")}
+            >
+              <button
+                className={`nav-link bgc-study ${activeTab === 7 ? "active  " : ""}`}
+                id="study-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#study-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="study-tab-pane"
+                aria-selected={activeTab === 7}
+                onClick={() => handleTabChange(7)}
+              >
+                Study <small>({studyCases?.length})</small>
+              </button>
+            </li>
           </ul>
           <div
             class="tab-content"
@@ -1061,7 +1097,7 @@ const Cases = () => {
             {/* All Cases */}
             <div
               // class="tab-pane fade show active"
-              className={`tab-pane fade ${activeTab === 0 ? "show active" : ""}`}
+              className={`tab-pane  fade ${activeTab === 0 ? "show active" : ""}`}
               id="allCases-tab-pane"
               role="tabpanel"
               aria-labelledby="allCases-tab"
@@ -1399,7 +1435,7 @@ const Cases = () => {
               id="home-tab-pane"
               role="tabpanel"
               aria-labelledby="home-tab"
-              tabIndex="1"
+              tabIndex="2"
             >
               <div className="form-group">
                 <input
@@ -1490,7 +1526,7 @@ const Cases = () => {
                 id="home-tab-pane"
                 role="tabpanel"
                 aria-labelledby="home-tab"
-                tabIndex="0"
+                tabIndex="3"
               >
                 <div className="form-group">
                   <input
@@ -1612,7 +1648,7 @@ const Cases = () => {
               id="contact-tab-pane"
               role="tabpanel"
               aria-labelledby="contact-tab"
-              tabIndex="3"
+              tabIndex="4"
             >
               <div className="form-group">
                 <input
@@ -1687,7 +1723,7 @@ const Cases = () => {
                 id="delay-tab-pane"
                 role="tabpanel"
                 aria-labelledby="delay-tab"
-                tabIndex="4"
+                tabIndex="5"
               >
                 <div className="form-group">
                   <input
@@ -1779,7 +1815,7 @@ const Cases = () => {
               id="urgent-tab-pane"
               role="tabpanel"
               aria-labelledby="urgent-tab"
-              tabIndex="5"
+              tabIndex="6"
             >
                 <div className="row">
                   <div class="col-lg-10">
@@ -1886,6 +1922,103 @@ const Cases = () => {
               )}
               {urgentCases.length <= 0 && (
                 <div className="no-content">No Cases Urgent yet!</div>
+              )}
+            </div>
+              {/* Study Cases */}
+              <div
+              // class="tab-pane fade"
+              className={`tab-pane fade ${activeTab === 7 ? "show active" : ""}`}
+              id="study-tab-pane"
+              role="tabpanel"
+              aria-labelledby="study-tab"
+              tabIndex="7"
+            >
+                <div className="row">
+                  <div class="col-lg-12">
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        name="searchText"
+                        className="form-control"
+                        placeholder="Search by name | case number | case type "
+                        value={searchText}
+                        onChange={(e) => searchByName(e.target.value, "study")}
+                      />
+                    </div>
+                  </div>
+                  {/* <div className="col-lg-2">
+                    <button
+                      className="btn btn-sm btn-primary w-100 p-2"
+                      onClick={() => handlePrintUrgentCases()}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                  </div> */}
+                </div>
+              {studyCases.length > 0 && (
+                <table
+                  className="table text-center table-bordered"
+                  
+                >
+                  <thead>
+                    <tr className="table-secondary">
+                      <th scope="col">#Case</th>
+                      <th scope="col">Doctor Name</th>
+                      <th scope="col">Patient Name</th>
+                      <th scope="col">#tooth</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
+                      <th scope="col" className="td-phone">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studyCases.map((item, index) => (
+                      <tr key={item._id}>
+                        <td>{item.caseNumber}</td>
+                        <td>{item.dentistObj.name}</td>
+                        <td>{item.patientName}</td>
+                        <td
+                          className={`${
+                            item.teethNumbers.length <= 0
+                              ? "bg-danger"
+                              : "bg-white"
+                          } `}
+                        >
+                          {item.teethNumbers.length}
+                        </td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>
+                          {item.dateOut &&
+                            _global.formatDateToYYYYMMDD(item.dateOut)}
+                        </td>
+                        <td className="td-phone">
+                          <div className="actions-btns">
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "view")}
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                            </span>
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "process")}
+                            >
+                              <i class="fa-brands fa-squarespace"></i>
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {studyCases?.length <= 0 && (
+                <div className="no-content">No Cases Study yet!</div>
               )}
             </div>
           </div>
@@ -2113,7 +2246,7 @@ const Cases = () => {
                 </div>
                 <div className="mb-2">
                   <h2 className="c-success">Doctor Name: </h2> 
-                  <h3> {item.dentistObj.name}</h3>
+                  <h3 className="border border-danger rounded border-customized p-1"> {item.dentistObj.name}</h3>
                 </div>
                 <div className="mb-4">
                   <div className=" d-flex justify-content-between align-items-center ">
@@ -2130,7 +2263,7 @@ const Cases = () => {
                     </label>
                   </div>
                   </div>
-                   <h3> {item.patientName}</h3>
+                   <h3 className="border border-danger rounded border-customized"> {item.patientName}</h3>
                 </div>
                 <div className=" d-flex justify-content-between align-items-center mb-4">
                   <div>

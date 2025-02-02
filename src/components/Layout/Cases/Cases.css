@@ -27,7 +27,7 @@
     padding: 5px 10px;
     font-size: 20px;
     font-weight: 600;
-
+    width: fit-content;
   }
 
   .f-20{
@@ -36,3 +36,9 @@
   .f-18 {
     font-size: 18px;
   }
+  /* .border-dashed{
+    width: fit-content;
+    border-style: solid;
+    border-color: brown;
+    padding: 5px;
+  } */

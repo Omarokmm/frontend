@@ -42,6 +42,7 @@ const CaseProcess = () => {
   const changeStatus = (id, type, actionName) => {
     console.log(actionName);
     let isUrgent = caseData.isUrgent
+    let isStudy = caseData.isStudy
     let model;
     let action;
   if (actionName === "start") {
@@ -89,6 +90,7 @@ logs.push(action);
     }
     if(caseData[type].namePhase === 'Delivering' &&  actionName === "end" ) {
       isUrgent = false
+      isStudy = false
      }
 let newModel = {
   namePhase: caseData[type].namePhase,
@@ -109,7 +111,8 @@ let newModel = {
     isEnd: actionName === "end" ? true : caseData[type].status.isEnd,
   },
   obj: buffObj,
-  isUrgent : isUrgent
+  isUrgent : isUrgent,
+  isStudy : isStudy
 };
 console.log("newModel",newModel);
     axios

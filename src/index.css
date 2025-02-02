@@ -629,6 +629,9 @@ cursor: pointer;
 .bgc-info{
   background: #b8e0e7;
 }
+.bgc-study{
+  background: rgba(140, 113, 255, 0.66);
+}
 .bgc-primary{
        background:   rgb(163 197 246);
  

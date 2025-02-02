@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import './AddNewCase.css'
+import "./AddNewCase.css";
 import axios from "axios";
 import * as _global from "../../../config/global";
 import { showToastMessage } from "../../../helper/toaster";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 
 const initialData = {
   caseNumber: "",
@@ -39,6 +40,7 @@ const initialData = {
   isPhoto: false,
   isHold: false,
   isUrgent: false,
+  isStudy: false,
   photos: [],
   deadline: "",
   dateReceived: "",
@@ -86,41 +88,42 @@ const initialData = {
 
 const AddNewCase = () => {
   // const naturalOfWorks = _global.naturalOfWorks
- const navigate = useNavigate()
- const numOfTeeth = _global.numOfTeeth;
- const user = JSON.parse(localStorage.getItem("user"))
- const [caseModel, setCaseModel] = useState(initialData);
- const [buffCaseType, setBuffCaseType] = useState("Digital");
- const [teethData, setTeethData] = useState(null);
- const [teethNumbers, setTeethNumbers] = useState([]);
- const [dentistPhone, setDentistPhone] = useState(" ");
- const [occlusalStaining, setOcclusalStaining] = useState("");
- const [texture, setTexture] = useState("");
- const [naturalOfTeeth, setNaturalOfTeeth] = useState("");
- const [isSubmit, setIsSubmit] = useState(false);
- const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
- const [dentistObj, setDentistObj] = useState({
-   id: "",
-   name: "",
-   phone: "1",
- });
+  const navigate = useNavigate();
+  const numOfTeeth = _global.numOfTeeth;
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [caseModel, setCaseModel] = useState(initialData);
+  const [buffCaseType, setBuffCaseType] = useState("Digital");
+  const [teethData, setTeethData] = useState(null);
+  const [teethNumbers, setTeethNumbers] = useState([]);
+  const [dentistPhone, setDentistPhone] = useState(" ");
+  const [occlusalStaining, setOcclusalStaining] = useState("");
+  const [texture, setTexture] = useState("");
+  const [naturalOfTeeth, setNaturalOfTeeth] = useState("");
+  const [isSubmit, setIsSubmit] = useState(false);
+  const [naturalOfWorks, setNaturalOfWorks] = useState(_global.naturalOfWorks);
+  const [dentistObj, setDentistObj] = useState({
+    id: "",
+    name: "",
+    phone: "1",
+  });
+  const [patients, setPatients] = useState([]);
 
-const [doctors, setDoctors] = useState([]);
-const [doctorsOptions, setDoctorsOptions] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [doctorsOptions, setDoctorsOptions] = useState([]);
   useEffect(() => {
     axios
       .get(`${_global.BASE_URL}doctors`)
       .then((res) => {
         const result = res.data;
         setDoctors(result);
-            setDoctorsOptions(
-              res.data.map((c) => {
-                return {
-                  label: `${c.firstName} ${c.lastName}(${c.clinicName})`,
-                  _id: c._id,
-                };
-              })
-            );
+        setDoctorsOptions(
+          res.data.map((c) => {
+            return {
+              label: `${c.firstName} ${c.lastName}(${c.clinicName})`,
+              _id: c._id,
+            };
+          })
+        );
         console.log(result);
       })
       .catch((error) => {
@@ -128,31 +131,31 @@ const [doctorsOptions, setDoctorsOptions] = useState([]);
       });
   }, []);
 
-const handleChange = (event) => {
-  const { name, value } = event.target;
-  setCaseModel((prevFormData) => ({ ...prevFormData, [name]: value }));
-}; 
- const handleChangeShade = (event) => {
-   const { name, value } = event.target;
-   setCaseModel((prevFormData) => ({
-     ...prevFormData, // Keep the rest of the form data
-     shadeCase: {
-       ...prevFormData.shadeCase, // Keep the previous shadeCase properties
-       [name]: value, // Update the specific shadeCase property
-     },
-   }));
- };
- const handleChangeOcclusal = (event) => {
-  setOcclusalStaining(event.target.value);
-  //  const { value, checked } = event.target;
-  //  if (checked) {
-  //    setOcclusalStaining((prevValues) => [...prevValues, value]); // Add value to array
-  //  } else {
-  //    setOcclusalStaining((prevValues) =>
-  //      prevValues.filter((item) => item !== value)
-  //    ); // Remove value from array
-  //  }
- };
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setCaseModel((prevFormData) => ({ ...prevFormData, [name]: value }));
+  };
+  const handleChangeShade = (event) => {
+    const { name, value } = event.target;
+    setCaseModel((prevFormData) => ({
+      ...prevFormData, // Keep the rest of the form data
+      shadeCase: {
+        ...prevFormData.shadeCase, // Keep the previous shadeCase properties
+        [name]: value, // Update the specific shadeCase property
+      },
+    }));
+  };
+  const handleChangeOcclusal = (event) => {
+    setOcclusalStaining(event.target.value);
+    //  const { value, checked } = event.target;
+    //  if (checked) {
+    //    setOcclusalStaining((prevValues) => [...prevValues, value]); // Add value to array
+    //  } else {
+    //    setOcclusalStaining((prevValues) =>
+    //      prevValues.filter((item) => item !== value)
+    //    ); // Remove value from array
+    //  }
+  };
   const handleChangeTexture = (event) => {
     setTexture(event.target.value);
     // const { value, checked } = event.target;
@@ -170,24 +173,53 @@ const handleChange = (event) => {
     }));
   };
   const handleChangeSelect = (event) => {
+    getNamesPatientsOfDoctor(event._id);
     const doctor = doctors.find((d) => d._id === event._id);
-    console.log(doctor)
+    console.log(doctor);
     setCaseModel((prevFormData) => ({
       ...prevFormData,
-      address: `${doctor.address.country} ${doctor.address.city ? ', ' + doctor.address.city :""}`
+      address: `${doctor.address.country} ${
+        doctor.address.city ? ", " + doctor.address.city : ""
+      }`,
     }));
-    console.log(caseModel.address)
-          setDentistObj((prevFormData) => ({
-            ...prevFormData,
-            id: event._id,
-          }));
+
+    setDentistObj((prevFormData) => ({
+      ...prevFormData,
+      id: event._id,
+    }));
   };
-  const handleSubmit = async() => {
-    setIsSubmit(true)
-    if(dentistObj.id !== ""){
-      const buffDoctor = doctors.find(
-        (doctor) => doctor._id === dentistObj.id
-      );
+  const handleChangeSelectPatient = (event) => {
+    console.log(event);
+    if (event) {
+      setCaseModel((prevFormData) => ({
+        ...prevFormData,
+        patientName: event.value,
+      }));
+    }
+  };
+  const getNamesPatientsOfDoctor = (id) => {
+    axios
+      .get(`${_global.BASE_URL}doctors/patients/${id}`)
+      .then((res) => {
+        // const result = res.data;
+        console.log(res.data.patients)
+        setPatients(
+          res.data.patients.map((c) => {
+            return {
+              label: `${c.name } (${_global.formatDateToYYYYMMDD(c.dateIn)})`,
+              value: c.name ,
+            };
+          })
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching Patients of doctors:", error);
+      });
+  };
+  const handleSubmit = async () => {
+    setIsSubmit(true);
+    if (dentistObj.id !== "") {
+      const buffDoctor = doctors.find((doctor) => doctor._id === dentistObj.id);
       let model = {
         caseType: buffCaseType,
         dateIn: caseModel.dateIn,
@@ -209,8 +241,9 @@ const handleChange = (event) => {
         isInvoice: false,
         isEmail: false,
         isPhoto: false,
-        isHold:false,
-        isUrgent:false,
+        isHold: false,
+        isUrgent: false,
+        isStudy: caseModel.isStudy,
         teethNumbers: teethNumbers,
         naturalOfWorks: [],
         translucency: caseModel.translucency,
@@ -308,84 +341,81 @@ const handleChange = (event) => {
         dateReceivedInEmail: caseModel.dateReceivedInEmail,
         notes: [],
       };
-      console.log(model)
-         const response = await fetch(`${_global.BASE_URL}cases`, {
-           method: "POST",
-           headers: {
-             "Content-Type": "application/json",
-           },
-           body: JSON.stringify(model),
-         });
-           if (response.ok) {
-            setIsSubmit(false)
-            navigate('/layout/cases')
-               showToastMessage("Added Case successfully", "success");
-           }
-           if (!response.ok) {
-             setIsSubmit(false)
-             showToastMessage("Error Added Case", "error");
-           }
-    }
-    else{
-      setIsSubmit(false)
+      // console.log(model);
+      const response = await fetch(`${_global.BASE_URL}cases`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(model),
+      });
+      if (response.ok) {
+        setIsSubmit(false);
+        navigate("/layout/cases");
+        showToastMessage("Added Case successfully", "success");
+      }
+      if (!response.ok) {
+        setIsSubmit(false);
+        showToastMessage("Error Added Case", "error");
+      }
+    } else {
+      setIsSubmit(false);
       showToastMessage("Please fill All fields have *", "error");
     }
- 
-  }
-   const chooseTeeth = (item,type)=>{
+  };
+  const chooseTeeth = (item, type) => {
     setNaturalOfWorks(_global.naturalOfWorks);
     setTeethData(item);
     console.log(item, type);
-  }
+  };
   const handleChangeColor = (color) => {
-    console.log('color',color)
-    setNaturalOfTeeth(color)
-    console.log('naturalOfTeeth',naturalOfTeeth)
-      const item =  naturalOfWorks.find((item) =>
-        item.name.toLowerCase().includes(naturalOfTeeth.toLowerCase())
+    console.log("color", color);
+    setNaturalOfTeeth(color);
+    console.log("naturalOfTeeth", naturalOfTeeth);
+    const item = naturalOfWorks.find((item) =>
+      item.name.toLowerCase().includes(naturalOfTeeth.toLowerCase())
+    );
+    console.log(teethNumbers);
+    console.log("teethData.name", teethData);
+    console.log("teethNumbers", teethNumbers);
+    const teethNumIndex = teethNumbers.findIndex(
+      (t) => t.teethNumber === teethData.name
+    );
+    console.log(teethNumIndex);
+    if (teethNumIndex !== -1) {
+      const updatedTeethNumbers = [...teethNumbers];
+      // If item already exists, update its color
+      console.log("item", item);
+      console.log(
+        "updatedTeethNumbers[teethNumIndex]",
+        updatedTeethNumbers[teethNumIndex]
       );
-      console.log(teethNumbers);
-      console.log("teethData.name", teethData);
-      console.log("teethNumbers", teethNumbers);
-      const teethNumIndex = teethNumbers.findIndex(
-        (t) => t.teethNumber === teethData.name
-      );
-      console.log(teethNumIndex);
-      if (teethNumIndex !== -1) {
-        const updatedTeethNumbers = [...teethNumbers];
-        // If item already exists, update its color
-        console.log("item", item);
-        console.log(
-          "updatedTeethNumbers[teethNumIndex]",
-          updatedTeethNumbers[teethNumIndex]
-        );
-        updatedTeethNumbers[teethNumIndex].color = item.color;
-        updatedTeethNumbers[teethNumIndex].natural = item;
-        updatedTeethNumbers[teethNumIndex].name = item.name;
-        setTeethNumbers(updatedTeethNumbers);
-      } else {
-        const updatedTeethNumbers = [...teethNumbers];
-        updatedTeethNumbers.push({
-          natural: item,
-          name: item.name,
-          teethNumber: teethData.name,
-          color: item.color,
-        });
-        setTeethNumbers(updatedTeethNumbers);
-      }
-  
+      updatedTeethNumbers[teethNumIndex].color = item.color;
+      updatedTeethNumbers[teethNumIndex].natural = item;
+      updatedTeethNumbers[teethNumIndex].name = item.name;
+      setTeethNumbers(updatedTeethNumbers);
+    } else {
+      const updatedTeethNumbers = [...teethNumbers];
+      updatedTeethNumbers.push({
+        natural: item,
+        name: item.name,
+        teethNumber: teethData.name,
+        color: item.color,
+      });
+      setTeethNumbers(updatedTeethNumbers);
+    }
   };
   const chooseColor = () => {
-    handleChangeColor(naturalOfTeeth)
+    handleChangeColor(naturalOfTeeth);
   };
-  const resetTeeth = ()=>{
+  const resetTeeth = () => {
     const updatedTeethNumbers = [...teethNumbers];
-     const afterUpdatedTeethNumbers = updatedTeethNumbers.filter(
-       (item) => item.teethNumber !== teethData.name
-     );
-     setTeethNumbers(afterUpdatedTeethNumbers);
-     console.log(teethNumbers);
-  }
+    const afterUpdatedTeethNumbers = updatedTeethNumbers.filter(
+      (item) => item.teethNumber !== teethData.name
+    );
+    setTeethNumbers(afterUpdatedTeethNumbers);
+    console.log(teethNumbers);
+  };
   return (
     <div className="content ">
       <div className="card">
@@ -393,7 +423,9 @@ const handleChange = (event) => {
         <div className="card-body">
           <div class="row">
             <div className="col-lg-12">
-              <label>Case Type</label>
+              <div className="d-flex justify-content-between">
+                <label>Case Type</label>
+              </div>
               <div className="type-case">
                 <div class="form-check">
                   <input
@@ -428,7 +460,9 @@ const handleChange = (event) => {
             {/* date in */}
             <div className="col-lg-4">
               <div className="form-group">
-                <label>DATE IN: <span className="required">*</span></label>
+                <label>
+                  DATE IN: <span className="required">*</span>
+                </label>
                 <input
                   type="date"
                   name="dateIn"
@@ -439,7 +473,9 @@ const handleChange = (event) => {
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-                <label>Due To: <span className="required">*</span></label>
+                <label>
+                  Due To: <span className="required">*</span>
+                </label>
                 <input
                   type="date"
                   name="dateOut"
@@ -474,7 +510,9 @@ const handleChange = (event) => {
             )}
             <div className="col-lg-8">
               <div className="form-group">
-                <label>Doctor Name: <span className="required">*</span></label>
+                <label>
+                  Doctor Name: <span className="required">*</span>
+                </label>
                 <Select
                   className="basic-single"
                   classNamePrefix="select"
@@ -526,28 +564,35 @@ const handleChange = (event) => {
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-                <label>Patient Name: <span className="required">*</span></label>
-                <input
+                <label>
+                  Patient Name: <span className="required">*</span>
+                </label>
+                {/* <input
                   type="text"
                   name="patientName"
                   placeholder="Enter Patient Name"
                   onChange={handleChange}
                   className="form-control"
+                /> */}
+                <CreatableSelect
+                  isClearable
+                  onChange={(e) => handleChangeSelectPatient(e)}
+                  options={patients}
                 />
               </div>
             </div>
             <div className="col-lg-4">
               <div className="form-group">
-              <label>Gender: </label>
-              <select
-                className={`form-select`}
-                onChange={handleChange}
-                name="gender"
-              >
-                <option selected>Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
+                <label>Gender: </label>
+                <select
+                  className={`form-select`}
+                  onChange={handleChange}
+                  name="gender"
+                >
+                  <option selected>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
               </div>
             </div>
             <div className="col-lg-4">
@@ -962,7 +1007,34 @@ const handleChange = (event) => {
             </div>
             <div className="col-lg-12 mt-4">
               <div className="form-group">
-                <label htmlFor="description"> Job Description: <span className="required">*</span> </label>{" "}
+                <div className="d-flex justify-content-between">
+                  <label htmlFor="description">
+                    {" "}
+                    Job Description: <span className="required">*</span>{" "}
+                  </label>{" "}
+                  <div className="d-flex ">
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="isStudy"
+                        role="switch"
+                        checked={caseModel.isStudy} // Ensure controlled component behavior
+                        onChange={ (e)=>  setCaseModel((prev) => ({
+                          ...prev,
+                          ['isStudy']: e.target.checked, // Updates `isStudy` as true/false
+                        }))}
+                        id="flexSwitchCheckDefault"
+                      />
+                      <label
+                        class="form-check-label"
+                        for="flexSwitchCheckDefault"
+                      >
+                        Study Case
+                      </label>
+                    </div>
+                  </div>
+                </div>
                 <textarea
                   type="text"
                   id="description"
@@ -985,8 +1057,11 @@ const handleChange = (event) => {
             </div>
             <div className="col-lg-12 ">
               <small className="required-note">
-                <span className="required">Note: </span> 
-                <span>All fields marked with an asterisk (<span className="required">* </span> ) are required.</span>
+                <span className="required">Note: </span>
+                <span>
+                  All fields marked with an asterisk (
+                  <span className="required">* </span> ) are required.
+                </span>
               </small>
             </div>
           </div>
@@ -1026,7 +1101,7 @@ const handleChange = (event) => {
                       name="color"
                       value={item.name}
                       id={item.name}
-                      onChange={(e)=>handleChangeColor(e.target.value)}
+                      onChange={(e) => handleChangeColor(e.target.value)}
                     />
                     <label className="form-check-label" htmlFor={item.name}>
                       {item.name}
