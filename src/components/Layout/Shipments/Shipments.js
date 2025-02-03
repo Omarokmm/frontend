@@ -904,6 +904,8 @@ const Shipments = () => {
                           <option value="DHL">DHL</option>
                           <option value="UPS">UPS</option>
                           <option value="Aramex">Aramex</option>
+                          <option value="Person">To Person</option>
+                          
                         </select>
                       </div>
                     </div>
@@ -1045,6 +1047,7 @@ const Shipments = () => {
                           <option value="DHL">DHL</option>
                           <option value="UPS">UPS</option>
                           <option value="Aramex">Aramex</option>
+                          <option value="Person">To Person</option>
                         </select>
                       </div>
                     </div>
@@ -1182,10 +1185,10 @@ const Shipments = () => {
               <div ref={userRefShipping}>
                 {buffShipment?.dentistObj?.map((item, index) =>
                   <div className="doctor-item" >
-                    <strong key={index}>{item.label}</strong>
+                    <strong key={index}>Dr. {item.label}</strong>
                     <span>{groupCasesByDentist(item.value, buffShipment.casesIds).map(item =>
                       <ul className="mt-2">
-                        <li> <i>PT </i> . {item.patientName}</li>
+                        <li> <i>Pt </i> . {item.patientName}</li>
                       </ul>
                     )}</span>
                   </div>

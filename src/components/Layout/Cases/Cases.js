@@ -1504,9 +1504,9 @@ const Cases = () => {
                   <tbody>
                     {inProcessCases.map((item, index) => (
                       // className={checkCaseDate(item)}
-                      <tr key={item._id}    className={
-                        (item.receptionPacking.status.isEnd === false && item.delivering.status.isEnd === false ? "table-warning" : "") 
-                      }>
+                      <tr key={item._id}   
+                      //  className={(item.receptionPacking.status.isEnd === false && item.delivering.status.isEnd === false ? "table-warning" : "") }
+                       >
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
