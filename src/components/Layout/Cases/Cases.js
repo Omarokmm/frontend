@@ -105,6 +105,8 @@ const Cases = () => {
   const [buffUrgentCases, setBuffUrgentCases] = useState([]);
   const [buffStudyCases, setBuffStudyCases] = useState([]);
   const [delayCases, setDelayCases] = useState([]);
+  const [packingCases, setPackingCases] = useState([]);
+  const [buffPackingCases, setBuffPackingCases] = useState([]);
   const [buffDelayCases, setBuffDelayCases] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [holdText, setHoldText] = useState("");
@@ -133,6 +135,12 @@ const Cases = () => {
         setFinishedCases(
           result.filter((r) => r.delivering.status.isEnd === true)
         );
+        setPackingCases(
+          result.filter((r) => r.receptionPacking.status.isEnd === true && r.delivering.status.isEnd === false)
+        );
+        setBuffPackingCases(
+          result.filter((r) => r.receptionPacking.status.isEnd === true && r.delivering.status.isEnd === false)
+        )
         // && r.delivering.status.isEnd === false
         setNotStartCases(
           result.filter(
@@ -537,6 +545,22 @@ const Cases = () => {
         setStudyCases(buffStudyCases);
       }
     }
+    if (name === "packing") {
+      if (searchText !== "") {
+        const filteredAllPackingCases = packingCases.filter(
+          (item) =>
+            item?.caseNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.dentistObj.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setPackingCases(filteredAllPackingCases);
+      } else {
+        setPackingCases(buffPackingCases);
+      }
+    }
   };
   // Handle key press to trigger search on "Enter"
   const handleKeyDown = (event) => {
@@ -911,7 +935,6 @@ const Cases = () => {
     content: () => userRef1.current,
     documentTitle: `Cases`,
   });
-
   const getDoctorCountry = (id) => {
     return docotrs.find((doctor) => doctor._id === id).address.country;
   };
@@ -1088,6 +1111,25 @@ const Cases = () => {
                 Study <small>({studyCases?.length})</small>
               </button>
             </li>
+           <li
+              class="nav-item"
+              role="presentation"
+              onClick={() => setSearchText("")}
+            >
+              <button
+                className={`nav-link bgc-primary ${activeTab === 8 ? "active  " : ""}`}
+                id="packing-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#packing-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="packing-tab-pane"
+                aria-selected={activeTab === 8}
+                onClick={() => handleTabChange(8)}
+              >
+                Packing <small>({packingCases?.length})</small>
+              </button>
+          </li>
           </ul>
           <div
             class="tab-content"
@@ -1344,7 +1386,6 @@ const Cases = () => {
                 <div className="no-content">No Cases Added yet!</div>
               )}
             </div>
-            
             {/* In Not Start  */}
            <div
               // class="tab-pane fade "
@@ -1463,7 +1504,9 @@ const Cases = () => {
                   <tbody>
                     {inProcessCases.map((item, index) => (
                       // className={checkCaseDate(item)}
-                      <tr key={item._id}>
+                      <tr key={item._id}    className={
+                        (item.receptionPacking.status.isEnd === false && item.delivering.status.isEnd === false ? "table-warning" : "") 
+                      }>
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
@@ -2019,6 +2062,103 @@ const Cases = () => {
               )}
               {studyCases?.length <= 0 && (
                 <div className="no-content">No Cases Study yet!</div>
+              )}
+            </div>
+              {/* Packing Cases */}
+              <div
+              // class="tab-pane fade"
+              className={`tab-pane fade ${activeTab === 8 ? "show active" : ""}`}
+              id="packing-tab-pane"
+              role="tabpanel"
+              aria-labelledby="packing-tab"
+              tabIndex="8"
+            >
+                <div className="row">
+                  <div class="col-lg-12">
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        name="searchText"
+                        className="form-control"
+                        placeholder="Search by name | case number | case type "
+                        value={searchText}
+                        onChange={(e) => searchByName(e.target.value, "packing")}
+                      />
+                    </div>
+                  </div>
+                  {/* <div className="col-lg-2">
+                    <button
+                      className="btn btn-sm btn-primary w-100 p-2"
+                      onClick={() => handlePrintUrgentCases()}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                  </div> */}
+                </div>
+              {packingCases.length > 0 && (
+                <table
+                  className="table text-center table-bordered"
+                  
+                >
+                  <thead>
+                    <tr className="table-secondary">
+                      <th scope="col">#Case</th>
+                      <th scope="col">Doctor Name</th>
+                      <th scope="col">Patient Name</th>
+                      <th scope="col">#tooth</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
+                      <th scope="col" className="td-phone">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {packingCases.map((item, index) => (
+                      <tr key={item._id}>
+                        <td>{item.caseNumber}</td>
+                        <td>{item.dentistObj.name}</td>
+                        <td>{item.patientName}</td>
+                        <td
+                          className={`${
+                            item.teethNumbers.length <= 0
+                              ? "bg-danger"
+                              : "bg-white"
+                          } `}
+                        >
+                          {item.teethNumbers.length}
+                        </td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>
+                          {item.dateOut &&
+                            _global.formatDateToYYYYMMDD(item.dateOut)}
+                        </td>
+                        <td className="td-phone">
+                          <div className="actions-btns">
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "view")}
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                            </span>
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "process")}
+                            >
+                              <i class="fa-brands fa-squarespace"></i>
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {packingCases?.length <= 0 && (
+                <div className="no-content">No Cases in Packing yet!</div>
               )}
             </div>
           </div>

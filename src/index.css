@@ -634,7 +634,9 @@ cursor: pointer;
 }
 .bgc-primary{
        background:   rgb(163 197 246);
- 
+}
+.bgc-primary{
+  background: rgb(114 162 235);
 }
 .nav-tabs .nav-link.active {
   background-color: #424242 !important;
