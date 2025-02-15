@@ -28,6 +28,7 @@ const UserProfile = () => {
   const [startDate, setStartDat] = useState(new Date());
   const [pauseDate, setPauseDate] = useState(new Date());
   console.log("User Data", userData);
+  const [activeTab, setActiveTab] = useState(0);
 
   const Roles = {
     0: "admin",
@@ -1269,6 +1270,12 @@ const UserProfile = () => {
   const handleClick = (text) => {
     setPrintText(text);
   };
+      // Handle tab change and update URL
+      const handleTabChange = (index, callback) => {
+        setActiveTab(index);
+        navigate(`?tab=${index}`); // Update the URL with the active tab index
+        if (callback) callback();
+      };
   return (
     <div className="content user-profile">
       <div className="card">
@@ -1299,15 +1306,18 @@ const UserProfile = () => {
             <ul class="nav nav-tabs" id="myTab" role="tablist">
               <li class="nav-item" role="presentation">
                 <button
-                  class="nav-link active bgc-primary"
+                   className={`nav-link bgc-primary ${activeTab === 0 ? "active " : ""}`}      
                   id="startCases-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#startCases-tab-pane"
                   type="button"
                   role="tab"
                   aria-controls="startCases-tab-pane"
-                  aria-selected="false"
-                  onClick={() => searchByName("", "Start")}
+                  onClick={() => {
+                    handleTabChange(0)
+                    searchByName("", "Start")
+                  }}
+                  aria-selected={activeTab === 0}
                 >
                   Start <small>({startCases.length})</small>
                 </button>
@@ -1318,7 +1328,7 @@ const UserProfile = () => {
                 onClick={() => searchByName("", "Pause")}
               >
                 <button
-                  class="nav-link  bgc-danger"
+                  className={`nav-link bgc-danger ${activeTab === 1 ? "active " : ""}`}     
                   id="holdCases-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#holdCases-tab-pane"
@@ -1326,6 +1336,10 @@ const UserProfile = () => {
                   role="tab"
                   aria-controls="holdCases-tab-pane"
                   aria-selected="true"
+                  onClick={() => {
+                    handleTabChange(1)
+                    searchByName("", "Pause")
+                  }}
                 >
                   Hold <small>({pauseCases.length})</small>
                 </button>
@@ -1336,7 +1350,7 @@ const UserProfile = () => {
                 onClick={() => searchByName("", "End")}
               >
                 <button
-                  class="nav-link  bgc-success"
+                  className={`nav-link bgc-success ${activeTab === 2 ? "active " : ""}`}     
                   id="endCases-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#endCases-tab-pane"
@@ -1344,6 +1358,10 @@ const UserProfile = () => {
                   role="tab"
                   aria-controls="endCases-tab-pane"
                   aria-selected="true"
+                  onClick={() => {
+                    handleTabChange(2)
+                    searchByName("", "End")
+                  }}
                 >
                   End <small>({casesUser?.length})</small>
                 </button>
@@ -1360,11 +1378,11 @@ const UserProfile = () => {
             }}
           >
             <div
-              class="tab-pane fade show active"
               id="startCases-tab-pane"
               role="tabpanel"
               aria-labelledby="startCases-tab"
               tabIndex="0"
+              className={`tab-pane fade ${activeTab === 0 ? "show active" : ""}`}
             >
               <div className="row">
                 <div className="col-lg-7 mb-3 ">
@@ -1523,7 +1541,7 @@ const UserProfile = () => {
             </div>
             {/* Holding Cases */}
             <div
-              class="tab-pane fade "
+              className={`tab-pane fade ${activeTab === 1 ? "show active" : ""}`}
               id="holdCases-tab-pane"
               role="tabpanel"
               aria-labelledby="holdCases-tab"
@@ -1678,7 +1696,7 @@ const UserProfile = () => {
             </div>
             {/* Finished Cases */}
             <div
-              class="tab-pane fade "
+              className={`tab-pane fade ${activeTab === 2 ? "show active" : ""}`}
               id="endCases-tab-pane"
               role="tabpanel"
               aria-labelledby="endCases-tab"

@@ -8,6 +8,7 @@ import { useReactToPrint } from "react-to-print";
 import SEARCH_FIELDS from "../../../enum/searchFieldEnum";
 import DatePicker, { Calendar, DateObject } from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel";
+import ViewCase from "./ViewCase";
 
 const initialData = {
   caseNumber: "",
@@ -128,7 +129,7 @@ const Cases = () => {
         const urgentCases = res.data.urgentCases;
         const studyCases = res.data.studyCases;
         setBuffUrgentCases(urgentCases);
-        setBuffStudyCases(studyCases);
+        setBuffStudyCases(studyCases.filter(s => !s.isHold));
         setAllCases(result);
         console.log(result);
         setBuffAllCases(result);
@@ -141,6 +142,7 @@ const Cases = () => {
         setBuffPackingCases(
           result.filter((r) => r.receptionPacking.status.isEnd === true && r.delivering.status.isEnd === false)
         )
+        // console.log('packingCases',packingCases)
         // && r.delivering.status.isEnd === false
         setNotStartCases(
           result.filter(
@@ -162,7 +164,7 @@ const Cases = () => {
         );
         setHoldingCases(holdingCases);
         setUrgentCases(urgentCases);
-        setStudyCases(studyCases);
+        setStudyCases(studyCases.filter(s => !s.isHold));
         console.log("Holding Cases", result.holdingCases);
         const delayCasesfilter = result.filter((c) => filterDaley(c));
         console.log(delayCasesfilter);
@@ -1282,6 +1284,11 @@ const Cases = () => {
                             <span
                               className="c-success"
                               onClick={() => viewCase(item, "view")}
+                              // data-bs-toggle="modal"
+                              // data-bs-target="#viewModal"
+                              // onClick={() => {
+                              //   setBuffCase(item);
+                              // }}
                             >
                               <i class="fa-solid fa-eye"></i>
                             </span>
@@ -2131,7 +2138,7 @@ const Cases = () => {
                           {item.teethNumbers.length}
                         </td>
                         {/* <td>{item.caseType}</td> */}
-                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>{_global.formatDateToYYYYMMDD(item.receptionPacking?.actions?.[item.receptionPacking?.actions?.length - 1]?.dateEnd)}</td>
                         <td>
                           {item.dateOut &&
                             _global.formatDateToYYYYMMDD(item.dateOut)}
@@ -2358,7 +2365,38 @@ const Cases = () => {
           </div>
         </div>
       </div>
-
+  {/* Modal View Case */}
+  {/* {allCases.length > 0 &&
+  <div
+        class="modal fade"
+        id="viewModal"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class={`modal-header  text-white bg-primary`}>
+              <h1 class="modal-title fs-5" id="exampleModalLabel">
+                Case Information # {buffCase?.caseNumber}
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              {console.log('buffCase',buffCase)}
+            <ViewCase caseModel={buffCase} />
+            </div>
+          </div>
+        </div>
+  </div>
+  } */}
       {/* Print Cases */}
       <div ref={userRef1}>
         <div className="row mt-0 pt-0 row-gap-1 page-cases  " id="casesPrint">
