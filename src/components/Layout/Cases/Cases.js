@@ -127,7 +127,7 @@ const Cases = () => {
         const result = res.data.cases;
         const holdingCases = res.data.holdingCases;
         const urgentCases = res.data.urgentCases;
-        const studyCases = res.data.studyCases;
+        const studyCases = res.data.studyCases.filter(s => s.cadCam.actions.length <= 0);
         setBuffUrgentCases(urgentCases);
         setBuffStudyCases(studyCases.filter(s => !s.isHold));
         setAllCases(result);
@@ -150,7 +150,8 @@ const Cases = () => {
               r.cadCam.actions.length <= 0 &&
               r.delivering.status.isEnd === false &&
               r.delivering.status.isEnd === false &&
-              r.isHold === false
+              r.isHold === false &&
+              r.isStudy === false
           )
         );
         setInProcessCases(
@@ -436,7 +437,8 @@ const Cases = () => {
               r.cadCam.actions.length <= 0 &&
               r.delivering.status.isEnd === false &&
               r.delivering.status.isEnd === false &&
-              r.isHold === false
+              r.isHold === false &&
+              r.isStudy === false
           )
         );
       }
@@ -616,7 +618,8 @@ const Cases = () => {
               r.cadCam.actions.length <= 0 &&
               r.delivering.status.isEnd === false &&
               r.delivering.status.isEnd === false &&
-              r.isHold === false
+              r.isHold === false &&
+              r.isStudy === false
           )
         );
         setInProcessCases(
@@ -1298,11 +1301,6 @@ const Cases = () => {
                             >
                               <i class="fa-brands fa-squarespace"></i>
                             </span>
-                            {user.firstName == "Fake" && (
-                              <span onClick={(e) => deleteCase(item._id)}>
-                                <i className="fa-solid fa-trash-can"></i>
-                              </span>
-                            )}
                             {!item.isHold &&
                               !item.cadCam.status.isEnd &&
                               (user.roles[0] === _global.allRoles.admin ||
@@ -1382,6 +1380,17 @@ const Cases = () => {
                                   </span>
                                 </span>
                               )}
+                            {(user.firstName === "Fake" || user.roles[0] === _global.allRoles.admin)  && (
+                              <span
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteCaseModal"
+                              onClick={() => {
+                                setBuffCase(item);
+                              }}
+                              >
+                                <i className="fa-solid fa-trash-can"></i>
+                              </span>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1460,6 +1469,17 @@ const Cases = () => {
                                 onClick={(e) => editCase(item._id)}
                               >
                                 <i class="fas fa-edit"></i>
+                              </span>
+                            )}
+                              {(user.firstName === "Fake" || user.roles[0] === _global.allRoles.admin)  && (
+                              <span
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteCaseModal"
+                              onClick={() => {
+                                setBuffCase(item);
+                              }}
+                              >
+                                <i className="fa-solid fa-trash-can"></i>
                               </span>
                             )}
                             {/* <span onClick={(e) => deleteCase(item._id)}>
@@ -2116,7 +2136,7 @@ const Cases = () => {
                       <th scope="col">#tooth</th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col">In</th>
-                      <th scope="col">Due</th>
+                      {/* <th scope="col">Due</th> */}
                       <th scope="col" className="td-phone">
                         Actions
                       </th>
@@ -2139,10 +2159,10 @@ const Cases = () => {
                         </td>
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.receptionPacking?.actions?.[item.receptionPacking?.actions?.length - 1]?.dateEnd)}</td>
-                        <td>
+                        {/* <td>
                           {item.dateOut &&
                             _global.formatDateToYYYYMMDD(item.dateOut)}
-                        </td>
+                        </td> */}
                         <td className="td-phone">
                           <div className="actions-btns">
                             <span
@@ -2365,6 +2385,50 @@ const Cases = () => {
           </div>
         </div>
       </div>
+      {/* Modal Hold History Case */}
+      <div
+        class="modal fade"
+        id="deleteCaseModal"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog ">
+          <div class="modal-content">
+            <div class={`modal-header  text-white bg-danger`}>
+              <h4 class="modal-title fs-5" id="exampleModalLabel">
+                Case Number # {buffCase?.caseNumber}
+              </h4>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div className="mx-4 text-center">
+                <p>Are you sure from delete this case?</p>
+              </div>
+              <div className="modal-footer">
+              <button className="btn btn-sm bg-danger text-light" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button
+                className= "btn btn-sm bg-light"
+                data-bs-dismiss="modal"
+               onClick={(e) => deleteCase(buffCase._id)}
+              >
+                Yes
+              </button>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
   {/* Modal View Case */}
   {/* {allCases.length > 0 &&
   <div
