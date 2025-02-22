@@ -375,3 +375,51 @@ export const allRoles= {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
     return diffDays;
   }
+  export const groupAndSortCases = (cases) => {
+    return cases
+    .sort((a, b) => {
+      // First, compare by dentist name
+      const nameA = a.dentistObj?.name || "";
+      const nameB = b.dentistObj?.name || "";
+      if (nameA !== nameB) {
+        return nameA.localeCompare(nameB); // Alphabetical order
+      }
+
+      // If dentist name is the same, sort by dateIn
+      return new Date(b.dateIn) - new Date(a.dateIn);
+    });
+  };
+  
+  export const filterCasesByDate = (cases, filterType, selectedDate = null) => {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const startOfPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const endOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+  
+    return cases.filter(caseItem => {
+      let caseDate = new Date(caseItem.dateIn); // Convert dateIn to Date object
+      // if(casesType === "all"){
+      //    caseDate = new Date(caseItem.dateIn); // Convert dateIn to Date object
+      // }
+      // if (filterType ==="FinishedCases") {
+      //    caseDate = new Date(caseItem.dateIn); // Convert dateIn to Date object
+      // }
+  
+      if (filterType === "currentMonth") {
+        return caseDate >= startOfMonth && caseDate <= today;
+      }
+  
+      if (filterType === "previousMonth") {
+        return caseDate >= startOfPrevMonth && caseDate <= endOfPrevMonth;
+      }
+  
+      if (filterType === "selectedDate" && selectedDate) {
+        const selectedStartDate = new Date(selectedDate.start);
+        const selectedEndDate = new Date(selectedDate.end);
+        return caseDate >= selectedStartDate && caseDate <= selectedEndDate;
+      }
+  
+      return false; // If filter type doesn't match, return false
+    });
+  };
+  

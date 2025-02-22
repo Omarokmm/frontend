@@ -398,7 +398,10 @@ display: none;
 cursor: pointer;
 }
 .form-control:focus{
-  box-shadow: none;
+  box-shadow: none !important;
+}
+.form-select:focus{
+  box-shadow: none !important;
 }
 .date-in-out{
   display: flex;
@@ -637,6 +640,9 @@ cursor: pointer;
 }
 .bgc-primary{
   background: rgb(114 162 235);
+}
+.bgc-work{
+  background: hsla(180,51.4%,51.6%,1);
 }
 .nav-tabs .nav-link.active {
   background-color: #424242 !important;

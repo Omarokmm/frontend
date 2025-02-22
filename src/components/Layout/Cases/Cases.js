@@ -108,6 +108,8 @@ const Cases = () => {
   const [delayCases, setDelayCases] = useState([]);
   const [packingCases, setPackingCases] = useState([]);
   const [buffPackingCases, setBuffPackingCases] = useState([]);
+  const [forWorkCases, setForWorkCases] = useState([]);
+  const [buffForWorkCases, setBuffForWorkCases] = useState([]);
   const [buffDelayCases, setBuffDelayCases] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [holdText, setHoldText] = useState("");
@@ -136,11 +138,12 @@ const Cases = () => {
         setFinishedCases(
           result.filter((r) => r.delivering.status.isEnd === true)
         );
+        const packingCasesbuff = result.filter((r) => r.receptionPacking.status.isEnd === true && r.delivering.status.isEnd === false)
         setPackingCases(
-          result.filter((r) => r.receptionPacking.status.isEnd === true && r.delivering.status.isEnd === false)
+          _global.groupAndSortCases(packingCasesbuff)
         );
         setBuffPackingCases(
-          result.filter((r) => r.receptionPacking.status.isEnd === true && r.delivering.status.isEnd === false)
+          _global.groupAndSortCases(packingCasesbuff)
         )
         // console.log('packingCases',packingCases)
         // && r.delivering.status.isEnd === false
@@ -153,6 +156,17 @@ const Cases = () => {
               r.isHold === false &&
               r.isStudy === false
           )
+        );
+        const casesWork = result.filter(
+          (r) =>
+            r.cadCam.actions.length <= 0 &&
+            r.delivering.status.isEnd === false &&
+            r.delivering.status.isEnd === false &&
+            r.isHold === false &&
+            r.isStudy === false
+        )
+        setForWorkCases(
+          _global.groupAndSortCases(casesWork)
         );
         setInProcessCases(
           result.filter(
@@ -565,6 +579,31 @@ const Cases = () => {
         setPackingCases(buffPackingCases);
       }
     }
+    if (name === "forWork") {
+      if (searchText !== "") {
+        const filteredAllForWorkCases = forWorkCases.filter(
+          (item) =>
+            item.caseNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setForWorkCases(filteredAllForWorkCases);
+      } else {
+        setForWorkCases(
+          buffAllCases.filter(
+            (r) =>
+              r.cadCam.actions.length <= 0 &&
+              r.delivering.status.isEnd === false &&
+              r.delivering.status.isEnd === false &&
+              r.isHold === false &&
+              r.isStudy === false
+          )
+        );
+      }
+    }
   };
   // Handle key press to trigger search on "Enter"
   const handleKeyDown = (event) => {
@@ -613,6 +652,16 @@ const Cases = () => {
         );
         // && r.delivering.status.isEnd === false
         setNotStartCases(
+          result.filter(
+            (r) =>
+              r.cadCam.actions.length <= 0 &&
+              r.delivering.status.isEnd === false &&
+              r.delivering.status.isEnd === false &&
+              r.isHold === false &&
+              r.isStudy === false
+          )
+        );
+        setForWorkCases(
           result.filter(
             (r) =>
               r.cadCam.actions.length <= 0 &&
@@ -1133,6 +1182,25 @@ const Cases = () => {
                 onClick={() => handleTabChange(8)}
               >
                 Packing <small>({packingCases?.length})</small>
+              </button>
+          </li>
+          <li
+              class="nav-item"
+              role="forWork"
+              onClick={() => setSearchText("")}
+            >
+              <button
+                className={`nav-link bgc-work ${activeTab === 9 ? "active  " : ""}`}
+                id="work-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#work-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="work-tab-pane"
+                aria-selected={activeTab === 9}
+                onClick={() => handleTabChange(9)}
+              >
+                For Work <small>({forWorkCases?.length})</small>
               </button>
           </li>
           </ul>
@@ -1730,6 +1798,7 @@ const Cases = () => {
                   onChange={(e) => searchByName(e.target.value, "finished")}
                 />
               </div>
+              
               {finishedCases.length > 0 && (
                 <table className="table text-center table-bordered">
                   <thead>
@@ -2186,6 +2255,100 @@ const Cases = () => {
               )}
               {packingCases?.length <= 0 && (
                 <div className="no-content">No Cases in Packing yet!</div>
+              )}
+            </div>
+               {/* For Work  */}
+           <div
+              // class="tab-pane fade "
+              className={`tab-pane fade ${activeTab === 9 ? "show active" : ""}`}
+              id="work-tab-pane"
+              role="tabpanel"
+              aria-labelledby="work-tab"
+              tabIndex="1"
+            >
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="searchText"
+                  className="form-control"
+                  placeholder="Search by name | case number | case type "
+                  value={searchText}
+                  onChange={(e) => searchByName(e.target.value, "forWork")}
+                />
+              </div>
+              {forWorkCases.length > 0 && (
+                <table className="table text-center table-bordered">
+                  <thead>
+                    <tr className="table-secondary">
+                      <th scope="col">#Case</th>
+                      <th scope="col">Doctor Name</th>
+                      <th scope="col">Patient Name</th>
+                      {/* <th scope="col">Type</th> */}
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {forWorkCases.map((item, index) => (
+                      <tr key={item._id} >
+                        <td>{item.caseNumber}</td>
+                        <td>{item.dentistObj.name}</td>
+                        <td>{item.patientName}</td>
+                        {/* <td>{item.caseType}</td> */}
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>
+                          {item.dateOut &&
+                            _global.formatDateToYYYYMMDD(item.dateOut)}
+                        </td>
+                        <td>
+                          <div className="actions-btns">
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "view")}
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                            </span>
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "process")}
+                            >
+                              <i class="fa-brands fa-squarespace"></i>
+                            </span>
+                            {((user.roles[0] === _global.allRoles.technician &&
+                              user.lastName === "Jamous") ||
+                              (user.roles[0] === _global.allRoles.admin &&
+                                departments[0].name === "QC")) && (
+                              <span
+                                className="c-primary"
+                                onClick={(e) => editCase(item._id)}
+                              >
+                                <i class="fas fa-edit"></i>
+                              </span>
+                            )}
+                              {(user.firstName === "Fake" || user.roles[0] === _global.allRoles.admin)  && (
+                              <span
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteCaseModal"
+                              onClick={() => {
+                                setBuffCase(item);
+                              }}
+                              >
+                                <i className="fa-solid fa-trash-can"></i>
+                              </span>
+                            )}
+                            {/* <span onClick={(e) => deleteCase(item._id)}>
+                              <i className="fa-solid fa-trash-can"></i>
+                            </span> */}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {forWorkCases.length <= 0 && (
+                <div className="no-content">No Cases Not Start yet!</div>
               )}
             </div>
           </div>

@@ -1581,7 +1581,6 @@ const UserProfile = () => {
                   </button>
                 </div>
               </div>
-
               <div ref={userRef2} style={{ width: "100%" }}>
                 {pauseCases?.length > 0 && (
                   <table className="table text-center table-bordered">
