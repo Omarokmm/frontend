@@ -239,7 +239,7 @@ const Doctors = () => {
             <span>
               Doctors <small>({doctors.length})</small>
             </span>
-           {(user.roles[0] === _global.allRoles.admin || user.roles[0] ===  _global.allRoles.super_admin) && <span className="add-user-icon">
+           {(user.roles[0] === _global.allRoles.admin || user.roles[0] ===  _global.allRoles.super_admin || user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous") && <span className="add-user-icon">
               <a data-bs-toggle="modal" data-bs-target="#exampleModal">
                 {" "}
                 <i class="fa-solid fa-circle-plus"></i>
