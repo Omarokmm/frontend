@@ -1,0 +1,12 @@
+.shipments .modal .form-group{
+margin-bottom: 2rem;
+}
+.shipments .nav-tabs{
+    grid-template-columns: 1fr 1fr 1fr 1fr ;
+}
+
+@media (max-width:768px){
+    .shipments .nav-tabs{
+        grid-template-columns: 1fr  1fr ;
+    }
+}
