@@ -98,6 +98,7 @@ const Cases = () => {
   const [allCases, setAllCases] = useState([]);
   const [inProcessCases, setInProcessCases] = useState([]);
   const [holdingCases, setHoldingCases] = useState([]);
+  const [holdingBuffCases, setHoldingBuffCases] = useState([]);
   const [urgentCases, setUrgentCases] = useState([]);
   const [studyCases, setStudyCases] = useState([]);
   const [finishedCases, setFinishedCases] = useState([]);
@@ -178,6 +179,7 @@ const Cases = () => {
           )
         );
         setHoldingCases(holdingCases);
+        setHoldingBuffCases(holdingCases);
         setUrgentCases(urgentCases);
         setStudyCases(studyCases.filter((s) => !s.isHold));
         console.log("Holding Cases", result.holdingCases);
@@ -494,7 +496,7 @@ const Cases = () => {
         );
         setHoldingCases(filteredAllHoldingCases);
       } else {
-        setHoldingCases(buffAllCases.holdingCases);
+        setHoldingCases(holdingBuffCases);
       }
     }
     if (name === "finished") {
