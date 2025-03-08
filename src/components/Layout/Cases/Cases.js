@@ -207,7 +207,7 @@ const Cases = () => {
                 result
               )
             );
-            console.log('ForWorkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk',getClinicsWithActiveCasesNotStart(clinics,notStartCases))
+            console.log('ForWork',getClinicsWithActiveCasesNotStart(clinics,notStartCases))
           })
           .catch((error) => {});
       })
