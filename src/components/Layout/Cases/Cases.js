@@ -172,7 +172,7 @@ const Cases = () => {
             r.isHold === false &&
             r.isStudy === false
         );
-        setForWorkCases(_global.groupAndSortCases(casesWork));
+        // setForWorkCases(_global.groupAndSortCases(casesWork));
         setInProcessCases(
           result.filter(
             (r) =>
@@ -191,7 +191,7 @@ const Cases = () => {
         console.log(delayCasesfilter);
         setDelayCases(delayCasesfilter);
         setBuffDelayCases(delayCasesfilter);
-        // get  clinics 
+        // get  clinics
         axios
           .get(`${_global.BASE_URL}clinics`)
           .then((res) => {
@@ -207,7 +207,33 @@ const Cases = () => {
                 result
               )
             );
-            console.log('ForWork',getClinicsWithActiveCasesNotStart(clinics,notStartCases))
+            setForWorkCases(
+              getClinicsWithActiveCasesNotStart(
+                resultClinics,
+                result.filter(
+                  (r) =>
+                    r.cadCam.actions.length <= 0 &&
+                    r.delivering.status.isEnd === false &&
+                    r.delivering.status.isEnd === false &&
+                    r.isHold === false &&
+                    r.isStudy === false
+                )
+              )
+            );
+            console.log(
+              "ForWork",
+              getClinicsWithActiveCasesNotStart(
+                resultClinics,
+                result.filter(
+                  (r) =>
+                    r.cadCam.actions.length <= 0 &&
+                    r.delivering.status.isEnd === false &&
+                    r.delivering.status.isEnd === false &&
+                    r.isHold === false &&
+                    r.isStudy === false
+                )
+              )
+            );
           })
           .catch((error) => {});
       })
@@ -1042,18 +1068,31 @@ const Cases = () => {
             // Group cases into NotStat, cadCamCases, fittingCases, ceramicCases based on conditions
             if (caseItem.cadCam?.actions?.length <= 0 && !caseItem.isHold) {
               caseItem.status = "NotStat"; // Mark as NotStat if cadCam actions are empty
-            } else if (!caseItem.cadCam?.status?.isStart && caseItem.cadCam?.status?.isPause && !caseItem.cadCam?.status?.isEnd) {
+            } else if (
+              !caseItem.cadCam?.status?.isStart &&
+              caseItem.cadCam?.status?.isPause &&
+              !caseItem.cadCam?.status?.isEnd
+            ) {
               caseItem.status = "cadCamCases"; // Mark as cadCamCases if cadCam is started
-            } else if (!caseItem.fitting?.status?.isStart && caseItem.fitting?.status?.isPause && !caseItem.fitting?.status?.isEnd) {
+            } else if (
+              !caseItem.fitting?.status?.isStart &&
+              caseItem.fitting?.status?.isPause &&
+              !caseItem.fitting?.status?.isEnd
+            ) {
               caseItem.status = "fittingCases"; // Mark as fittingCases if fitting is started
-            }
-            else if (caseItem.fitting?.status?.isEnd && caseItem.ceramic?.status?.isStart && caseItem.receptionPacking?.status?.isStart ) {
-              caseItem.status = "forCeramicCases"; // Mark as forCeramicCases 
-            }
-            else if (!caseItem.ceramic?.status?.isStart && caseItem.ceramic?.status?.isPause && !caseItem.ceramic?.status?.isEnd) {
+            } else if (
+              caseItem.fitting?.status?.isEnd &&
+              caseItem.ceramic?.status?.isStart &&
+              caseItem.receptionPacking?.status?.isStart
+            ) {
+              caseItem.status = "forCeramicCases"; // Mark as forCeramicCases
+            } else if (
+              !caseItem.ceramic?.status?.isStart &&
+              caseItem.ceramic?.status?.isPause &&
+              !caseItem.ceramic?.status?.isEnd
+            ) {
               caseItem.status = "ceramicCases"; // Mark as ceramicCases if ceramic is started
-            } 
-            else if (caseItem.receptionPacking?.status?.isEnd) {
+            } else if (caseItem.receptionPacking?.status?.isEnd) {
               caseItem.status = "receptionPacking"; // Mark as ceramicCases if ceramic is started
             }
             return caseItem;
@@ -1122,6 +1161,7 @@ const Cases = () => {
       .filter((clinic) => clinic !== null && clinic.dentists.length > 0); // Remove clinics without dentists or active cases
   };
   const getClinicsWithActiveCasesNotStart = (clinics, cases) => {
+    console.log("casesNOTSTART", cases, clinics);
     if (cases.length === 0 || clinics.length === 0) return [];
     return clinics
       .map((clinic) => {
@@ -1194,8 +1234,7 @@ const Cases = () => {
         totalLength += caseItem.teethNumbers.length;
       });
       return totalLength;
-    }
-    else if (type === "Start") {
+    } else if (type === "Start") {
       notStartCases.forEach((caseItem) => {
         totalLength += caseItem.teethNumbers.length;
       });
@@ -1210,26 +1249,22 @@ const Cases = () => {
         totalLength += caseItem.teethNumbers.length;
       });
       return totalLength;
-    }
-    else if (type === "holding") {
+    } else if (type === "holding") {
       holdingCases.forEach((caseItem) => {
         totalLength += caseItem.teethNumbers.length;
       });
       return totalLength;
-    }
-    else if (type === "study") {
+    } else if (type === "study") {
       studyCases.forEach((caseItem) => {
         totalLength += caseItem.teethNumbers.length;
       });
       return totalLength;
-    }
-    else if (type === "packing") {
+    } else if (type === "packing") {
       packingCases.forEach((caseItem) => {
         totalLength += caseItem.teethNumbers.length;
       });
       return totalLength;
-    }
-    else if (type === "forWorking") {
+    } else if (type === "forWorking") {
       forWorkCases.forEach((caseItem) => {
         totalLength += caseItem.teethNumbers.length;
       });
@@ -1253,8 +1288,7 @@ const Cases = () => {
           result[name]++;
         });
       });
-    }
-    else if (type === "End") {
+    } else if (type === "End") {
       finishedCases.forEach((singleCase) => {
         singleCase.teethNumbers.forEach((teethNumber) => {
           const { name } = teethNumber;
@@ -1284,8 +1318,7 @@ const Cases = () => {
           result[name]++;
         });
       });
-    }
-    else if (type === "holding") {
+    } else if (type === "holding") {
       holdingCases.forEach((singleCase) => {
         singleCase.teethNumbers.forEach((teethNumber) => {
           const { name } = teethNumber;
@@ -1295,8 +1328,7 @@ const Cases = () => {
           result[name]++;
         });
       });
-    }
-    else if (type === "study") {
+    } else if (type === "study") {
       studyCases.forEach((singleCase) => {
         singleCase.teethNumbers.forEach((teethNumber) => {
           const { name } = teethNumber;
@@ -1306,8 +1338,7 @@ const Cases = () => {
           result[name]++;
         });
       });
-    }
-    else if (type === "packing") {
+    } else if (type === "packing") {
       packingCases.forEach((singleCase) => {
         singleCase.teethNumbers.forEach((teethNumber) => {
           const { name } = teethNumber;
@@ -1317,8 +1348,7 @@ const Cases = () => {
           result[name]++;
         });
       });
-    }
-    else if (type === "forWorking") {
+    } else if (type === "forWorking") {
       forWorkCases.forEach((singleCase) => {
         singleCase.teethNumbers.forEach((teethNumber) => {
           const { name } = teethNumber;
@@ -1560,7 +1590,7 @@ const Cases = () => {
                 aria-selected={activeTab === 9}
                 onClick={() => handleTabChange(9)}
               >
-                For Work <small>({forWorkCases?.length})</small>
+                For Work <small>({notStartCases?.length})</small>
               </button>
             </li>
             <li
@@ -1883,7 +1913,7 @@ const Cases = () => {
                       <th scope="col">Doctor Name</th>
                       <th scope="col">Patient Name</th>
                       {/* <th scope="col">Type</th> */}
-                <th className="td-phone" scope="col">
+                      <th className="td-phone" scope="col">
                         #tooth
                       </th>
                       <th scope="col">In</th>
@@ -1898,7 +1928,7 @@ const Cases = () => {
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
                         {/* <td>{item.caseType}</td> */}
-     <td
+                        <td
                           className={`${
                             item.teethNumbers.length <= 0
                               ? "bg-danger"
@@ -1956,7 +1986,7 @@ const Cases = () => {
                         </td>
                       </tr>
                     ))}
-                       {user.roles[0] === _global.allRoles.admin && (
+                    {user.roles[0] === _global.allRoles.admin && (
                       <>
                         <tr>
                           <td className="f-bold c-success" colSpan={5}>
@@ -2224,7 +2254,7 @@ const Cases = () => {
                           </td>
                         </tr>
                       ))}
-                          {holdingCases.map((item, index) => (
+                      {holdingCases.map((item, index) => (
                         <tr key={item._id}>
                           <td>{item.caseNumber}</td>
                           <td>{item.dentistObj.name}</td>
@@ -2302,20 +2332,20 @@ const Cases = () => {
                           </td>
                         </tr>
                       ))}
-                    {user.roles[0] === _global.allRoles.admin && (
-                      <>
-                        <tr>
-                          <td className="f-bold c-success" colSpan={5}>
-                            <b>Total of Pieces</b>
-                          </td>
-                          <td
-                            className="bg-success p-2 text-dark bg-opacity-50"
-                            colSpan={2}
-                          >
-                            <b>{sumOfTeethNumbersLength("holding")}</b>
-                          </td>
-                        </tr>
-                        {/* {user.roles[0] === _global.allRoles.admin && (
+                      {user.roles[0] === _global.allRoles.admin && (
+                        <>
+                          <tr>
+                            <td className="f-bold c-success" colSpan={5}>
+                              <b>Total of Pieces</b>
+                            </td>
+                            <td
+                              className="bg-success p-2 text-dark bg-opacity-50"
+                              colSpan={2}
+                            >
+                              <b>{sumOfTeethNumbersLength("holding")}</b>
+                            </td>
+                          </tr>
+                          {/* {user.roles[0] === _global.allRoles.admin && (
                           <tr>
                             <td className="f-bold c-success" colSpan={5}>
                               <b>Total Without Study</b>
@@ -2333,24 +2363,24 @@ const Cases = () => {
                             </td>
                           </tr>
                         )} */}
-                        <tr>
-                          <td colSpan={7}>
-                            <div className="summary-teeth-cases">
-                              {groupCasesTeethNumbersByName("holding")?.map(
-                                (item) => (
-                                  <p className="mb-0">
-                                    <span>{item.name}:</span>
-                                    <b className="badge text-bg-success">
-                                      {item.count}
-                                    </b>
-                                  </p>
-                                )
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      </>
-                    )}
+                          <tr>
+                            <td colSpan={7}>
+                              <div className="summary-teeth-cases">
+                                {groupCasesTeethNumbersByName("holding")?.map(
+                                  (item) => (
+                                    <p className="mb-0">
+                                      <span>{item.name}:</span>
+                                      <b className="badge text-bg-success">
+                                        {item.count}
+                                      </b>
+                                    </p>
+                                  )
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      )}
                     </tbody>
                   </table>
                 )}
@@ -2738,7 +2768,7 @@ const Cases = () => {
                         </td>
                       </tr>
                     ))}
-                      {studyCases.map((item, index) => (
+                    {studyCases.map((item, index) => (
                       <tr key={item._id}>
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
@@ -2776,7 +2806,7 @@ const Cases = () => {
                         </td>
                       </tr>
                     ))}
-                     {user.roles[0] === _global.allRoles.admin && (
+                    {user.roles[0] === _global.allRoles.admin && (
                       <>
                         <tr>
                           <td className="f-bold c-success" colSpan={5}>
@@ -2927,7 +2957,7 @@ const Cases = () => {
                         </td>
                       </tr>
                     ))}
-                      {packingCases.map((item, index) => (
+                    {packingCases.map((item, index) => (
                       <tr key={item._id}>
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
@@ -2971,7 +3001,7 @@ const Cases = () => {
                         </td>
                       </tr>
                     ))}
-                     {user.roles[0] === _global.allRoles.admin && (
+                    {user.roles[0] === _global.allRoles.admin && (
                       <>
                         <tr>
                           <td className="f-bold c-success" colSpan={5}>
@@ -3038,7 +3068,7 @@ const Cases = () => {
               aria-labelledby="work-tab"
               tabIndex="1"
             >
-              <div className="form-group">
+              {/* <div className="form-group">
                 <input
                   type="text"
                   name="searchText"
@@ -3047,137 +3077,97 @@ const Cases = () => {
                   value={searchText}
                   onChange={(e) => searchByName(e.target.value, "forWork")}
                 />
-              </div>
+              </div> */}
               {forWorkCases.length > 0 && (
-                <table className="table text-center table-bordered">
+                <table className="table shipping-table  table-bordered">
                   <thead>
-                    <tr className="table-secondary">
-                      <th scope="col">#Case</th>
-                      <th scope="col">Doctor Name</th>
-                      <th scope="col">Patient Name</th>
-                      {/* <th scope="col">Type</th> */}
-                      <th className="td-phone" scope="col">
-                        #tooth
+                    <tr className="table-secondary ">
+                      <th scope="col">Clinic</th>
+                      <th scope="col" className="text-center">
+                        Doctor Cases
                       </th>
-                      <th scope="col">In</th>
-                      <th scope="col">Due</th>
-                      <th scope="col">Actions</th>
+                      {/* <th scope="col">Cad Cam</th>
+                        <th scope="col">Fitting</th>
+                        <th scope="col">For Ceramic</th>
+                        <th scope="col">Ceramic</th>
+                        <th scope="col">Packing</th> */}
                     </tr>
                   </thead>
                   <tbody>
-                    {forWorkCases.map((item, index) => (
-                      <tr key={item._id}>
-                        <td>{item.caseNumber}</td>
-                        <td>{item.dentistObj.name}</td>
-                        <td>{item.patientName}</td>
-                        {/* <td>{item.caseType}</td> */}
-                       <td
-                          className={`${
-                            item.teethNumbers.length <= 0
-                              ? "bg-danger"
-                              : "bg-white"
-                          } td-phone`}
-                        >
-                          {item.teethNumbers.length}
-                        </td>
-                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                    {forWorkCases.map((item) => (
+                      <tr key={item.clinicName}>
+                        <td className="clinic-name">{item.clinicName}</td>
                         <td>
-                          {item.dateOut &&
-                            _global.formatDateToYYYYMMDD(item.dateOut)}
-                        </td>
-                        <td>
-                          <div className="actions-btns">
-                            <span
-                              className="c-success"
-                              onClick={() => viewCase(item, "view")}
-                            >
-                              <i class="fa-solid fa-eye"></i>
-                            </span>
-                            <span
-                              className="c-success"
-                              onClick={() => viewCase(item, "process")}
-                            >
-                              <i class="fa-brands fa-squarespace"></i>
-                            </span>
-                            {((user.roles[0] === _global.allRoles.technician &&
-                              user.lastName === "Jamous") ||
-                              (user.roles[0] === _global.allRoles.admin &&
-                                departments[0].name === "QC")) && (
-                              <span
-                                className="c-primary"
-                                onClick={(e) => editCase(item._id)}
-                              >
-                                <i class="fas fa-edit"></i>
+                          <table className="table working-table  table-bordered">
+                            <thead>
+                              <tr className="table-info">
+                                <th scope="col">#</th>
+                                <th scope="col">Dr.Name</th>
+                                <th scope="col">Pt.Name</th>
+                                <th scope="col">DateIn</th>
+                                <th scope="col">DateOut</th>
+                                <th scope="col">#Unites</th>
+                              </tr>
+                            </thead>
+                            {item.dentists?.length > 0 ? (
+                              item.dentists.map((dentistItem) => (
+                                <tbody>
+                                  {dentistItem.cases.length > 0 &&
+                                    dentistItem.cases.map((caseItem, j) => (
+                                      <tr>
+                                        <td>
+                                          <span>{caseItem.caseNumber}</span>
+                                        </td>
+                                        <td>
+                                          <strong>
+                                            <span>
+                                              {" "}
+                                              Dr.{" "}
+                                              {extractName(
+                                                caseItem?.dentistObj?.name
+                                              )}
+                                            </span>
+                                          </strong>
+                                        </td>
+                                        <td>
+                                          <span key={j}>
+                                            {" "}
+                                            Pt. {caseItem.patientName}
+                                          </span>
+                                        </td>
+                                        <td>
+                                          {_global.formatDateToYYYYMMDD(
+                                            caseItem.dateIn
+                                          )}
+                                        </td>
+                                        <td>
+                                          {_global.formatDateToYYYYMMDD(
+                                            caseItem.dateIn
+                                          )}
+                                        </td>
+                                        <td
+                                          className={`${
+                                            caseItem?.teethNumbers?.length <= 0
+                                              ? "bg-danger"
+                                              : "bg-white"
+                                          } `}
+                                        >
+                                          {caseItem.teethNumbers.length}
+                                        </td>
+                                      </tr>
+                                      // </div>
+                                    ))}
+                                </tbody>
+                              ))
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
                               </span>
                             )}
-                            {(user.firstName === "Fake" ||
-                              user.roles[0] === _global.allRoles.admin) && (
-                              <span
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteCaseModal"
-                                onClick={() => {
-                                  setBuffCase(item);
-                                }}
-                              >
-                                <i className="fa-solid fa-trash-can"></i>
-                              </span>
-                            )}
-                            {/* <span onClick={(e) => deleteCase(item._id)}>
-                              <i className="fa-solid fa-trash-can"></i>
-                            </span> */}
-                          </div>
+                          </table>
                         </td>
                       </tr>
                     ))}
-                     {user.roles[0] === _global.allRoles.admin && (
-                      <>
-                        <tr>
-                          <td className="f-bold c-success" colSpan={5}>
-                            <b>Total of Pieces</b>
-                          </td>
-                          <td
-                            className="bg-success p-2 text-dark bg-opacity-50"
-                            colSpan={2}
-                          >
-                            <b>{sumOfTeethNumbersLength("forWorking")}</b>
-                          </td>
-                        </tr>
-                        {/* {user.roles[0] === _global.allRoles.admin && (
-                          <tr>
-                            <td className="f-bold c-success" colSpan={5}>
-                              <b>Total Without Study</b>
-                            </td>
-                            <td
-                              className="bg-success p-2 text-dark bg-opacity-50"
-                              colSpan={2}
-                            >
-                              <b>
-                                {sumOfTeethNumbersLength("Start") -
-                                  getStudyCases(
-                                    groupCasesTeethNumbersByName("Start")
-                                  )}
-                              </b>
-                            </td>
-                          </tr>
-                        )} */}
-                        <tr>
-                          <td colSpan={7}>
-                            <div className="summary-teeth-cases">
-                              {groupCasesTeethNumbersByName("forWorking")?.map(
-                                (item) => (
-                                  <p className="mb-0">
-                                    <span>{item.name}:</span>
-                                    <b className="badge text-bg-success">
-                                      {item.count}
-                                    </b>
-                                  </p>
-                                )
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      </>
-                    )}
                   </tbody>
                 </table>
               )}
@@ -3235,12 +3225,13 @@ const Cases = () => {
                               item.allClinicCases?.NotStatCases?.map(
                                 (caseItem) => (
                                   <div
-                                  className={`case-item-shipment 
-                                    ${caseItem.isUrgent ? "text-bg-danger" : ""} 
-                                    ${caseItem.isStudy ? "bgc-study" : ""}`
-                                  }
-                                  key={caseItem._id}
-                                >
+                                    className={`case-item-shipment 
+                                    ${
+                                      caseItem.isUrgent ? "text-bg-danger" : ""
+                                    } 
+                                    ${caseItem.isStudy ? "bgc-study" : ""}`}
+                                    key={caseItem._id}
+                                  >
                                     <strong className="d-flex justify-content-between">
                                       Dr.{" "}
                                       {extractName(caseItem.dentistObj.name)}
@@ -3322,7 +3313,8 @@ const Cases = () => {
                             )}
                           </td>
                           <td>
-                            {item.allClinicCases?.forCeramicCases?.length > 0 ? (
+                            {item.allClinicCases?.forCeramicCases?.length >
+                            0 ? (
                               item.allClinicCases.forCeramicCases.map(
                                 (caseItem) => (
                                   <div
@@ -3395,10 +3387,12 @@ const Cases = () => {
                                         }`}
                                       >
                                         <strong className="d-flex justify-content-between">
-                                          <span> Dr.{" "}
-                                          {extractName(
-                                            caseItem?.dentistObj?.name
-                                          )}
+                                          <span>
+                                            {" "}
+                                            Dr.{" "}
+                                            {extractName(
+                                              caseItem?.dentistObj?.name
+                                            )}
                                           </span>
                                           <span>{caseItem.caseNumber}</span>
                                         </strong>
@@ -3436,7 +3430,7 @@ const Cases = () => {
         id="caseHoldModal"
         data-bs-backdrop="static"
         data-bs-keyboard="false"
-        tabindex="-1"
+        tabIndex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
@@ -3500,7 +3494,7 @@ const Cases = () => {
         id="caseUrgentModal"
         data-bs-backdrop="static"
         data-bs-keyboard="false"
-        tabindex="-1"
+        tabIndex="-1"
         aria-labelledby="exampleModalLabel_3"
         aria-hidden="true"
       >
@@ -3581,7 +3575,7 @@ const Cases = () => {
         id="caseHoldHistoryModal"
         data-bs-backdrop="static"
         data-bs-keyboard="false"
-        tabindex="-1"
+        tabIndex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
@@ -3630,7 +3624,7 @@ const Cases = () => {
         id="deleteCaseModal"
         data-bs-backdrop="static"
         data-bs-keyboard="false"
-        tabindex="-1"
+        tabIndex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >

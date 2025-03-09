@@ -11,7 +11,6 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="logo_item">
-        
         <div class="btn-group dropend menu-navbar">
           <button
             type="button"
@@ -59,7 +58,7 @@ const Navbar = () => {
         <div className="c-pointer mr-2" onClick={()=>navigate("/layout/cases")}>
           <img src="/images/logo.png" alt=""  />
           <span>Arak</span>
-          <sup>1.2.1</sup>
+          <sup>1.2.2</sup>
         </div>
       </div>
       {/* <div className="search_bar">

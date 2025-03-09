@@ -63,6 +63,14 @@
 .w-fit{
   width: fit-content !important
 }
+.working-table{
+  font-size: 11px !important;
+  text-align: center;
+}
+.working-table th,.working-table td {
+  font-size: 11px !important;
+  padding: 2px !important;
+}
 /* .border-dashed{
     width: fit-content;
     border-style: solid;
