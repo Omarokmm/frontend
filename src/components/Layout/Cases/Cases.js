@@ -2768,44 +2768,7 @@ const Cases = () => {
                         </td>
                       </tr>
                     ))}
-                    {studyCases.map((item, index) => (
-                      <tr key={item._id}>
-                        <td>{item.caseNumber}</td>
-                        <td>{item.dentistObj.name}</td>
-                        <td>{item.patientName}</td>
-                        <td
-                          className={`${
-                            item.teethNumbers.length <= 0
-                              ? "bg-danger"
-                              : "bg-white"
-                          } `}
-                        >
-                          {item.teethNumbers.length}
-                        </td>
-                        {/* <td>{item.caseType}</td> */}
-                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
-                        <td>
-                          {item.dateOut &&
-                            _global.formatDateToYYYYMMDD(item.dateOut)}
-                        </td>
-                        <td className="td-phone">
-                          <div className="actions-btns">
-                            <span
-                              className="c-success"
-                              onClick={() => viewCase(item, "view")}
-                            >
-                              <i class="fa-solid fa-eye"></i>
-                            </span>
-                            <span
-                              className="c-success"
-                              onClick={() => viewCase(item, "process")}
-                            >
-                              <i class="fa-brands fa-squarespace"></i>
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+         
                     {user.roles[0] === _global.allRoles.admin && (
                       <>
                         <tr>
