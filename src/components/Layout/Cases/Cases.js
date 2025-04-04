@@ -9,6 +9,7 @@ import SEARCH_FIELDS from "../../../enum/searchFieldEnum";
 import DatePicker, { Calendar, DateObject } from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel";
 import ViewCase from "./ViewCase";
+import { CountryDropdown } from "react-country-region-selector";
 
 const initialData = {
   caseNumber: "",
@@ -88,6 +89,7 @@ const Cases = () => {
   const userRef = useRef();
   const userRef1 = useRef();
   const userRef2 = useRef();
+  const userRef3 = useRef();
   const casesRefUrgent = useRef();
   const departments = JSON.parse(localStorage.getItem("departments"));
   const user = JSON.parse(localStorage.getItem("user"));
@@ -107,12 +109,14 @@ const Cases = () => {
   const [finishedCases, setFinishedCases] = useState([]);
   const [notStartCases, setNotStartCases] = useState([]);
   const [buffAllCases, setBuffAllCases] = useState([]);
+  const [allCasesInClinics, setAllCasesInClinics] = useState([]);
+  const [buffAllCasesInClinics, setBuffAllCasesInClinics] = useState([]);
   const [buffUrgentCases, setBuffUrgentCases] = useState([]);
   const [buffStudyCases, setBuffStudyCases] = useState([]);
   const [delayCases, setDelayCases] = useState([]);
   const [packingCases, setPackingCases] = useState([]);
   const [redoCases, setRedoCases] = useState([]);
-  const [redoBuffCases, setRedobuffCases] = useState([]);
+  const [redoBuffCases, setRedoBuffCases] = useState([]);
   const [buffPackingCases, setBuffPackingCases] = useState([]);
   const [forWorkCases, setForWorkCases] = useState([]);
   const [buffForWorkCases, setBuffForWorkCases] = useState([]);
@@ -120,6 +124,7 @@ const Cases = () => {
   const [searchText, setSearchText] = useState("");
   const [holdText, setHoldText] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
+  const [countryFilter, setCountryFilter] = useState("");
   const [filterBy, setFilterBy] = useState(SEARCH_FIELDS.CASE_NUMBER);
   const [values, setValues] = useState([
     new DateObject().subtract(0, "days"),
@@ -141,7 +146,7 @@ const Cases = () => {
         );
         setBuffUrgentCases(urgentCases);
         setRedoCases(redoCases);
-        setRedobuffCases(redoCases);
+        setRedoBuffCases(redoCases);
         setBuffStudyCases(studyCases.filter((s) => !s.isHold));
         setAllCases(result);
         console.log(result);
@@ -154,7 +159,7 @@ const Cases = () => {
             r.receptionPacking.status.isEnd === true &&
             r.delivering.status.isEnd === false
         );
-        console.log("packingCasesbuff", packingCasesbuff);
+        // console.log("packingCasesbuff", packingCasesbuff);
         setPackingCases(_global.groupAndSortCases(packingCasesbuff));
         setBuffPackingCases(_global.groupAndSortCases(packingCasesbuff));
         // console.log('packingCases',packingCases)
@@ -211,6 +216,12 @@ const Cases = () => {
                 packingCasesbuff,
                 result
               )
+            );
+            setAllCasesInClinics(
+              getClinicsWithAllActiveCases(resultClinics, result, result)
+            );
+            setBuffAllCasesInClinics(
+              getClinicsWithAllActiveCases(resultClinics, result, result)
             );
             setForWorkCases(
               getClinicsWithActiveCasesNotStart(
@@ -673,9 +684,7 @@ const Cases = () => {
         );
         setRedoCases(filteredAllForWorkCases);
       } else {
-        setRedoCases(
-          redoBuffCases
-        );
+        setRedoCases(redoBuffCases);
       }
     }
   };
@@ -768,9 +777,9 @@ const Cases = () => {
         console.error("Error fetching cases:", error);
       });
   };
-  const editCase = (id,isRedo) => {
+  const editCase = (id, isRedo) => {
     // navigate(`/layout/edit-case/${id}`);
-    navigate(`/layout/edit-case/${id}`, { state: { isRedo: isRedo } });
+    navigate(`/layout/edit-case/${id}`);
   };
   const addItemToDelayCases = (item) => {
     setDelayCases((prevDelayCases) => [...prevDelayCases, item]);
@@ -975,6 +984,9 @@ const Cases = () => {
     ) {
       return "table-info";
     }
+    if (item.isRedo) {
+      return "table-warning";
+    }
   };
   function groupTeethNumbersByName(teethNumbers) {
     const result = {};
@@ -1067,6 +1079,10 @@ const Cases = () => {
   const printSelectedItemsShippment = useReactToPrint({
     content: () => userRef2.current,
     documentTitle: `Cases For Shipment`,
+  });
+  const printSelectedItemsClinics = useReactToPrint({
+    content: () => userRef3.current,
+    documentTitle: `Cases In  clinics`,
   });
   const getDoctorCountry = (id) => {
     return docotrs.find((doctor) => doctor._id === id).address.country;
@@ -1184,8 +1200,129 @@ const Cases = () => {
       })
       .filter((clinic) => clinic !== null && clinic.dentists.length > 0); // Remove clinics without dentists or active cases
   };
+  const getClinicsWithAllActiveCases = (clinics, cases, allCases) => {
+    console.log("getClinicsWithAllActiveCases", clinics, cases, allCases);
+    if (cases.length === 0 || clinics.length === 0) return [];
+    return clinics
+      .map((clinic) => {
+        // Get all cases related to this clinic (by matching dentistId in cases with clinic's dentistsIds)
+        const clinicCases = allCases
+          .filter((caseItem) =>
+            clinic.dentistsIds.some(
+              (dentistIdObj) => dentistIdObj.value === caseItem.dentistObj.id
+            )
+          )
+          .filter(
+            (caseItem) =>
+              // Filter cases with delivering.actions <= 0 and receptionPacking.actions <= 0
+              caseItem.delivering?.actions?.length <= 0
+          )
+          .map((caseItem) => {
+            // Group cases into NotStat, cadCamCases, fittingCases, ceramicCases based on conditions
+            if (caseItem.cadCam?.actions?.length <= 0 && !caseItem.isHold) {
+              caseItem.status = "NotStat"; // Mark as NotStat if cadCam actions are empty
+            }
+            if (caseItem.isHold) {
+              caseItem.status = "Holding"; // Mark as NotStat if cadCam actions are empty
+            } else if (
+              !caseItem.cadCam?.status?.isStart &&
+              caseItem.cadCam?.status?.isPause &&
+              !caseItem.cadCam?.status?.isEnd
+            ) {
+              caseItem.status = "cadCamCases"; // Mark as cadCamCases if cadCam is started
+            } else if (
+              !caseItem.fitting?.status?.isStart &&
+              caseItem.fitting?.status?.isPause &&
+              !caseItem.fitting?.status?.isEnd
+            ) {
+              caseItem.status = "fittingCases"; // Mark as fittingCases if fitting is started
+            } else if (
+              caseItem.fitting?.status?.isEnd &&
+              caseItem.ceramic?.status?.isStart &&
+              caseItem.receptionPacking?.status?.isStart
+            ) {
+              caseItem.status = "forCeramicCases"; // Mark as forCeramicCases
+            } else if (
+              !caseItem.ceramic?.status?.isStart &&
+              caseItem.ceramic?.status?.isPause &&
+              !caseItem.ceramic?.status?.isEnd
+            ) {
+              caseItem.status = "ceramicCases"; // Mark as ceramicCases if ceramic is started
+            } else if (caseItem.receptionPacking?.status?.isEnd) {
+              caseItem.status = "receptionPacking"; // Mark as ceramicCases if ceramic is started
+            }
+            return caseItem;
+          });
+
+        // Check if this clinic has any active cases
+        const hasActiveCases = clinicCases.some((caseItem) =>
+          [
+            "NotStat",
+            "Holding",
+            "cadCamCases",
+            "fittingCases",
+            "ceramicCases",
+            "receptionPacking",
+            "forCeramicCases",
+          ].includes(caseItem.status)
+        );
+
+        // If clinic doesn't have active cases, skip it
+        if (!hasActiveCases) {
+          return null;
+        }
+
+        // Get dentists in this clinic who have active cases
+        const dentistsWithCases = clinic.dentistsIds
+          .map((dentistIdObj) => {
+            const dentistId = dentistIdObj.value; // Extracting actual dentist ID
+            const dentistCases = cases.filter(
+              (c) => c.dentistObj.id === dentistId
+            );
+            return dentistCases.length > 0
+              ? {
+                  dentistId,
+                  dentistName: dentistCases[0].dentistObj.name, // Get name from first case
+                  cases: dentistCases,
+                }
+              : null;
+          })
+          .filter((dentist) => dentist !== null); // Remove dentists without cases
+
+        // Return clinic with grouped cases and dentist-related cases
+        return {
+          clinicName: clinic.clinicName,
+          address: clinic.address,
+          dentists: dentistsWithCases,
+          allClinicCases: {
+            NotStatCases: clinicCases.filter(
+              (caseItem) => caseItem.status === "NotStat"
+            ),
+            Holding: clinicCases.filter(
+              (caseItem) => caseItem.status === "Holding"
+            ),
+            cadCamCases: clinicCases.filter(
+              (caseItem) => caseItem.status === "cadCamCases"
+            ),
+            fittingCases: clinicCases.filter(
+              (caseItem) => caseItem.status === "fittingCases"
+            ),
+            forCeramicCases: clinicCases.filter(
+              (caseItem) => caseItem.status === "forCeramicCases"
+            ),
+            ceramicCases: clinicCases.filter(
+              (caseItem) => caseItem.status === "ceramicCases"
+            ),
+            receptionPacking: clinicCases.filter(
+              (caseItem) => caseItem.status === "receptionPacking"
+            ),
+          },
+        };
+      })
+      .filter((clinic) => clinic !== null && clinic.dentists.length > 0); // Remove clinics without dentists or active cases
+  };
   const getClinicsWithActiveCasesNotStart = (clinics, cases) => {
-    console.log("casesNOTSTART", cases, clinics);
+    // console.log("casesNOTSTART", cases, clinics);
     if (cases.length === 0 || clinics.length === 0) return [];
     return clinics
       .map((clinic) => {
@@ -1293,8 +1430,7 @@ const Cases = () => {
         totalLength += caseItem.teethNumbers.length;
       });
       return totalLength;
-    }
-    else if (type === "redo") {
+    } else if (type === "redo") {
       redoCases.forEach((caseItem) => {
         totalLength += caseItem.teethNumbers.length;
       });
@@ -1388,8 +1524,7 @@ const Cases = () => {
           result[name]++;
         });
       });
-    }
-    else if (type === "redo") {
+    } else if (type === "redo") {
       redoCases.forEach((singleCase) => {
         singleCase.teethNumbers.forEach((teethNumber) => {
           const { name } = teethNumber;
@@ -1402,6 +1537,18 @@ const Cases = () => {
     }
     return Object.entries(result).map(([name, count]) => ({ name, count }));
   }
+  const searchByCountry = (searchText) => {
+    // setAllCasesInClinics(buffAllCasesInClinics)
+    setCountryFilter(searchText);
+    if (searchText !== "") {
+      const filteredClinic = buffAllCasesInClinics.filter((item) =>
+        item.address.country.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setAllCasesInClinics(filteredClinic);
+    } else {
+      setAllCasesInClinics(buffAllCasesInClinics);
+    }
+  };
   return (
     <div className="content">
       <div className="card">
@@ -1438,7 +1585,8 @@ const Cases = () => {
             </li>
             {((user.roles[0] === _global.allRoles.admin &&
               departments[0].name === "QC") ||
-              user.roles[0] === _global.allRoles.Reception ||  user.lastName === "Jamous")  && (
+              user.roles[0] === _global.allRoles.Reception ||
+              user.lastName === "Jamous") && (
               <li
                 class="nav-item"
                 role="presentation"
@@ -1655,14 +1803,10 @@ const Cases = () => {
                 Shipments <small>({forShipments?.length})</small>
               </button>
             </li>
-            <li
-              class="nav-item"
-              role="redo"
-              onClick={() => setSearchText("")}
-            >
+            <li class="nav-item" role="redo" onClick={() => setSearchText("")}>
               <button
                 className={`nav-link bgc-redo ${
-                  activeTab === 10 ? "active  " : ""
+                  activeTab === 12 ? "active  " : ""
                 }`}
                 id="redo-tab"
                 data-bs-toggle="tab"
@@ -1670,10 +1814,31 @@ const Cases = () => {
                 type="button"
                 role="tab"
                 aria-controls="redo-tab-pane"
-                aria-selected={activeTab === 11}
-                onClick={() => handleTabChange(11)}
+                aria-selected={activeTab === 12}
+                onClick={() => handleTabChange(12)}
               >
                 Redo <small>({redoCases?.length})</small>
+              </button>
+            </li>
+            <li
+              class="nav-item"
+              role="clinics"
+              onClick={() => setSearchText("")}
+            >
+              <button
+                className={`nav-link bgc-clinics ${
+                  activeTab === 13 ? "active  " : ""
+                }`}
+                id="clinics-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#clinics-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="clinics-tab-pane"
+                aria-selected={activeTab === 13}
+                onClick={() => handleTabChange(13)}
+              >
+                Clinics <small>({allCasesInClinics?.length})</small>
               </button>
             </li>
           </ul>
@@ -1894,20 +2059,24 @@ const Cases = () => {
                                 departments[0].name === "QC") ||
                               user.roles[0] ===
                                 _global.allRoles.super_admin) && (
-                                  <>
-                              <span
-                                className="c-primary ml-3"
-                                onClick={(e) => editCase(item._id,false)}
-                              >
-                                <i class="fas fa-edit"></i>
-                              </span>
-                                   <span
-                                   className="c-success"
-                                   onClick={(e) => editCase(item._id,true)}
-                                 >
-                                 <i class="fas fa-retweet"></i>
-                                 </span>
-                                 </>
+                              <>
+                                <span
+                                  className="c-primary ml-3"
+                                  onClick={(e) => editCase(item._id)}
+                                >
+                                  <i class="fas fa-edit"></i>
+                                </span>
+                                <span
+                                  className="c-success"
+                                  onClick={(e) =>
+                                    navigate(`/layout/redo-case/${item._id}`, {
+                                      state: { isRedo: true },
+                                    })
+                                  }
+                                >
+                                  <i class="fas fa-retweet"></i>
+                                </span>
+                              </>
                             )}
                             {!item.isUrgent &&
                               !item?.delivering?.status?.isEnd &&
@@ -1931,8 +2100,9 @@ const Cases = () => {
                                   </span>
                                 </span>
                               )}
-                            {(user.firstName === "Fake" || (user.roles[0] === _global.allRoles.technician &&
-                              user.lastName === "Jamous") ||
+                            {(user.firstName === "Fake" ||
+                              (user.roles[0] === _global.allRoles.technician &&
+                                user.lastName === "Jamous") ||
                               user.roles[0] === _global.allRoles.admin) && (
                               <span
                                 data-bs-toggle="modal"
@@ -2033,7 +2203,7 @@ const Cases = () => {
                                 departments[0].name === "QC")) && (
                               <span
                                 className="c-primary"
-                                onClick={(e) => editCase(item._id,false)}
+                                onClick={(e) => editCase(item._id)}
                               >
                                 <i class="fas fa-edit"></i>
                               </span>
@@ -2183,7 +2353,7 @@ const Cases = () => {
                                 departments[0].name === "QC")) && (
                               <span
                                 className="c-primary"
-                                onClick={(e) => editCase(item._id,false)}
+                                onClick={(e) => editCase(item._id)}
                               >
                                 <i class="fas fa-edit"></i>
                               </span>
@@ -2761,7 +2931,7 @@ const Cases = () => {
                         </td>
                       </tr>
                     ))}
-         
+
                     {user.roles[0] === _global.allRoles.admin && (
                       <>
                         <tr>
@@ -3333,8 +3503,8 @@ const Cases = () => {
                 <div className="no-content">No Cases for Shipments yet!</div>
               )}
             </div>
-               {/* In Redo */}
-               <div
+            {/* In Redo */}
+            <div
               // class="tab-pane fade"
               className={`tab-pane fade ${
                 activeTab === 11 ? "show active" : ""
@@ -3430,23 +3600,23 @@ const Cases = () => {
                             </td>
                           </tr>
                           {user.roles[0] === _global.allRoles.admin && (
-                          <tr>
-                            <td className="f-bold c-success" colSpan={5}>
-                              <b>Total Without Study</b>
-                            </td>
-                            <td
-                              className="bg-success p-2 text-dark bg-opacity-50"
-                              colSpan={2}
-                            >
-                              <b>
-                                {sumOfTeethNumbersLength("redo") -
-                                  getStudyCases(
-                                    groupCasesTeethNumbersByName("redo")
-                                  )}
-                              </b>
-                            </td>
-                          </tr>
-                        )}
+                            <tr>
+                              <td className="f-bold c-success" colSpan={5}>
+                                <b>Total Without Study</b>
+                              </td>
+                              <td
+                                className="bg-success p-2 text-dark bg-opacity-50"
+                                colSpan={2}
+                              >
+                                <b>
+                                  {sumOfTeethNumbersLength("redo") -
+                                    getStudyCases(
+                                      groupCasesTeethNumbersByName("redo")
+                                    )}
+                                </b>
+                              </td>
+                            </tr>
+                          )}
                           <tr>
                             <td colSpan={7}>
                               <div className="summary-teeth-cases">
@@ -3472,6 +3642,319 @@ const Cases = () => {
                   <div className="no-content">No Cases Redo yet!</div>
                 )}
               </div>
+            </div>
+            {/*  Clinics  */}
+            <div
+              // class="tab-pane fade "
+              className={`tab-pane fade ${
+                activeTab === 13 ? "show active" : ""
+              }`}
+              id="clinics-tab-pane"
+              role="tabpanel"
+              aria-labelledby="clinics-tab"
+              tabIndex="1"
+            >
+             <div className="row">
+             {/* <div className="form-group  d-flex justify-content-end"> */}
+                <div className="col-lg-6">
+                  <CountryDropdown
+                    className="form-control mb-3"
+                    value={countryFilter}
+                    onChange={(val) => searchByCountry(val)}
+                  />
+                </div>
+                <div className="col-lg-6">
+                <button
+                  className="btn btn-sm w-100 pb-2 pt-2 btn-primary "
+                  onClick={(e) => printSelectedItemsClinics()}
+                >
+                  Print
+                </button>
+                </div>
+              {/* </div> */}
+             </div>
+             
+              <div ref={userRef3}>
+                {allCasesInClinics.length > 0 && (
+                  <table className="table shipping-table  table-bordered">
+                    <thead>
+                      <tr className="table-secondary">
+                        <th scope="col">Clinic</th>
+                        <th scope="col">Not Start</th>
+                        <th scope="col">Holding</th>
+                        <th scope="col">Cad Cam</th>
+                        <th scope="col">Fitting</th>
+                        <th scope="col">For Ceramic</th>
+                        <th scope="col">Ceramic</th>
+                        <th scope="col">Packing</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allCasesInClinics.map((item) => (
+                        <tr key={item.clinicName}>
+                          <td className="clinic-name">{item.clinicName}</td>
+                          <td>
+                            {item.allClinicCases?.NotStatCases?.length > 0 ? (
+                              item.allClinicCases?.NotStatCases?.map(
+                                (caseItem) => (
+                                  <div
+                                    className={`case-item-shipment 
+                                    ${
+                                      caseItem.isUrgent ? "text-bg-danger" : ""
+                                    } 
+                                    ${caseItem.isStudy ? "bgc-study" : ""}`}
+                                    key={caseItem._id}
+                                  >
+                                    <strong className="d-flex justify-content-between">
+                                      Dr.{" "}
+                                      {extractName(caseItem.dentistObj.name)}
+                                      <span>{caseItem.caseNumber}</span>
+                                      {/* <span>{caseItem.caseNumber}</span> */}
+                                    </strong>
+                                    <span>
+                                      {" "}
+                                      Pt. {caseItem.patientName} (
+                                      {caseItem.teethNumbers.length})
+                                    </span>
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {item.allClinicCases?.Holding?.length > 0 ? (
+                              item.allClinicCases?.Holding?.map(
+                                (caseItem) => (
+                                  <div
+                                    className={`case-item-shipment 
+                                   text-bg-danger`}
+                                    key={caseItem._id}
+                                  >
+                                    <strong className="d-flex justify-content-between">
+                                      Dr.{" "}
+                                      {extractName(caseItem.dentistObj.name)}
+                                      <span>{caseItem.caseNumber}</span>
+                                      {/* <span>{caseItem.caseNumber}</span> */}
+                                    </strong>
+                                    <span>
+                                      {" "}
+                                      Pt. {caseItem.patientName} (
+                                      {caseItem.teethNumbers.length})
+                                    </span>
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {item.allClinicCases?.cadCamCases?.length > 0 ? (
+                              item.allClinicCases.cadCamCases.map(
+                                (caseItem) => (
+                                  <div
+                                    className={`case-item-shipment ${
+                                      caseItem.isUrgent ? "text-bg-danger" : ""
+                                    }`}
+                                    key={caseItem._id}
+                                  >
+                                    <strong className="d-flex justify-content-between">
+                                      Dr.{" "}
+                                      {extractName(caseItem.dentistObj.name)}
+                                      <span>{caseItem.caseNumber}</span>
+                                      {/* <span>{caseItem.caseNumber}</span> */}
+                                    </strong>
+                                    <span>
+                                      {" "}
+                                      Pt. {caseItem.patientName} (
+                                      {caseItem.teethNumbers.length})
+                                    </span>
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {item.allClinicCases?.fittingCases?.length > 0 ? (
+                              item.allClinicCases.fittingCases.map(
+                                (caseItem) => (
+                                  <div
+                                    className={`case-item-shipment ${
+                                      caseItem.isUrgent ? "text-bg-danger" : ""
+                                    }`}
+                                    key={caseItem._id}
+                                  >
+                                    <strong className="d-flex justify-content-between">
+                                      Dr.{" "}
+                                      {extractName(caseItem.dentistObj.name)}
+                                      <span>{caseItem.caseNumber}</span>
+                                      {/* <span>{caseItem.caseNumber}</span> */}
+                                    </strong>
+                                    <span>
+                                      {" "}
+                                      Pt. {caseItem.patientName} (
+                                      {caseItem.teethNumbers.length})
+                                    </span>
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {item.allClinicCases?.forCeramicCases?.length >
+                            0 ? (
+                              item.allClinicCases.forCeramicCases.map(
+                                (caseItem) => (
+                                  <div
+                                    className={`case-item-shipment ${
+                                      caseItem.isUrgent ? "text-bg-danger" : ""
+                                    }`}
+                                    key={caseItem._id}
+                                  >
+                                    <strong className="d-flex justify-content-between">
+                                      Dr.{" "}
+                                      {extractName(caseItem.dentistObj.name)}
+                                      <span>{caseItem.caseNumber}</span>
+                                      {/* <span>{caseItem.caseNumber}</span> */}
+                                    </strong>
+                                    <span>
+                                      {" "}
+                                      Pt. {caseItem.patientName} (
+                                      {caseItem.teethNumbers.length})
+                                    </span>
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {item.allClinicCases?.ceramicCases?.length > 0 ? (
+                              item.allClinicCases.ceramicCases.map(
+                                (caseItem) => (
+                                  <div
+                                    className={`case-item-shipment ${
+                                      caseItem.isUrgent ? "text-bg-danger" : ""
+                                    }`}
+                                    key={caseItem._id}
+                                  >
+                                    <strong className="d-flex justify-content-between">
+                                      Dr.{" "}
+                                      {extractName(caseItem.dentistObj.name)}
+                                      <span>{caseItem.caseNumber}</span>
+                                      {/* <span>{caseItem.caseNumber}</span> */}
+                                    </strong>
+                                    <span>
+                                      {" "}
+                                      Pt. {caseItem.patientName} (
+                                      {caseItem.teethNumbers.length})
+                                    </span>
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {item.allClinicCases?.receptionPacking?.length >
+                            0 ? (
+                              item.allClinicCases.receptionPacking.map(
+                                (caseItem) => (
+                                  <div
+                                  className={`case-item-shipment ${
+                                    caseItem.isUrgent
+                                      ? "text-bg-danger"
+                                      : "text-bg-success"
+                                  }`}
+                                    key={caseItem._id}
+                                  >
+                                    <strong className="d-flex justify-content-between">
+                                      Dr.{" "}
+                                      {extractName(caseItem.dentistObj.name)}
+                                      <span>{caseItem.caseNumber}</span>
+                                      {/* <span>{caseItem.caseNumber}</span> */}
+                                    </strong>
+                                    <span>
+                                      {" "}
+                                      Pt. {caseItem.patientName} (
+                                      {caseItem.teethNumbers.length})
+                                    </span>
+                                  </div>
+                                )
+                              )
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td>
+                          {/* <td>
+                            {item.dentists?.length > 0 ? (
+                              item.dentists.map((dentistItem) => (
+                                <div key={dentistItem.dentistId}>
+                                  {dentistItem.cases.length > 0 &&
+                                    dentistItem.cases.map((caseItem, j) => (
+                                      <div
+                                        className={`case-item-shipment ${
+                                          caseItem.isUrgent
+                                            ? "text-bg-danger"
+                                            : "text-bg-success"
+                                        }`}
+                                      >
+                                        <strong className="d-flex justify-content-between">
+                                          <span>
+                                            {" "}
+                                            Dr.{" "}
+                                            {extractName(
+                                              caseItem?.dentistObj?.name
+                                            )}
+                                          </span>
+                                          <span>{caseItem.caseNumber}</span>
+                                        </strong>
+                                        <span key={j}>
+                                          {" "}
+                                          Pt. {caseItem.patientName} (
+                                          {caseItem.teethNumbers.length})
+                                        </span>
+                                      </div>
+                                    ))}
+                                </div>
+                              ))
+                            ) : (
+                              <span className="case-item-shipment w-fit">
+                                No cases
+                              </span>
+                            )}
+                          </td> */}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              {forShipments.length <= 0 && (
+                <div className="no-content">No Cases for Clinics yet!</div>
+              )}
             </div>
           </div>
         </div>

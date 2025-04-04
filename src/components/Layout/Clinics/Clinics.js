@@ -49,6 +49,7 @@ const Clinics = () => {
   const [doctors, setDoctors] = useState([]);
   const [selectedOptionDentists, setSelectedOptionDentists] = useState([]);
   const navigate = useNavigate();
+ 
   useEffect(() => {
     axios
       .get(`${_global.BASE_URL}clinics`)

@@ -50,6 +50,7 @@ const Doctors = () => {
     3: "technician",
     // Add more roles as needed
   };
+
   useEffect(() => {
     axios
       .get(`${_global.BASE_URL}doctors`)

@@ -48,6 +48,7 @@ const Users = () => {
     8: "Super Admin"
     // Add more roles as needed
   };
+  
   useEffect(() => {
     axios
       .get(`${_global.BASE_URL}users`)

@@ -647,7 +647,10 @@ cursor: pointer;
 .bgc-redo{
   background: var(--primary-color);
   color: #fff !important;
-
+}
+.bgc-clinics{
+  background: #76a229;
+  color: #fff !important;
 }
 .nav-tabs .nav-link.active {
   background-color: #424242 !important;

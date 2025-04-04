@@ -422,4 +422,46 @@ export const allRoles= {
       return false; // If filter type doesn't match, return false
     });
   };
+  export const transformData = (data) => {
+    // Function to recursively transform _id, createdAt, and updatedAt
+    const transformRecursively = (obj) => {
+      if (obj && typeof obj === 'object') {
+        if (Array.isArray(obj)) {
+          // If it's an array, recursively transform each item
+          obj.forEach((item) => transformRecursively(item));
+        } else {
+          // For an object, check each key
+          Object.keys(obj).forEach((key) => {
+            // Transform _id field
+            if (key === '_id' && obj[key]) {
+              obj[key] = { "$oid": obj[key].toString() };  // Convert _id to {"$oid": "_id"}
+            }
+            // Transform createdAt field
+            else if (key === 'createdAt' && obj[key]) {
+              const createdAtDate = new Date(obj[key]);
+              if (!isNaN(createdAtDate)) {
+                obj[key] = { "$date": createdAtDate.toISOString() };  // Convert createdAt to {"$date": "createdAt date"}
+              }
+            }
+            // Transform updatedAt field
+            else if (key === 'updatedAt' && obj[key]) {
+              const updatedAtDate = new Date(obj[key]);
+              if (!isNaN(updatedAtDate)) {
+                obj[key] = { "$date": updatedAtDate.toISOString() };  // Convert updatedAt to {"$date": "updatedAt date"}
+              }
+            }
+  
+            // Recursively process nested objects or arrays
+            transformRecursively(obj[key]);
+          });
+        }
+      }
+    };
+  
+    // Create a deep copy of the data and transform it
+    let transformedData = JSON.parse(JSON.stringify(data)); // Create a deep copy of the data
+    transformRecursively(transformedData);  // Apply transformation recursively
+  
+    return transformedData;
+  };
   

@@ -52,10 +52,16 @@ const Navbar = () => {
                 user.roles[0] === _global.allRoles.super_admin ||
                 (user.roles[0] === _global.allRoles.technician &&
                   user.lastName === "Jamous")) && (
+                    <>
                 <Link class="dropdown-item" to="/layout/doctors">
                   Doctors
                 </Link>
+                  <Link class="dropdown-item" to="/layout/shipments">
+                  Shipments
+                </Link>
+                </>
               )}
+
             </li>
             {/* <li>
               <a class="dropdown-item" href="#">
@@ -70,7 +76,7 @@ const Navbar = () => {
         >
           <img src="/images/logo.png" alt="" />
           <span>Arak</span>
-          <sup>1.2.2</sup>
+          <sup>1.2.3</sup>
         </div>
       </div>
       {/* <div className="search_bar">

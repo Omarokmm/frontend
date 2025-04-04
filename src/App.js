@@ -20,6 +20,7 @@ import DocotrCases from "./components/Layout/DoctorCases.js";
 import Shipments from "./components/Layout/Shipments/Shipments.js";
 import CasesInDepartments from "./components/Layout/Departments/CasesInDepartments.js";
 import Clinics from "./components/Layout/Clinics/Clinics.js";
+import RedoCase from "./components/Layout/Cases/RedoCase.js";
 function App() {
   return (
     <div className="App">
@@ -40,6 +41,7 @@ function App() {
                 <Route path="view-case" element={<ViewCase />} />
                 <Route path="add-case" element={<AddNewCase />} />
                 <Route path="edit-case/:id" element={<EditCase />} />
+                <Route path="redo-case/:id" element={<RedoCase />} />
                 <Route path="process-case" element={<CaseProcess />} />
                 <Route path="user-notes" element={<NotesUser />} />
                 <Route path="cases-by-doctors" element={<DocotrCases />} />

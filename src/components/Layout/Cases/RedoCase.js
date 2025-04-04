@@ -3,7 +3,7 @@ import "./AddNewCase.css";
 import axios from "axios";
 import * as _global from "../../../config/global";
 import { showToastMessage } from "../../../helper/toaster";
-import {useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import { Patch } from "react-axios";
 
@@ -87,10 +87,11 @@ const initialData = {
   ],
 };
 
-const EditCase = () => {
+const RedoCase = () => {
   const { id } = useParams();
-  console.log(id);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isRedo = location.state?.isRedo || false; // Retrieve isRedo from state 
   const numOfTeeth = _global.numOfTeeth;
   const user = JSON.parse(localStorage.getItem("user"));
   const [caseModel, setCaseModel] = useState(initialData);
@@ -229,13 +230,15 @@ const EditCase = () => {
     });
   };
   const handleSubmit = async () => {
+    console.log('caseModel.redoReason',caseModel.redoReason)
     setIsSubmit(true);
-    if (dentistObj.id !== "") {
+    console.log("dentistObj", dentistObj);
+    if (dentistObj.id !== "" &&  caseModel.redoReason !== "" ) {
       const buffDoctor = doctors.find((doctor) => doctor._id === dentistObj.id);
       let model = {
         caseType: buffCaseType,
-        dateIn: caseModel.dateIn,
-        dateOut: caseModel.dateOut,
+        dateIn: new Date(),
+        dateOut:new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
         dentistObj: {
           id: dentistObj.id,
           name: `${buffDoctor.firstName}, ${buffDoctor.lastName}, (${buffDoctor.clinicName})`,
@@ -256,36 +259,37 @@ const EditCase = () => {
         isHold: caseModel.isHold,
         isStudy: caseModel.isStudy,
         isUrgent: caseModel.isUrgent,
-        isRedo: caseModel.isRedo,
-        oldCaseIds: caseModel.oldCaseIds || [],
-        teethNumbers: teethNumbers,
+        isRedo: true,
+        oldCaseIds: [...new Set([...(caseModel.oldCaseIds || []), id])], // Ensure uniqueness
+        teethNumbers: [],
         naturalOfWorks: caseModel.naturalOfWorks,
         redoReason: caseModel.redoReason ? caseModel.redoReason : "",
         translucency: caseModel.translucency,
         photos: caseModel.photos,
-        fitting: caseModel.fitting,
-        plaster: caseModel.plaster,
-        ceramic: caseModel.ceramic,
-        cadCam: caseModel.cadCam,
-        designing: caseModel.designing,
-        qualityControl: caseModel.qualityControl,
-        receptionPacking: caseModel.receptionPacking,
-        delivering: caseModel.delivering,
+        fitting: initialData.fitting,
+        plaster: initialData.plaster,
+        ceramic: initialData.ceramic,
+        cadCam: initialData.cadCam,
+        designing: initialData.designing,
+        qualityControl: initialData.qualityControl,
+        receptionPacking: initialData.receptionPacking,
+        delivering: initialData.delivering,
         logs: caseModel.logs.push({
           id: user._id,
           name: `${user.firstName} ${user.lastName}`,
           date: new Date(),
-          msg: "Updated Case by",
+          flag: 'redo',
+          msg: `Redo beacuse ${caseModel.redoReason}`,
         }
       ),
-        deadline: caseModel.dateOut,
-        dateReceived: caseModel.dateReceived,
-        dateReceivedInEmail: caseModel.dateReceivedInEmail,
+        deadline: new Date(),
+        dateReceived: new Date(),
+        dateReceivedInEmail: new Date(),
         notes: caseModel.notes,
       };
-     
-       const response = await fetch(`${_global.BASE_URL}cases/${id}`, {
-          method: "PATCH",
+        // console.log(model);
+        const response = await fetch(`${_global.BASE_URL}cases`, {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -294,12 +298,13 @@ const EditCase = () => {
         if (response.ok) {
           setIsSubmit(false);
           navigate("/layout/cases");
-          showToastMessage("Updated Case successfully", "success");
+          showToastMessage("Added Case successfully", "success");
         }
         if (!response.ok) {
           setIsSubmit(false);
-          showToastMessage("Error Updated Case", "error");
+          showToastMessage("Error Added Case", "error");
         }
+     
     } else {
       setIsSubmit(false);
       showToastMessage("Please fill All fields have *", "error");
@@ -369,7 +374,7 @@ const EditCase = () => {
             <i class="fa-solid fa-arrow-left-long"></i>
           </span>
           <span>
-            Edit Case <b>#{caseModel.caseNumber} </b>
+          Redo <b>#{caseModel.caseNumber} </b>
           </span>
         </h5>
         <div className="card-body">
@@ -415,7 +420,7 @@ const EditCase = () => {
                 </label>
                 <input
                   type="date"
-                  value={_global.formatDateToYYYYMMDD(caseModel.dateIn)}
+                  value={_global.formatDateToYYYYMMDD(new Date())}
                   name="dateIn"
                   onChange={handleChange}
                   className="form-control"
@@ -430,7 +435,7 @@ const EditCase = () => {
                 <input
                   type="date"
                   name="dateOut"
-                  value={_global.formatDateToYYYYMMDD(caseModel.dateOut)}
+                  value={_global.formatDateToYYYYMMDD(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000))}
                   onChange={handleChange}
                   className="form-control"
                 />
@@ -455,7 +460,7 @@ const EditCase = () => {
                     type="date"
                     name="dateReceivedInEmail"
                     value={_global.formatDateToYYYYMMDD(
-                      caseModel.dateReceivedInEmail
+                    new Date()
                     )}
                     onChange={handleChange}
                     className="form-control"
@@ -971,7 +976,7 @@ const EditCase = () => {
                 ))}
               </div>
             </div>
-            <div className={caseModel.isRedo ? "col-lg-6 mt-4" : "col-12 mt-4"}>
+            <div className="col-lg-6 mt-4">
               <div className="d-flex justify-content-between">
                 <label htmlFor="description">
                   {" "}
@@ -1009,7 +1014,7 @@ const EditCase = () => {
                 ></textarea>
               </div>
             </div>
-          {caseModel.isRedo &&  <div className={caseModel.isRedo ? "col-lg-6 mt-4" : "col-12 mt-4"}>
+        <div className="col-lg-6 mt-4">
               <div className="d-flex justify-content-between">
                 <label htmlFor="description">
                   {" "}
@@ -1028,7 +1033,6 @@ const EditCase = () => {
                 ></textarea>
               </div>
             </div>
-            }
             <div className="col-lg-12 btn-add-case">
               <button
                 type="button"
@@ -1036,7 +1040,7 @@ const EditCase = () => {
                 onClick={handleSubmit}
                 // disabled={isSubmit}
               >
-                Update
+                Redo
               </button>
             </div>
             <div className="col-lg-12 ">
@@ -1122,4 +1126,4 @@ const EditCase = () => {
     </div>
   );
 };
-export default EditCase;
+export default RedoCase;
