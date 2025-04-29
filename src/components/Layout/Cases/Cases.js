@@ -120,12 +120,14 @@ const Cases = () => {
   const [redoBuffCases, setRedoBuffCases] = useState([]);
   const [buffPackingCases, setBuffPackingCases] = useState([]);
   const [forWorkCases, setForWorkCases] = useState([]);
+  const [redoCasesInClinics, setRedoCasesInClinics] = useState([]);
   const [buffForWorkCases, setBuffForWorkCases] = useState([]);
   const [buffDelayCases, setBuffDelayCases] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [holdText, setHoldText] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [countryFilter, setCountryFilter] = useState("");
+  const [isTableView, setIsTableView] = useState(false);
   const [filterBy, setFilterBy] = useState(SEARCH_FIELDS.CASE_NUMBER);
   const [values, setValues] = useState([
     new DateObject().subtract(0, "days"),
@@ -199,7 +201,9 @@ const Cases = () => {
         setUrgentCases(urgentCases);
         setStudyCases(studyCases.filter((s) => !s.isHold));
         console.log("Holding Cases", result.holdingCases);
-        const delayCasesfilter = result.filter((c) => filterDaley(c) && c.isHold === false );
+        const delayCasesfilter = result.filter(
+          (c) => filterDaley(c) && c.isHold === false
+        );
         console.log(delayCasesfilter);
         setDelayCases(delayCasesfilter);
         setBuffDelayCases(delayCasesfilter);
@@ -238,20 +242,16 @@ const Cases = () => {
                 )
               )
             );
-            console.log(
-              "ForWork",
-              getClinicsWithActiveCasesNotStart(
-                resultClinics,
-                result.filter(
-                  (r) =>
-                    r.cadCam.actions.length <= 0 &&
-                    r.delivering.status.isEnd === false &&
-                    r.delivering.status.isEnd === false &&
-                    r.isHold === false &&
-                    r.isStudy === false
-                )
-              )
+            setRedoCasesInClinics(
+              getClinicsWithActiveCasesNotStart(resultClinics, redoCases)
             );
+            console.log(
+              "redoCasesInClinics",
+              getClinicsWithActiveCasesNotStart(resultClinics, redoCases)
+            );
+            // setRedoCasesInClinics(
+            //   getClinicsWithActiveCasesNotStart(resultClinics, redoCases)
+            // );
           })
           .catch((error) => {});
       })
@@ -386,45 +386,45 @@ const Cases = () => {
         console.error("Error fetching cases:", error);
       });
   };
-    // approve case
-    const aprroveCase = (id) => {
-      let buffHistoryApproving = [
-        ...(buffCase?.historyApproving ? buffCase?.historyApproving : []),
-        {
-          id: user._id,
-          name: `${user.firstName}, ${user.lastName}`,
-          date: new Date(),
-          isApprove: true,
-          msg: "",
-        },
-      ];
-     
-      axios
-        .put(
-          `${_global.BASE_URL}cases/${buffCase._id}/approve/${true}`,
-          buffHistoryApproving
-        )
-        .then((res) => {
-          const result = res.data;
-          setHoldText("");
-          console.log(result);
-            const filteredAllCases = allCases.map((item) => {
-              if (item._id === result._id) {
-                return {
-                  ...item,
-                  isApprove: true,
-                  historyApproving: result.historyApproving,
-                };
-              }
-              return item;
-            });
-            setAllCases(filteredAllCases);
-            showToastMessage("Approved Case successfully", "success");
-        })
-        .catch((error) => {
-          console.error("Error fetching cases:", error);
+  // approve case
+  const aprroveCase = (id) => {
+    let buffHistoryApproving = [
+      ...(buffCase?.historyApproving ? buffCase?.historyApproving : []),
+      {
+        id: user._id,
+        name: `${user.firstName}, ${user.lastName}`,
+        date: new Date(),
+        isApprove: true,
+        msg: "",
+      },
+    ];
+
+    axios
+      .put(
+        `${_global.BASE_URL}cases/${buffCase._id}/approve/${true}`,
+        buffHistoryApproving
+      )
+      .then((res) => {
+        const result = res.data;
+        setHoldText("");
+        console.log(result);
+        const filteredAllCases = allCases.map((item) => {
+          if (item._id === result._id) {
+            return {
+              ...item,
+              isApprove: true,
+              historyApproving: result.historyApproving,
+            };
+          }
+          return item;
         });
-    };
+        setAllCases(filteredAllCases);
+        showToastMessage("Approved Case successfully", "success");
+      })
+      .catch((error) => {
+        console.error("Error fetching cases:", error);
+      });
+  };
   // hold case
   const urgentCase = (id) => {
     // let action;
@@ -1154,21 +1154,19 @@ const Cases = () => {
               caseItem.status = "NotStat"; // Mark as NotStat if cadCam actions are empty
             } else if (
               (!caseItem.cadCam?.status?.isStart &&
-              caseItem.cadCam?.status?.isPause &&
-              !caseItem.cadCam?.status?.isEnd) || 
-              (
-              !caseItem.cadCam?.status?.isStart &&
-              !caseItem.cadCam?.status?.isPause &&
-              caseItem.cadCam?.status?.isEnd &&
-              caseItem.fitting.actions.length <= 0 &&
-              caseItem.receptionPacking?.actions.length <= 0
-              )
+                caseItem.cadCam?.status?.isPause &&
+                !caseItem.cadCam?.status?.isEnd) ||
+              (!caseItem.cadCam?.status?.isStart &&
+                !caseItem.cadCam?.status?.isPause &&
+                caseItem.cadCam?.status?.isEnd &&
+                caseItem.fitting.actions.length <= 0 &&
+                caseItem.receptionPacking?.actions.length <= 0)
             ) {
               caseItem.status = "cadCamCases"; // Mark as cadCamCases if cadCam is started
             } else if (
-              (!caseItem.fitting?.status?.isStart &&
+              !caseItem.fitting?.status?.isStart &&
               caseItem.fitting?.status?.isPause &&
-              !caseItem.fitting?.status?.isEnd)
+              !caseItem.fitting?.status?.isEnd
             ) {
               caseItem.status = "fittingCases"; // Mark as fittingCases if fitting is started
             } else if (
@@ -1604,9 +1602,33 @@ const Cases = () => {
   };
   const buffCaseHandle = (item) => {
     const newItem = JSON.parse(JSON.stringify(item)); // Deep clone = new object ref
-    setBuffCase(newItem);  
-    console.log('buffCaseHandle',buffCase)
+    setBuffCase(newItem);
+    console.log("buffCaseHandle", buffCase);
   };
+  function extractAllCases(data) {
+    if (!data || !Array.isArray(data.dentists)) return [];
+
+    return data.dentists.flatMap((dentist) =>
+      dentist.cases.map((c) => ({
+        dentistId: dentist.dentistId,
+        dentistName: dentist.dentistName,
+        caseId: c._id,
+        caseNumber: c.caseNumber,
+        patientName: c.patientName,
+        jobDescription: c.jobDescription,
+        teethNumbers: (c.teethNumbers || []).map((t) => ({
+          teethNumber: t.teethNumber,
+          material: t.name,
+          color: t.color,
+        })),
+        isRedo: c.isRedo,
+        redoReason: c.redoReason || null,
+        dateIn: c.dateIn,
+        dateOut: c.dateOut,
+      }))
+    );
+  }
+
   return (
     <div className="content">
       <div className="card">
@@ -1970,7 +1992,7 @@ const Cases = () => {
                 </div>
               </div>
               {allCases.length > 0 && (
-                <table className="table text-center table-bordered">
+                <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
                       {(user.roles[0] === _global.allRoles.admin ||
@@ -2176,19 +2198,20 @@ const Cases = () => {
                                 <i className="fa-solid fa-trash-can"></i>
                               </span>
                             )}
-                            {user.roles[0] === _global.allRoles.Reception && !item.isApprove &&
-                              <span
-                              className="c-success"
-                                // data-bs-toggle="modal"
-                                // data-bs-target="#deleteCaseModal"
-                                onClick={() => {
-                                  setBuffCase(item);
-                                  aprroveCase(item._id)
-                                }}
-                              >
-                                <i class="fas fa-check-circle"></i>
-                              </span>
-                            }
+                            {user.roles[0] === _global.allRoles.Reception &&
+                              !item.isApprove && (
+                                <span
+                                  className="c-success"
+                                  // data-bs-toggle="modal"
+                                  // data-bs-target="#deleteCaseModal"
+                                  onClick={() => {
+                                    setBuffCase(item);
+                                    aprroveCase(item._id);
+                                  }}
+                                >
+                                  <i class="fas fa-check-circle"></i>
+                                </span>
+                              )}
                           </div>
                         </td>
                       </tr>
@@ -2222,7 +2245,7 @@ const Cases = () => {
                 />
               </div>
               {notStartCases.length > 0 && (
-                <table className="table text-center table-bordered">
+                <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">#Case</th>
@@ -2385,7 +2408,7 @@ const Cases = () => {
                 />
               </div>
               {inProcessCases.length > 0 && (
-                <table className="table text-center table-bordered">
+                <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">#Case</th>
@@ -2486,7 +2509,7 @@ const Cases = () => {
                   />
                 </div>
                 {holdingCases.length > 0 && (
-                  <table className="table text-center table-bordered">
+                  <table className="table table-responsive text-center table-bordered">
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">#Case</th>
@@ -2665,7 +2688,7 @@ const Cases = () => {
               </div>
 
               {finishedCases.length > 0 && (
-                <table className="table text-center table-bordered">
+                <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">#Case</th>
@@ -2762,7 +2785,7 @@ const Cases = () => {
                 </div>
                 <div ref={userRef}>
                   {delayCases.length > 0 && (
-                    <table className="table text-center table-bordered">
+                    <table className="table table-responsive text-center table-bordered">
                       <thead>
                         <tr className="table-secondary">
                           <th scope="col">#Case</th>
@@ -2807,7 +2830,9 @@ const Cases = () => {
                                 </span>
                                 <span
                                   className="c-success"
-                                  onClick={() => viewCaseHandle(item, "process")}
+                                  onClick={() =>
+                                    viewCaseHandle(item, "process")
+                                  }
                                 >
                                   <i class="fa-brands fa-squarespace"></i>
                                 </span>
@@ -2860,7 +2885,7 @@ const Cases = () => {
               </div>
               {urgentCases.length > 0 && (
                 <table
-                  className="table text-center table-bordered"
+                  className="table table-responsive text-center table-bordered"
                   ref={casesRefUrgent}
                 >
                   <thead>
@@ -2982,7 +3007,7 @@ const Cases = () => {
                   </div> */}
               </div>
               {studyCases.length > 0 && (
-                <table className="table text-center table-bordered">
+                <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">#Case</th>
@@ -3133,7 +3158,7 @@ const Cases = () => {
                   </div> */}
               </div>
               {packingCases.length > 0 && (
-                <table className="table text-center table-bordered">
+                <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
                       <th scope="col">#Case</th>
@@ -3276,7 +3301,7 @@ const Cases = () => {
                 />
               </div> */}
               {forWorkCases.length > 0 && (
-                <table className="table shipping-table  table-bordered">
+                <table className="table table-responsive shipping-table  table-bordered">
                   <thead>
                     <tr className="table-secondary ">
                       <th scope="col">Clinic</th>
@@ -3295,7 +3320,7 @@ const Cases = () => {
                       <tr key={item.clinicName}>
                         <td className="clinic-name">{item.clinicName}</td>
                         <td>
-                          <table className="table working-table  table-bordered">
+                          <table className="table table-responsive working-table  table-bordered">
                             <thead>
                               <tr className="table-info">
                                 <th scope="col">#</th>
@@ -3401,7 +3426,7 @@ const Cases = () => {
               </div>
               <div ref={userRef2}>
                 {forShipments.length > 0 && (
-                  <table className="table shipping-table  table-bordered">
+                  <table className="table table-responsive shipping-table  table-bordered">
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">Clinic</th>
@@ -3445,6 +3470,14 @@ const Cases = () => {
                                       Pt. {caseItem.patientName} (
                                       {caseItem.teethNumbers.length})
                                     </span>
+                                    <span>
+                                      <b className="c-primary font-bold">
+                                        CrAt:{" "}
+                                      </b>
+                                      {_global.formatDateToYYYYMMDD(
+                                        caseItem.createdAt
+                                      )}
+                                    </span>
                                   </div>
                                 )
                               )
@@ -3480,6 +3513,14 @@ const Cases = () => {
                                       Pt. {caseItem.patientName} (
                                       {caseItem.teethNumbers.length})
                                     </span>
+                                    <span>
+                                      <b className="c-primary font-bold">
+                                        CrAt:{" "}
+                                      </b>
+                                      {_global.formatDateToYYYYMMDD(
+                                        caseItem.createdAt
+                                      )}
+                                    </span>
                                   </div>
                                 )
                               )
@@ -3514,6 +3555,14 @@ const Cases = () => {
                                       {" "}
                                       Pt. {caseItem.patientName} (
                                       {caseItem.teethNumbers.length})
+                                    </span>
+                                    <span>
+                                      <b className="c-primary font-bold">
+                                        CrAt:{" "}
+                                      </b>
+                                      {_global.formatDateToYYYYMMDD(
+                                        caseItem.createdAt
+                                      )}
                                     </span>
                                   </div>
                                 )
@@ -3551,6 +3600,14 @@ const Cases = () => {
                                       Pt. {caseItem.patientName} (
                                       {caseItem.teethNumbers.length})
                                     </span>
+                                    <span>
+                                      <b className="c-primary font-bold">
+                                        CrAt:{" "}
+                                      </b>
+                                      {_global.formatDateToYYYYMMDD(
+                                        caseItem.createdAt
+                                      )}
+                                    </span>
                                   </div>
                                 )
                               )
@@ -3586,6 +3643,14 @@ const Cases = () => {
                                       Pt. {caseItem.patientName} (
                                       {caseItem.teethNumbers.length})
                                     </span>
+                                    <span>
+                                      <b className="c-primary font-bold">
+                                        CrAt:{" "}
+                                      </b>
+                                      {_global.formatDateToYYYYMMDD(
+                                        caseItem.createdAt
+                                      )}
+                                    </span>
                                   </div>
                                 )
                               )
@@ -3613,14 +3678,13 @@ const Cases = () => {
                                         data-bs-toggle="modal"
                                         data-bs-target="#viewModal"
                                       >
-                                          {caseItem?.isApprove && 
-                                        <span class="badge badge-success">
+                                        {caseItem?.isApprove && (
+                                          <span class="badge badge-success">
                                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill ">
-                                            <i class="fas fa-check-circle fa-3x c-primary"></i>
-  </span>
-                                         
+                                              <i class="fas fa-check-circle fa-3x c-primary"></i>
+                                            </span>
                                           </span>
-                                        }
+                                        )}
                                         <strong className="d-flex justify-content-between">
                                           <span>
                                             {" "}
@@ -3637,15 +3701,23 @@ const Cases = () => {
                                           {caseItem.teethNumbers.length})
                                         </span>
                                         <span>
-                                          {
-                                            _global.formatDateToYYYYMMDD(
-                                              caseItem.receptionPacking?.actions?.[
-                                                caseItem.receptionPacking?.actions?.length - 1
-                                              ]?.dateEnd)
-                                          }
+                                          <b className="label-shipping">Pk: </b>
+                                          {_global.formatDateToYYYYMMDD(
+                                            caseItem.receptionPacking
+                                              ?.actions?.[
+                                              caseItem.receptionPacking?.actions
+                                                ?.length - 1
+                                            ]?.dateEnd
+                                          )}
                                         </span>
-
-                                     
+                                        <span>
+                                          <b className="label-shipping">
+                                            CrAt:{" "}
+                                          </b>
+                                          {_global.formatDateToYYYYMMDD(
+                                            caseItem.createdAt
+                                          )}
+                                        </span>
                                       </div>
                                     ))}
                                 </div>
@@ -3684,17 +3756,54 @@ const Cases = () => {
                 aria-labelledby="redo-tab"
                 tabIndex="11"
               >
-                <div className="form-group">
-                  <input
-                    type="text"
-                    name="searchText"
-                    className="form-control"
-                    placeholder="Search by name | case number | case type "
-                    value={searchText}
-                    onChange={(e) => searchByName(e.target.value, "redo")}
-                  />
+                <div className="row">
+                {isTableView &&
+                <div className="col-lg-10">
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        name="searchText"
+                        className="form-control"
+                        placeholder="Search by name | case number | case type "
+                        value={searchText}
+                        onChange={(e) => searchByName(e.target.value, "redo")}
+                      />
+                    </div>
+                  </div>
+}
+                  <div className="col-lg-2 ml-auto mb-2">
+                    <div className="icons-view">
+                      <span
+                        onClick={() => {
+                          setIsTableView(true);
+                        }}
+                      >
+                        <i
+                          className={`fas fa-table ${
+                            isTableView
+                              ? "primary-text-color"
+                              : "text-secondary"
+                          }`}
+                        ></i>
+                      </span>
+                      <span
+                        onClick={() => {
+                          setIsTableView(false);
+                        }}
+                      >
+                        <i
+                          className={`fas fa-list ${
+                            !isTableView
+                              ? "primary-text-color"
+                              : "text-secondary"
+                          }`}
+                        ></i>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                {redoCases.length > 0 && (
+                {/* Table Redo View */}
+                {isTableView && redoCases.length > 0 && (
                   <table className="table text-center table-bordered">
                     <thead>
                       <tr className="table-secondary">
@@ -3806,6 +3915,135 @@ const Cases = () => {
                     </tbody>
                   </table>
                 )}
+
+                {/* Clinics Table Redo View */}
+                {!isTableView && redoCases.length > 0 && (
+                  <table className="table table-responsive shipping-table  table-bordered">
+                    <thead>
+                      <tr className="table-secondary ">
+                        <th scope="col">Clinic</th>
+                        <th scope="col" className="text-center">
+                          Doctor Cases
+                        </th>
+                        {/* <th scope="col">Cad Cam</th>
+                        <th scope="col">Fitting</th>
+                        <th scope="col">For Ceramic</th>
+                        <th scope="col">Ceramic</th>
+                        <th scope="col">Packing</th> */}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {redoCasesInClinics.map((item) => (
+                        <tr key={item.clinicName}>
+                          <td className="clinic-name">
+                            {item.clinicName} ({extractAllCases(item)?.length}){" "}
+                          </td>
+                          <td>
+                            <table className="table working-table table-responsive  table-bordered mb-0">
+                              <thead>
+                                <tr className="table-info">
+                                  <th scope="col">#</th>
+                                  <th scope="col">Dr.Name</th>
+                                  <th scope="col">Pt.Name</th>
+                                  <th scope="col">DateIn</th>
+                                  <th scope="col">DateOut</th>
+                                  <th scope="col">#Unites</th>
+                                </tr>
+                              </thead>
+
+                              {item.dentists?.length > 0 ? (
+                                item.dentists.map((dentistItem) => (
+                                  <tbody>
+                                    {dentistItem.cases.length > 0 &&
+                                      dentistItem.cases.map((caseItem, j) => (
+                                        <tr>
+                                          <td>
+                                            <span>{caseItem.caseNumber}</span>
+                                          </td>
+                                          <td>
+                                            <strong>
+                                              <span>
+                                                {" "}
+                                                Dr.{" "}
+                                                {extractName(
+                                                  caseItem?.dentistObj?.name
+                                                )}
+                                              </span>
+                                            </strong>
+                                          </td>
+                                          <td>
+                                            <span key={j}>
+                                              {" "}
+                                              Pt. {caseItem.patientName}
+                                            </span>
+                                          </td>
+                                          <td>
+                                            {_global.formatDateToYYYYMMDD(
+                                              caseItem.dateIn
+                                            )}
+                                          </td>
+                                          <td>
+                                            {_global.formatDateToYYYYMMDD(
+                                              caseItem.dateIn
+                                            )}
+                                          </td>
+                                          <td
+                                            className={`${
+                                              caseItem?.teethNumbers?.length <=
+                                              0
+                                                ? "bg-danger"
+                                                : "bg-white"
+                                            } `}
+                                          >
+                                            {caseItem.teethNumbers.length}
+                                          </td>
+                                        </tr>
+                                        // </div>
+                                      ))}
+                                  </tbody>
+                                ))
+                              ) : (
+                                <span className="case-item-shipment w-fit">
+                                  No cases
+                                </span>
+                              )}
+                            </table>
+                            <div>
+                              {user.roles[0] === _global.allRoles.admin && (
+                                <table className="table table-responsive  working-table  mb-1">
+                                  <tbody>
+                                    <tr>
+                                      <td className="f-bold c-success w-75" >
+                                        <b>Total of Pieces</b>
+                                      </td>
+                                      <td
+                                        className="bg-success p-2 text-dark bg-opacity-50 w-25" 
+                                        // colSpan={2}
+                                      >
+                                        <b>
+                                          {extractAllCases(item).reduce(
+                                            (total, caseItem) => {
+                                              return (
+                                                total +
+                                                (caseItem.teethNumbers
+                                                  ?.length || 0)
+                                              );
+                                            },
+                                            0
+                                          )}
+                                        </b>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
                 {redoCases.length <= 0 && (
                   <div className="no-content">No Cases Redo yet!</div>
                 )}
@@ -3822,8 +4060,8 @@ const Cases = () => {
               aria-labelledby="clinics-tab"
               tabIndex="1"
             >
-             <div className="row">
-             {/* <div className="form-group  d-flex justify-content-end"> */}
+              <div className="row">
+                {/* <div className="form-group  d-flex justify-content-end"> */}
                 <div className="col-lg-6">
                   <CountryDropdown
                     className="form-control mb-3"
@@ -3832,19 +4070,19 @@ const Cases = () => {
                   />
                 </div>
                 <div className="col-lg-6">
-                <button
-                  className="btn btn-sm w-100 pb-2 pt-2 btn-primary "
-                  onClick={(e) => printSelectedItemsClinics()}
-                >
-                  Print
-                </button>
+                  <button
+                    className="btn btn-sm w-100 pb-2 pt-2 btn-primary "
+                    onClick={(e) => printSelectedItemsClinics()}
+                  >
+                    Print
+                  </button>
                 </div>
-              {/* </div> */}
-             </div>
-             
+                {/* </div> */}
+              </div>
+
               <div ref={userRef3}>
                 {allCasesInClinics.length > 0 && (
-                  <table className="table shipping-table  table-bordered">
+                  <table className="table  table-responsive shipping-table  table-bordered">
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">Clinic</th>
@@ -3895,27 +4133,24 @@ const Cases = () => {
                           </td>
                           <td>
                             {item.allClinicCases?.Holding?.length > 0 ? (
-                              item.allClinicCases?.Holding?.map(
-                                (caseItem) => (
-                                  <div
-                                    className={`case-item-shipment 
+                              item.allClinicCases?.Holding?.map((caseItem) => (
+                                <div
+                                  className={`case-item-shipment 
                                    text-bg-danger`}
-                                    key={caseItem._id}
-                                  >
-                                    <strong className="d-flex justify-content-between">
-                                      Dr.{" "}
-                                      {extractName(caseItem.dentistObj.name)}
-                                      <span>{caseItem.caseNumber}</span>
-                                      {/* <span>{caseItem.caseNumber}</span> */}
-                                    </strong>
-                                    <span>
-                                      {" "}
-                                      Pt. {caseItem.patientName} (
-                                      {caseItem.teethNumbers.length})
-                                    </span>
-                                  </div>
-                                )
-                              )
+                                  key={caseItem._id}
+                                >
+                                  <strong className="d-flex justify-content-between">
+                                    Dr. {extractName(caseItem.dentistObj.name)}
+                                    <span>{caseItem.caseNumber}</span>
+                                    {/* <span>{caseItem.caseNumber}</span> */}
+                                  </strong>
+                                  <span>
+                                    {" "}
+                                    Pt. {caseItem.patientName} (
+                                    {caseItem.teethNumbers.length})
+                                  </span>
+                                </div>
+                              ))
                             ) : (
                               <span className="case-item-shipment w-fit">
                                 No cases
@@ -4049,11 +4284,11 @@ const Cases = () => {
                               item.allClinicCases.receptionPacking.map(
                                 (caseItem) => (
                                   <div
-                                  className={`case-item-shipment ${
-                                    caseItem.isUrgent
-                                      ? "text-bg-danger"
-                                      : "text-bg-success"
-                                  }`}
+                                    className={`case-item-shipment ${
+                                      caseItem.isUrgent
+                                        ? "text-bg-danger"
+                                        : "text-bg-success"
+                                    }`}
                                     key={caseItem._id}
                                   >
                                     <strong className="d-flex justify-content-between">
@@ -4369,38 +4604,38 @@ const Cases = () => {
       </div>
 
       {/* Modal View Case */}
-      {allCases.length > 0 &&
-      <div
-            class="modal fade"
-            id="viewModal"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            tabindex="-1"
-            aria-labelledby="exampleModalLabel"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog modal-xl">
-              <div class="modal-content">
-                <div class={`modal-header  text-white bg-primary`}>
-                  <h1 class="modal-title fs-5" id="exampleModalLabel">
-                    Case Information # {buffCase?.caseNumber}
-                  </h1>
-                  <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div class="modal-body">
-                  {console.log('buffCase',buffCase)}
+      {allCases.length > 0 && (
+        <div
+          class="modal fade"
+          id="viewModal"
+          data-bs-backdrop="static"
+          data-bs-keyboard="false"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+              <div class={`modal-header  text-white bg-primary`}>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">
+                  Case Information # {buffCase?.caseNumber}
+                </h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                {console.log("buffCase", buffCase)}
                 {buffCase && <ViewCase caseModel={buffCase} />}
-                </div>
               </div>
             </div>
-      </div>
-       }
-           {/* Modal Process Case */}
+          </div>
+        </div>
+      )}
+      {/* Modal Process Case */}
       {/* {allCases.length > 0 &&
       <div
             class="modal fade"

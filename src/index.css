@@ -160,6 +160,9 @@ body.dark {
 .navlink_icon:hover {
   background: var(--primary-color);
 }
+.priamry-text-color {
+  color: var(--primary-color);
+}
 .sidebar .nav_link {
   display: flex;
   align-items: center;
@@ -514,7 +517,10 @@ cursor: pointer;
   -ms-border-radius: 3px;
   -o-border-radius: 3px;
 }
-
+.label-shipping{
+  color: #000;
+  margin-right: 5px;
+}
 .teeth-sup{
     position: absolute;
      top: -10px;
@@ -659,6 +665,16 @@ cursor: pointer;
   background-color: #424242 !important;
     color: #fff;
 
+}
+.icons-view{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  margin-top: 4px;
+}
+.icons-view span i {
+  font-size: 1.8em;
+  color: var(--primary-color);
 }
 .btn-arak{
   background-color: var(--primary-color);

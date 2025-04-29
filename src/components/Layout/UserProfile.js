@@ -237,6 +237,25 @@ const UserProfile = () => {
       }
       if (
         userData.isAdmin
+          ? userData.departments[0].name === "Fitting" &&
+            userData.lastName === "Jamous"
+          : departments[0].name === "Fitting" && userData.lastName === "Jamous"
+      ) {
+        const filteredCases = buffCasesUser.filter((item) => {
+          
+          if(item.cadCam.actions.length > 0) {
+            console.log('item.cadCam.actions', item.cadCam.actions.length,item.caseNumber)
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd
+            ) === date
+          );
+        }
+        });
+        setCasesUser(filteredCases);
+      }
+      if (
+        userData.isAdmin
           ? userData.departments[0].name === "Caramic"
           : departments[0].name === "Caramic"
       ) {
@@ -916,8 +935,8 @@ const UserProfile = () => {
       let endDateStr = "";
       if (
         userData.isAdmin
-          ? userData.departments[0].name === "CadCam"
-          : departments[0].name === "CadCam"
+          ? userData.departments[0].name === "CadCam" 
+          : departments[0].name === "CadCam" 
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
           item.cadCam.actions.find((i) => i.dateEnd).dateEnd
@@ -929,7 +948,6 @@ const UserProfile = () => {
             userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
-        console.log("FITTING CAD CAM");
         endDateStr = _global.formatDateToYYYYMMDD(
           item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd
         );
