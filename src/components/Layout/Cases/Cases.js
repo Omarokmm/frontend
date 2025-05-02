@@ -191,7 +191,8 @@ const Cases = () => {
           result.filter(
             (r) =>
               // r.cadCam.status.isStart === true &&
-              r.delivering.status.isEnd === false &&
+              r.ceramic.status.isEnd === false &&
+              r.receptionPacking.status.isEnd === false &&
               r.isHold === false &&
               r.cadCam.actions.length > 0
           )
@@ -585,7 +586,8 @@ const Cases = () => {
           buffAllCases.filter(
             (r) =>
               // r.cadCam.status.isStart === true &&
-              r.delivering.status.isEnd === false &&
+              r.ceramic.status.isEnd === false &&
+              r.receptionPacking.status.isEnd === false &&
               r.isHold === false &&
               r.cadCam.actions.length > 0
           )
@@ -802,7 +804,8 @@ const Cases = () => {
           result.filter(
             (r) =>
               // r.cadCam.status.isStart === true &&
-              r.delivering.status.isEnd === false &&
+            r.ceramic.status.isEnd === false &&
+              r.receptionPacking.status.isEnd === false &&
               r.isHold === false &&
               r.cadCam.actions.length > 0
           )
