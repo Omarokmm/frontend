@@ -624,7 +624,51 @@ const CasesInDepartments = () => {
       return "-";
     }
   };
-
+  const getStartingDate1 = (item) => {
+    if (item) {
+      let startDateStr = "";
+      if (state.shortDescription === 'cadCam') {
+        startDateStr = _global.formatDateToYYYYMMDD(
+          item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+        );
+      }
+      if (state.shortDescription === 'ceramic') {
+        startDateStr = _global.formatDateToYYYYMMDD(
+          item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+        );
+      }
+      if (state.shortDescription === 'fitting') {
+        startDateStr = _global.formatDateToYYYYMMDD(
+          item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+        );
+      }
+      if (state.shortDescription === 'plaster' ) {
+        startDateStr = _global.formatDateToYYYYMMDD(
+          item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+        );
+      }
+      if (state.shortDescription === 'receptionPacking' ) {
+        startDateStr = _global.formatDateToYYYYMMDD(
+          item.receptionPacking.actions[
+            item.receptionPacking.actions.length - 1
+          ]?.dateStart
+        );
+      }
+      if (state.shortDescription === 'designing') {
+        startDateStr = _global.formatDateToYYYYMMDD(
+          item.designing.actions[item.designing.actions.length - 1]?.dateStart
+        );
+      }
+      if (state.shortDescription === 'delivering') {
+        startDateStr = _global.formatDateToYYYYMMDD(
+          item.delivering.actions[item.delivering.actions.length - 1]?.dateStart
+        );
+      }
+      return startDateStr;
+    } else {
+      return "-";
+    }
+  };
   const getTechnicainName = (item) => {
     if (item) {
       let technicainName = "";
@@ -1275,7 +1319,7 @@ const CasesInDepartments = () => {
                           data-bs-target="#viewModal"
                         >
                           <td>{item.caseNumber}</td>
-                          <td>{getStartingDate(item)}</td>
+                          <td>{getStartingDate1(item)}</td>
                           <td>{getTechnicainName(item)}</td>
                           <td>{item?.dentistObj?.name}</td>
                           <td>{item.patientName}</td>
