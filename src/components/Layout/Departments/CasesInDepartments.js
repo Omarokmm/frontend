@@ -9,9 +9,9 @@ const CasesInDepartments = () => {
   const userRef2 = useRef();
   const userRef1 = useRef();
   const userRef = useRef();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { state } = useLocation();
-  console.log(state)
+  console.log(state);
   const user = JSON.parse(localStorage.getItem("user"));
   const departments = JSON.parse(localStorage.getItem("departments"));
   const [userData, setUserData] = useState(state ? state : user);
@@ -33,23 +33,23 @@ const CasesInDepartments = () => {
 
   useEffect(() => {
     axios
-      .get(`${_global.BASE_URL}departments/casesInDepartment/${state?.shortDescription}`)
+      .get(
+        `${_global.BASE_URL}departments/casesInDepartment/${state?.shortDescription}`
+      )
       .then((res) => {
         const result = res.data;
-        console.log("result",result);
+        console.log("result", result);
         // setBuffCase(result.casesEnd[0])
-        setStartCases(result.casesStart)
-        setBuffStartingCasesUser(result.casesStart)
-        setFinishedCases(result.casesEnd)
-        setBuffCasesUser(result.casesEnd)
-        if(department.shortDescription === "cadCam")
-        {
-        setPauseCases(result.casesHolding)
-        setBuffCasesHoldingUser(result.casesHolding)
-        }
-        else{
-        setPauseCases(result.casesPause)
-        setBuffCasesHoldingUser(result.casesPause)
+        setStartCases(result.casesStart);
+        setBuffStartingCasesUser(result.casesStart);
+        setFinishedCases(result.casesEnd);
+        setBuffCasesUser(result.casesEnd);
+        if (department.shortDescription === "cadCam") {
+          setPauseCases(result.casesHolding);
+          setBuffCasesHoldingUser(result.casesHolding);
+        } else {
+          setPauseCases(result.casesPause);
+          setBuffCasesHoldingUser(result.casesPause);
         }
       })
       .catch((error) => {
@@ -64,7 +64,10 @@ const CasesInDepartments = () => {
           item?.historyHolding[item.historyHolding.length - 1]?.date
         );
       }
-      if (department.shortDescription === "fitting" && userData.lastName === "Jamous") {
+      if (
+        department.shortDescription === "fitting" &&
+        userData.lastName === "Jamous"
+      ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
           item?.historyHolding[item.historyHolding.length - 1]?.date
         );
@@ -112,7 +115,9 @@ const CasesInDepartments = () => {
       if (department.shortDescription === "cadCam") {
         reason = item?.historyHolding[item.historyHolding.length - 1]?.msg;
       }
-      if (department.shortDescription === "fitting" && userData.lastName === "Jamous"
+      if (
+        department.shortDescription === "fitting" &&
+        userData.lastName === "Jamous"
       ) {
         reason = item?.historyHolding[item.historyHolding.length - 1]?.msg;
       }
@@ -241,7 +246,9 @@ const CasesInDepartments = () => {
           item.cadCam.actions.find((i) => i.dateEnd).dateEnd
         );
       }
-      if (department.shortDescription === "fitting" &&  userData.lastName === "Jamous"
+      if (
+        department.shortDescription === "fitting" &&
+        userData.lastName === "Jamous"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
           item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd
@@ -285,71 +292,373 @@ const CasesInDepartments = () => {
   const getStartingDate = (item) => {
     if (item) {
       let startDateStr = "";
-      if (state.shortDescription === 'cadCam') {
-        startDateStr = _global.formatDateToYYYYMMDD(
-          item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+      if (
+        state.shortDescription === "cadCam" &&
+        item.cadCam.actions.length > 1
+      ) {
+        const starts = item.cadCam.actions.filter(
+          (item) => item.prfeix === "start"
         );
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = _global.formatDateToYYYYMMDD(lastStart?.dateStart);
       }
-      if (state.shortDescription === 'ceramic') {
-        startDateStr = _global.formatDateToYYYYMMDD(
-          item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+      if (
+        state.shortDescription === "ceramic" &&
+        item.ceramic.actions.length > 1
+      ) {
+        const starts = item.ceramic.actions.filter(
+          (item) => item.prfeix === "start"
         );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = _global.formatDateToYYYYMMDD(lastStart?.dateStart);
       }
-      if (state.shortDescription === 'fitting') {
-        startDateStr = _global.formatDateToYYYYMMDD(
-          item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+      if (
+        state.shortDescription === "fitting" &&
+        item.fitting.actions.length > 1
+      ) {
+        const starts = item.fitting.actions.filter(
+          (item) => item.prfeix === "start"
         );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = _global.formatDateToYYYYMMDD(lastStart?.dateStart);
       }
-      if (state.shortDescription === 'plaster' ) {
-        startDateStr = _global.formatDateToYYYYMMDD(
-          item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+      if (
+        state.shortDescription === "plaster" &&
+        item.plaster.actions.length > 1
+      ) {
+        const starts = item.plaster.actions.filter(
+          (item) => item.prfeix === "start"
         );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = _global.formatDateToYYYYMMDD(lastStart?.dateStart);
       }
-      if (state.shortDescription === 'receptionPacking' ) {
-        startDateStr = _global.formatDateToYYYYMMDD(
-          item.receptionPacking.actions[
-            item.receptionPacking.actions.length - 1
-          ]?.dateStart
+      if (
+        state.shortDescription === "receptionPacking" &&
+        item.receptionPacking.actions.length > 1
+      ) {
+        const starts = item.receptionPacking.actions.filter(
+          (item) => item.prfeix === "start"
         );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = _global.formatDateToYYYYMMDD(lastStart?.dateStart);
       }
-      if (state.shortDescription === 'designing') {
-        startDateStr = _global.formatDateToYYYYMMDD(
-          item.designing.actions[item.designing.actions.length - 1]?.dateStart
+      if (
+        state.shortDescription === "designing" &&
+        item.designing.actions.length > 1
+      ) {
+        const starts = item.designing.actions.filter(
+          (item) => item.prfeix === "start"
         );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = _global.formatDateToYYYYMMDD(lastStart?.dateStart);
       }
-      if (state.shortDescription === 'delivering') {
-        startDateStr = _global.formatDateToYYYYMMDD(
-          item.delivering.actions[item.delivering.actions.length - 1]?.dateStart
+      if (
+        state.shortDescription === "delivering" &&
+        item.delivering.actions.length > 1
+      ) {
+        const starts = item.delivering.actions.filter(
+          (item) => item.prfeix === "start"
         );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = _global.formatDateToYYYYMMDD(lastStart?.dateStart);
       }
       return startDateStr;
     } else {
       return "-";
     }
   };
+  const getFullFinisheingDate = (item) => {
+    if (item) {
+      let endDateStr = "";
+      if (department.shortDescription === "cadCam") {
+        endDateStr = item.cadCam.actions.find((i) => i.dateEnd).dateEnd;
+      }
+      if (
+        department.shortDescription === "fitting" &&
+        userData.lastName === "Jamous"
+      ) {
+        endDateStr = item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd;
+      }
+      if (department.shortDescription === "ceramic") {
+        endDateStr = item.ceramic.actions.find((i) => i.dateEnd).dateEnd;
+      }
+      if (department.shortDescription === "fitting") {
+        endDateStr = item.fitting.actions.find((i) => i.dateEnd)?.dateEnd;
+      }
+      if (department.shortDescription === "plaster") {
+        endDateStr = item.plaster.actions.find((i) => i.dateEnd).dateEnd;
+      }
+      if (department.shortDescription === "receptionPacking") {
+        endDateStr = item.receptionPacking.actions.find((i) => i.dateEnd ).dateEnd;
+      }
+      if (department.shortDescription === "designing") {
+        endDateStr = item.designing.actions.find((i) => i.dateEnd).dateEnd;
+      }
+      if (department.shortDescription === "delivering") {
+        endDateStr = item.delivering.actions.find((i) => i.dateEnd).dateEnd;
+      }
+      return endDateStr;
+    } else {
+      return "-";
+    }
+  };
+  const getFullStartingDate = (item) => {
+    if (item) {
+      let startDateStr = "";
+      if (
+        state.shortDescription === "cadCam" &&
+        item.cadCam.actions.length > 1
+      ) {
+        const starts = item.cadCam.actions.filter(
+          (item) => item.prfeix === "start"
+        );
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = lastStart?.dateStart;
+      }
+      if (
+        state.shortDescription === "ceramic" &&
+        item.ceramic.actions.length > 1
+      ) {
+        const starts = item.ceramic.actions.filter(
+          (item) => item.prfeix === "start"
+        );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = lastStart?.dateStart;
+      }
+      if (
+        state.shortDescription === "fitting" &&
+        item.fitting.actions.length > 1
+      ) {
+        const starts = item.fitting.actions.filter(
+          (item) => item.prfeix === "start"
+        );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = lastStart?.dateStart;
+      }
+      if (
+        state.shortDescription === "plaster" &&
+        item.plaster.actions.length > 1
+      ) {
+        const starts = item.plaster.actions.filter(
+          (item) => item.prfeix === "start"
+        );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = lastStart?.dateStart;
+      }
+      if (
+        state.shortDescription === "receptionPacking" &&
+        item.receptionPacking.actions.length > 1
+      ) {
+        const starts = item.receptionPacking.actions.filter(
+          (item) => item.prfeix === "start"
+        );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = lastStart?.dateStart;
+      }
+      if (
+        state.shortDescription === "designing" &&
+        item.designing.actions.length > 1
+      ) {
+        const starts = item.designing.actions.filter(
+          (item) => item.prfeix === "start"
+        );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = lastStart?.dateStart;
+      }
+      if (
+        state.shortDescription === "delivering" &&
+        item.delivering.actions.length > 1
+      ) {
+        const starts = item.delivering.actions.filter(
+          (item) => item.prfeix === "start"
+        );
+        // console.log("starts",starts)
+        // Get the last (most recent) start by comparing dateStart
+        let lastStart = null;
+        if (starts.length > 0) {
+          lastStart = starts.reduce((latest, current) => {
+            return new Date(current.dateStart) > new Date(latest.dateStart)
+              ? current
+              : latest;
+          });
+        }
+        startDateStr = lastStart?.dateStart;
+      }
+      return startDateStr;
+    } else {
+      return "-";
+    }
+  };
+  const handleCalculate = (startDate, endDate) => {
+    // console.log("startDate",startDate,"endDate",endDate)
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      const diffMs = end - start;
+
+      if (diffMs < 0) return "-";
+
+      const totalMinutes = Math.floor(diffMs / (1000 * 60));
+      const days = Math.floor(totalMinutes / (60 * 24));
+      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+      const minutes = totalMinutes % 60;
+
+      return `${days}d ${hours}h ${minutes}m`;
+    } else {
+      return "-";
+    }
+  };
+
   const getTechnicainName = (item) => {
     if (item) {
       let technicainName = "";
-      if (state.shortDescription === 'cadCam') {
-        technicainName = item.cadCam.actions[item.cadCam.actions.length - 1]?.technicianName
+      if (state.shortDescription === "cadCam") {
+        technicainName =
+          item.cadCam.actions[item.cadCam.actions.length - 1]?.technicianName;
       }
-      if (state.shortDescription === 'ceramic') {
-        technicainName = item.ceramic.actions[item.ceramic.actions.length - 1]?.technicianName
+      if (state.shortDescription === "ceramic") {
+        technicainName =
+          item.ceramic.actions[item.ceramic.actions.length - 1]?.technicianName;
       }
-      if (state.shortDescription === 'fitting') {
-        technicainName = item.fitting.actions[item.fitting.actions.length - 1]?.technicianName
+      if (state.shortDescription === "fitting") {
+        technicainName =
+          item.fitting.actions[item.fitting.actions.length - 1]?.technicianName;
       }
-      if (state.shortDescription === 'plaster' ) {
-        technicainName = item.plaster.actions[item.plaster.actions.length - 1]?.technicianName
+      if (state.shortDescription === "plaster") {
+        technicainName =
+          item.plaster.actions[item.plaster.actions.length - 1]?.technicianName;
       }
-      if (state.shortDescription === 'receptionPacking' ) {
-        technicainName = item.receptionPacking.actions[item.receptionPacking.actions.length - 1]?.technicianName
+      if (state.shortDescription === "receptionPacking") {
+        technicainName =
+          item.receptionPacking.actions[
+            item.receptionPacking.actions.length - 1
+          ]?.technicianName;
       }
-      if (state.shortDescription === 'designing') {
-        technicainName = item.designing.actions[item.designing.actions.length - 1]?.technicianName
+      if (state.shortDescription === "designing") {
+        technicainName =
+          item.designing.actions[item.designing.actions.length - 1]
+            ?.technicianName;
       }
-      if (state.shortDescription === 'delivering') {
-        technicainName = item.delivering.actions[item.delivering.actions.length - 1]?.technicianName
+      if (state.shortDescription === "delivering") {
+        technicainName =
+          item.delivering.actions[item.delivering.actions.length - 1]
+            ?.technicianName;
       }
       return technicainName;
     } else {
@@ -421,7 +730,7 @@ const CasesInDepartments = () => {
         });
         setStartCases(filteredCases);
       }
-      if (department.name ==="Caramic") {
+      if (department.name === "Caramic") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -431,7 +740,7 @@ const CasesInDepartments = () => {
         });
         setStartCases(filteredCases);
       }
-      if (department.name  === "Fitting") {
+      if (department.name === "Fitting") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           if (item.fitting.actions.length > 0)
             return (
@@ -443,7 +752,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (department.name  === "Plaster") {
+      if (department.name === "Plaster") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -454,7 +763,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (department.name ==="Reception") {
+      if (department.name === "Reception") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -492,7 +801,7 @@ const CasesInDepartments = () => {
 
         setStartCases(filteredCases);
       }
-      if (department.name ==="Drivers") {
+      if (department.name === "Drivers") {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -513,7 +822,7 @@ const CasesInDepartments = () => {
     setPauseDate(date);
     if (date != "") {
       console.log("date");
-      if (department.name ===  "CadCam") {
+      if (department.name === "CadCam") {
         const filteredCases = buffCasesHoldingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -523,7 +832,7 @@ const CasesInDepartments = () => {
         });
         setPauseCases(filteredCases);
       }
-      if (department.name ===  "Caramic") {
+      if (department.name === "Caramic") {
         const filteredCases = buffCasesHoldingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -533,7 +842,7 @@ const CasesInDepartments = () => {
         });
         setPauseCases(filteredCases);
       }
-      if (department.name ===  "Fitting") {
+      if (department.name === "Fitting") {
         const filteredCases = buffCasesHoldingUser.filter((item) => {
           if (item.fitting.actions.length > 0)
             return (
@@ -556,7 +865,7 @@ const CasesInDepartments = () => {
 
         setPauseCases(filteredCases);
       }
-      if (department.name ===  "Reception") {
+      if (department.name === "Reception") {
         const filteredCases = buffCasesHoldingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -614,7 +923,7 @@ const CasesInDepartments = () => {
     const date = e.target.value;
     const start = _global.formatDateToYYYYMMDD(startFinishDate);
     const end = _global.formatDateToYYYYMMDD(date);
-    setEndDate(date)
+    setEndDate(date);
     if (date != "") {
       const filteredCases = buffCasesUser.filter((item) => {
         let endDateStr = "";
@@ -623,12 +932,12 @@ const CasesInDepartments = () => {
             item.cadCam.actions.find((i) => i.dateEnd).dateEnd
           );
         }
-        if (department.name ==="Caramic") {
+        if (department.name === "Caramic") {
           endDateStr = _global.formatDateToYYYYMMDD(
             item.ceramic.actions.find((i) => i.dateEnd).dateEnd
           );
         }
-        if (department.name ==="Fitting") {
+        if (department.name === "Fitting") {
           endDateStr = _global.formatDateToYYYYMMDD(
             item.fitting.actions.find((i) => i.dateEnd)?.dateEnd
           );
@@ -638,22 +947,22 @@ const CasesInDepartments = () => {
             item.plaster.actions.find((i) => i.dateEnd).dateEnd
           );
         }
-        if (department.name ==="Reception") {
+        if (department.name === "Reception") {
           endDateStr = _global.formatDateToYYYYMMDD(
             item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
           );
         }
-        if (department.name ==="Marketing") {
+        if (department.name === "Marketing") {
           endDateStr = _global.formatDateToYYYYMMDD(
             item.designing.actions.find((i) => i.dateEnd).dateEnd
           );
         }
-        if (department.name ==="QC") {
+        if (department.name === "QC") {
           endDateStr = _global.formatDateToYYYYMMDD(
             item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
           );
         }
-        if (department.name ==="Drivers") {
+        if (department.name === "Drivers") {
           endDateStr = _global.formatDateToYYYYMMDD(
             item.delivering.actions.find((i) => i.dateEnd).dateEnd
           );
@@ -670,7 +979,7 @@ const CasesInDepartments = () => {
     setStartFinishDate(date);
     if (date != "") {
       console.log("date");
-      if (department.name ==="CadCam") {
+      if (department.name === "CadCam") {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -680,7 +989,7 @@ const CasesInDepartments = () => {
         });
         setFinishedCases(filteredCases);
       }
-      if (department.name ==="Caramic") {
+      if (department.name === "Caramic") {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -702,7 +1011,7 @@ const CasesInDepartments = () => {
 
         setFinishedCases(filteredCases);
       }
-      if (department.name ==="Plaster") {
+      if (department.name === "Plaster") {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -724,7 +1033,7 @@ const CasesInDepartments = () => {
 
         setFinishedCases(filteredCases);
       }
-      if (department.name ==="Marketing") {
+      if (department.name === "Marketing") {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
@@ -773,34 +1082,34 @@ const CasesInDepartments = () => {
     content: () => userRef2.current,
     documentTitle: `${department.name} (Holding Cases)`,
   });
-  function sortCasesByTechnacianName(cases,type) {
-    const sortingCases= [...cases].sort((a, b) => {
-        const nameA = getTechnicainName(a).toLowerCase(); // Convert names to lower case for case-insensitive comparison
-        const nameB = getTechnicainName(b).toLowerCase(); // Convert names to lower case for case-insensitive comparison
+  function sortCasesByTechnacianName(cases, type) {
+    const sortingCases = [...cases].sort((a, b) => {
+      const nameA = getTechnicainName(a).toLowerCase(); // Convert names to lower case for case-insensitive comparison
+      const nameB = getTechnicainName(b).toLowerCase(); // Convert names to lower case for case-insensitive comparison
 
-        if (nameA < nameB) {
-            return -1; // a should come before b
-        }
-        if (nameA > nameB) {
-            return 1; // b should come before a
-        }
-        return 0; // names are equal
+      if (nameA < nameB) {
+        return -1; // a should come before b
+      }
+      if (nameA > nameB) {
+        return 1; // b should come before a
+      }
+      return 0; // names are equal
     });
     const deepClonedCases = JSON.parse(JSON.stringify(sortingCases));
-    if(type === "Start"){
-      setStartCases(deepClonedCases)
+    if (type === "Start") {
+      setStartCases(deepClonedCases);
     }
-    if(type === "Hold"){
-      setPauseCases(deepClonedCases)
+    if (type === "Hold") {
+      setPauseCases(deepClonedCases);
     }
-    if(type === "End"){
-     setFinishedCases(deepClonedCases)
+    if (type === "End") {
+      setFinishedCases(deepClonedCases);
     }
-}
-const buffCaseHandle = (item) => {
-  const newItem = JSON.parse(JSON.stringify(item)); // Deep clone = new object ref
-  setBuffCase(newItem);  
-};
+  }
+  const buffCaseHandle = (item) => {
+    const newItem = JSON.parse(JSON.stringify(item)); // Deep clone = new object ref
+    setBuffCase(newItem);
+  };
   return (
     <div className="content user-profile">
       <div className="card">
@@ -821,9 +1130,9 @@ const buffCaseHandle = (item) => {
                 aria-controls="startCases-tab-pane"
                 aria-selected="false"
                 onClick={() => {
-                  searchByName("", "Start")
-                  setStartDate("")
-                  }}
+                  searchByName("", "Start");
+                  setStartDate("");
+                }}
               >
                 Start <small>({startCases.length})</small>
               </button>
@@ -842,9 +1151,9 @@ const buffCaseHandle = (item) => {
                 role="tab"
                 aria-controls="holdCases-tab-pane"
                 onClick={() => {
-                  searchByName("", "Pause")
-                  setPauseDate("")
-                  }}
+                  searchByName("", "Pause");
+                  setPauseDate("");
+                }}
                 aria-selected="true"
               >
                 Hold <small>({pauseCases.length})</small>
@@ -864,10 +1173,10 @@ const buffCaseHandle = (item) => {
                 role="tab"
                 aria-controls="endCases-tab-pane"
                 onClick={() => {
-                  searchByName("", "End")
-                  setStartFinishDate("")
-                  setEndDate("")
-                  }}
+                  searchByName("", "End");
+                  setStartFinishDate("");
+                  setEndDate("");
+                }}
                 aria-selected="true"
               >
                 End <small>({FinishedCases?.length})</small>
@@ -893,47 +1202,60 @@ const buffCaseHandle = (item) => {
               tabIndex="0"
             >
               {/* Starting  */}
-              <div >
-              <div className="row">
-                <div className="col-lg-7 mb-3 ">
-                  <input
-                    type="text"
-                    name="searchTextStart"
-                    className="form-control"
-                    placeholder="Search by name | case number | case type "
-                    value={searchTextStart}
-                    onChange={(e) => searchByName(e.target.value, "Start")}
-                  />
-                </div>
-                {/* Start Date */}
-                <div className="col-lg-3 ">
-                  <div className="form-group">
+              <div>
+                <div className="row">
+                  <div className="col-lg-7 mb-3 ">
                     <input
-                      type="date"
+                      type="text"
+                      name="searchTextStart"
                       className="form-control"
-                      placeholder="Select Date"
-                      value={startDate}
-                      onChange={(e) => searchStartByDate(e)}
+                      placeholder="Search by name | case number | case type "
+                      value={searchTextStart}
+                      onChange={(e) => searchByName(e.target.value, "Start")}
                     />
                   </div>
+                  {/* Start Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder="Select Date"
+                        value={startDate}
+                        onChange={(e) => searchStartByDate(e)}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-lg-2 mb-3 print-btn">
+                    <button
+                      className="btn btn-sm btn-primary "
+                      onClick={() => {
+                        handlePrint1();
+                      }}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                  </div>
                 </div>
-                <div className="col-lg-2 mb-3 print-btn">
-                  <button
-                    className="btn btn-sm btn-primary "
-                    onClick={() => {handlePrint1()}}
-                  >
-                    {" "}
-                    <i class="fas fa-print"></i> print
-                  </button>
-                </div>
-              </div>
                 {startCases?.length > 0 && (
-                  <table ref={userRef1} style={{ width: "100%" }} className="table text-center table-bordered">
+                  <table
+                    ref={userRef1}
+                    style={{ width: "100%" }}
+                    className="table text-center table-bordered"
+                  >
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">StartedAt</th>
-                        <th scope="col" onClick={ () => sortCasesByTechnacianName(startCases,"Start")}>Technacian</th>
+                        <th
+                          scope="col"
+                          onClick={() =>
+                            sortCasesByTechnacianName(startCases, "Start")
+                          }
+                        >
+                          Technacian
+                        </th>
                         <th scope="col">Doctor</th>
                         <th scope="col">Patient</th>
                         {/* <th>Actions</th> */}
@@ -943,12 +1265,14 @@ const buffCaseHandle = (item) => {
                     </thead>
                     <tbody>
                       {startCases.map((item) => (
-                        <tr key={item._id} className="c-pointer" 
-                        onClick={() => {
-                          buffCaseHandle(item);
-                        }}
-                        data-bs-toggle="modal"
-                        data-bs-target="#viewModal"
+                        <tr
+                          key={item._id}
+                          className="c-pointer"
+                          onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewModal"
                         >
                           <td>{item.caseNumber}</td>
                           <td>{getStartingDate(item)}</td>
@@ -997,7 +1321,7 @@ const buffCaseHandle = (item) => {
                               <b>{sumOfTeethNumbersLength("Start")}</b>
                             </td>
                           </tr>
-                          {(userData.isAdmin) && (
+                          {userData.isAdmin && (
                             <tr>
                               <td className="f-bold c-success" colSpan={5}>
                                 <b>Total Without Study</b>
@@ -1040,59 +1364,72 @@ const buffCaseHandle = (item) => {
                 </div>
               )}
             </div>
-          {/* Pauseing Cases */}
-          <div
-            class="tab-pane fade "
-            id="holdCases-tab-pane"
-            role="tabpanel"
-            aria-labelledby="holdCases-tab"
-            tabIndex="0"
-          >
-             <div >
-             <div className="row">
-                <div className="col-lg-7 mb-3 ">
-                  <input
-                    type="text"
-                    name="searchTextStart"
-                    className="form-control"
-                    placeholder="Search by name | case number | case type "
-                    value={searchTextHold}
-                    onChange={(e) => searchByName(e.target.value, "Pause")}
-                  />
-                </div>
-                {/* Paus Date */}
-                <div className="col-lg-3 ">
-                  <div className="form-group">
+            {/* Pauseing Cases */}
+            <div
+              class="tab-pane fade "
+              id="holdCases-tab-pane"
+              role="tabpanel"
+              aria-labelledby="holdCases-tab"
+              tabIndex="0"
+            >
+              <div>
+                <div className="row">
+                  <div className="col-lg-7 mb-3 ">
                     <input
-                      type="date"
+                      type="text"
+                      name="searchTextStart"
                       className="form-control"
-                      placeholder="Select Date"
-                      value={pauseDate}
-                      onChange={(e) => searchPauseByDate(e)}
+                      placeholder="Search by name | case number | case type "
+                      value={searchTextHold}
+                      onChange={(e) => searchByName(e.target.value, "Pause")}
                     />
                   </div>
+                  {/* Paus Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder="Select Date"
+                        value={pauseDate}
+                        onChange={(e) => searchPauseByDate(e)}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-lg-2 mb-3 print-btn">
+                    <button
+                      className="btn btn-sm btn-primary "
+                      onClick={() => {
+                        handlePrint2();
+                      }}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                  </div>
                 </div>
-                <div className="col-lg-2 mb-3 print-btn">
-                  <button
-                    className="btn btn-sm btn-primary "
-                    onClick={() => {handlePrint2()}}
-                  >
-                    {" "}
-                    <i class="fas fa-print"></i> print
-                  </button>
-                </div>
-              </div>
                 {pauseCases?.length > 0 && (
-                  <table ref={userRef2} style={{ width: "100%" }} className="table text-center table-bordered">
+                  <table
+                    ref={userRef2}
+                    style={{ width: "100%" }}
+                    className="table text-center table-bordered"
+                  >
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">HeldAt</th>
-                        <th scope="col" onClick={ () => sortCasesByTechnacianName(pauseCases,"Hold")}>Technacian</th>
+                        <th
+                          scope="col"
+                          onClick={() =>
+                            sortCasesByTechnacianName(pauseCases, "Hold")
+                          }
+                        >
+                          Technacian
+                        </th>
                         <th scope="col">Doctor</th>
                         <th scope="col">Patient</th>
                         <th scope="col">Reason</th>
-                       <th scope="col">#teeth</th>
+                        <th scope="col">#teeth</th>
                         {/* <th scope="col">Actions</th> */}
                       </tr>
                     </thead>
@@ -1147,7 +1484,8 @@ const buffCaseHandle = (item) => {
                               <b>{sumOfTeethNumbersLength("Pause")}</b>
                             </td>
                           </tr>
-                          {((departments[0].name === "cadCam") || (departments[0].name === "fitting")) && (
+                          {(departments[0].name === "cadCam" ||
+                            departments[0].name === "fitting") && (
                             <tr>
                               <td className="f-bold c-success" colSpan={6}>
                                 <b>Total Without Study</b>
@@ -1189,68 +1527,83 @@ const buffCaseHandle = (item) => {
                   <h6>No pauseing Cases Yet! </h6>
                 </div>
               )}
-          </div>
-          {/* Finished Cases */}
-          <div
-            class="tab-pane fade "
-            id="endCases-tab-pane"
-            role="tabpanel"
-            aria-labelledby="endCases-tab"
-            tabIndex="0"
-          >
-            <div >
-            <div className="row">
-                <div className="col-lg-6 mb-3 ">
-                  <input
-                    type="text"
-                    name="searchTextStart"
-                    className="form-control"
-                    placeholder="Search by name | case number | case type "
-                    value={searchText}
-                    onChange={(e) => searchByName(e.target.value, "End")}
-                  />
-                </div>
-            {/* Start Date */}
-            <div className="col-lg-3 ">
-                  <div className="form-group">
+            </div>
+            {/* Finished Cases */}
+            <div
+              class="tab-pane fade "
+              id="endCases-tab-pane"
+              role="tabpanel"
+              aria-labelledby="endCases-tab"
+              tabIndex="0"
+            >
+              <div>
+                <div className="row">
+                  <div className="col-lg-6 mb-3 ">
                     <input
-                      type="date"
+                      type="text"
+                      name="searchTextStart"
                       className="form-control"
-                      placeholder="Start Date"
-                      value={startFinishDate}
-                      onChange={(e) => searchByDate(e)}
+                      placeholder="Search by name | case number | case type "
+                      value={searchText}
+                      onChange={(e) => searchByName(e.target.value, "End")}
                     />
                   </div>
-                </div>
-                {/* End Date */}
-                <div className="col-lg-3 ">
-                  <div className="form-group">
-                    <input
-                      type="date"
-                      className="form-control"
-                      placeholder=" End Date"
-                      value={endDate}
-                      onChange={(e) => searchByEndDate(e)}
-                    />
+                  {/* Start Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder="Start Date"
+                        value={startFinishDate}
+                        onChange={(e) => searchByDate(e)}
+                      />
+                    </div>
+                  </div>
+                  {/* End Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder=" End Date"
+                        value={endDate}
+                        onChange={(e) => searchByEndDate(e)}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-lg-12 mb-3 print-btn">
+                    <button
+                      className="btn btn-sm btn-primary "
+                      onClick={() => {
+                        handlePrint();
+                      }}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
                   </div>
                 </div>
-                <div className="col-lg-12 mb-3 print-btn">
-                  <button
-                    className="btn btn-sm btn-primary "
-                    onClick={() => {handlePrint()}}
-                  >
-                    {" "}
-                    <i class="fas fa-print"></i> print
-                  </button>
-                </div>
-              </div>
                 {FinishedCases?.length > 0 && (
-                  <table ref={userRef} style={{ width: "100%" }} className="table text-center table-bordered">
+                  <table
+                    ref={userRef}
+                    style={{ width: "100%" }}
+                    className="table text-center table-bordered"
+                  >
                     <thead>
                       <tr className="table-secondary">
                         <th scope="col">#</th>
+                        <th scope="col">StartedAtAt</th>
                         <th scope="col">FinishedAt</th>
-                        <th scope="col" onClick={ () => sortCasesByTechnacianName(FinishedCases,"End")}>Technacian</th>
+                        <th scope="col">day(s)</th>
+                        <th
+                          scope="col"
+                          onClick={() =>
+                            sortCasesByTechnacianName(FinishedCases, "End")
+                          }
+                        >
+                          Technacian
+                        </th>
                         <th scope="col">Doctor</th>
                         <th scope="col">Patient</th>
                         <th scope="col">#teeth</th>
@@ -1270,7 +1623,14 @@ const buffCaseHandle = (item) => {
                           data-bs-target="#viewModal"
                         >
                           <td>{item.caseNumber}</td>
+                          <td>{getStartingDate(item)}</td>
                           <td>{getFinisheingDate(item)}</td>
+                          <td>
+                            {handleCalculate(
+                              getFullStartingDate(item),
+                              getFullFinisheingDate(item)
+                            )}
+                          </td>
                           <td>{getTechnicainName(item)}</td>
                           <td>{item?.dentistObj?.name}</td>
                           <td>{item.patientName}</td>
@@ -1307,7 +1667,8 @@ const buffCaseHandle = (item) => {
                               <b>{sumOfTeethNumbersLength("End")}</b>
                             </td>
                           </tr>
-                          {((departments[0].name === "cadCam") || (departments[0].name === "fitting")) && (
+                          {(departments[0].name === "cadCam" ||
+                            departments[0].name === "fitting") && (
                             <tr>
                               <td className="f-bold c-success" colSpan={5}>
                                 <b>Total Without Study</b>
@@ -1343,47 +1704,47 @@ const buffCaseHandle = (item) => {
                     </tbody>
                   </table>
                 )}
-            </div>
+              </div>
               {FinishedCases?.length <= 0 && (
                 <div className="text-center">
                   <h6>No have Cases </h6>
                 </div>
               )}
-          </div>
+            </div>
           </div>
         </div>
       </div>
-      {FinishedCases.length > 0 &&
-      <div
-            class="modal fade"
-            id="viewModal"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            tabindex="-1"
-            aria-labelledby="exampleModalLabel"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog modal-xl">
-              <div class="modal-content">
-                <div class={`modal-header  text-white bg-primary`}>
-                  <h1 class="modal-title fs-5" id="exampleModalLabel">
-                    Case Information # {buffCase?.caseNumber}
-                  </h1>
-                  <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div class="modal-body">
-                  {console.log('buffCase',buffCase)}
-                  {buffCase && <ViewCase caseModel={buffCase} />}
-                </div>
+      {FinishedCases.length > 0 && (
+        <div
+          class="modal fade"
+          id="viewModal"
+          data-bs-backdrop="static"
+          data-bs-keyboard="false"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+              <div class={`modal-header  text-white bg-primary`}>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">
+                  Case Information # {buffCase?.caseNumber}
+                </h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                {console.log("buffCase", buffCase)}
+                {buffCase && <ViewCase caseModel={buffCase} />}
               </div>
             </div>
-      </div>
-       }
+          </div>
+        </div>
+      )}
     </div>
   );
 };
