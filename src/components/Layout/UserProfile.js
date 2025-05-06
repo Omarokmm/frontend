@@ -90,9 +90,15 @@ const UserProfile = () => {
           setStartCases(result.casesStart);
           setBuffStartingCasesUser(result.casesStart);
           // Pauseing Cases
-          console.log("pausing", result.casesPause);
-          setPauseCases(result.casesPause);
-          setBuffCasesHoldingUser(result.casesPause);
+       if (userData.lastName === "Jamous") {
+            setPauseCases(result.casesHolding);
+            setBuffCasesHoldingUser(result.casesHolding);
+          } else {
+            // Pauseing Cases
+            console.log("pausing", result.casesPause);
+            setPauseCases(result.casesPause);
+            setBuffCasesHoldingUser(result.casesPause);
+          }
         }
       })
       .catch((error) => {
