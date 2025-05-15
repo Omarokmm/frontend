@@ -93,10 +93,10 @@ const Shipments = () => {
     axios
       .get(`${_global.BASE_URL}cases/cases-by-month-for-shipment`)
       .then((res) => {
-        const result = res.cases;
+        const result = res.data.cases;
         setCases(result)
         setCasesOptions(
-          res.cases.map((c) => {
+          res.data.cases.map((c) => {
             return {
               label: `${c.caseNumber}`,
               value: c._id,
