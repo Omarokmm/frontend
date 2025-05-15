@@ -91,9 +91,9 @@ const Shipments = () => {
       });
     //  get cases 
     axios
-      .get(`${_global.BASE_URL}cases`)
+      .get(`${_global.BASE_URL}cases/cases-by-month-for-shipment`)
       .then((res) => {
-        const result = res.data;
+        const result = res.data.cases;
         setCases(result)
         setCasesOptions(
           res.data.map((c) => {
