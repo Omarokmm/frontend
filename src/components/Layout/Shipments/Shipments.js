@@ -96,7 +96,7 @@ const Shipments = () => {
         const result = res.cases;
         setCases(result)
         setCasesOptions(
-          res.data.map((c) => {
+          res.cases.map((c) => {
             return {
               label: `${c.caseNumber}`,
               value: c._id,
