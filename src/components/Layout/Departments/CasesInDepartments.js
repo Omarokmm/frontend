@@ -1704,7 +1704,7 @@ const CasesInDepartments = () => {
                       {userData.isAdmin && (
                         <>
                           <tr>
-                            <td className="f-bold c-success" colSpan={5}>
+                            <td className="f-bold c-success" colSpan={7}>
                               <b>Total of Pieces</b>
                             </td>
                             <td className="bg-success p-2 text-dark bg-opacity-50">
@@ -1714,7 +1714,7 @@ const CasesInDepartments = () => {
                           {(departments[0].name === "cadCam" ||
                             departments[0].name === "fitting") && (
                             <tr>
-                              <td className="f-bold c-success" colSpan={5}>
+                              <td className="f-bold c-success" colSpan={7}>
                                 <b>Total Without Study</b>
                               </td>
                               <td className="bg-success p-2 text-dark bg-opacity-50">
@@ -1728,7 +1728,7 @@ const CasesInDepartments = () => {
                             </tr>
                           )}
                           <tr>
-                            <td colSpan={6}>
+                            <td colSpan={8}>
                               <div className="summary-teeth-cases">
                                 {groupCasesTeethNumbersByName("End")?.map(
                                   (item) => (
