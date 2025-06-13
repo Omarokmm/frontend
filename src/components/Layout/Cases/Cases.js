@@ -4793,7 +4793,7 @@ const Cases = () => {
                     <h2 className="c-success">Patient Name: </h2>
                     <div class="form-check  text-right">
                       <input
-                        class="form-check-input"
+                        class="form-check-input check-input-print"
                         type="checkbox"
                         value=""
                         id="have-photo"
@@ -4879,27 +4879,27 @@ const Cases = () => {
                   <b>Cad Cam: </b>{" "}
                   <span>
                     {" "}
-                    _________ <span>Date</span>____________
+                    _______ <span>Date</span>______
                   </span>
                 </div>
                 <div className="mb-3 f-18">
                   <b>Fitting: </b>{" "}
                   <span>
                     {" "}
-                    ___________ <span>Date</span>____________
+                    _______ <span>Date</span>_______
                   </span>
                 </div>
                 <div className="mb-3 f-18">
                   <b>Ceramic: </b>{" "}
                   <span>
                     {" "}
-                    _________ <span>Date</span>____________
+                    _______ <span>Date</span>_______
                   </span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-2 f-18">
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="email"
@@ -4910,7 +4910,7 @@ const Cases = () => {
                   </div>
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="whatsapp"
@@ -4921,7 +4921,7 @@ const Cases = () => {
                   </div>
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="telgram"
@@ -4932,7 +4932,7 @@ const Cases = () => {
                   </div>
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="itero"
@@ -4974,7 +4974,7 @@ const Cases = () => {
                 <div className="d-flex justify-content-between gap-3 align-items-center mb-2 f-18">
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="zoho"
@@ -4985,7 +4985,7 @@ const Cases = () => {
                   </div>
                   <div class="form-check ">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="alameen"
@@ -4998,7 +4998,7 @@ const Cases = () => {
                 <div className="d-flex justify-content-between align-items-center f-18">
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="photo"
@@ -5009,7 +5009,7 @@ const Cases = () => {
                   </div>
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="Invoice"
@@ -5020,7 +5020,7 @@ const Cases = () => {
                   </div>
                   <div class="form-check">
                     <input
-                      class="form-check-input"
+                      class="form-check-input check-input-print"
                       type="checkbox"
                       value=""
                       id="Email"

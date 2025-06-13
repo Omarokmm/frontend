@@ -60,16 +60,22 @@
   padding: 0 7px;
   border-radius: 5px;
 }
-.w-fit{
-  width: fit-content !important
+.w-fit {
+  width: fit-content !important;
 }
-.working-table{
+.working-table {
   font-size: 11px !important;
   text-align: center;
 }
-.working-table th,.working-table td {
+.working-table th,
+.working-table td {
   font-size: 11px !important;
   padding: 2px !important;
+}
+.check-input-print {
+  background-color: #f9f9f9 !important;
+  border: medium solid #d75252 !important;
+  /* border-width: medium; */
 }
 /* .border-dashed{
     width: fit-content;
