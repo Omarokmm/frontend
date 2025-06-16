@@ -61,7 +61,7 @@ const Users = () => {
           axios
           .get(`${_global.BASE_URL}cases/cases-by-month`)
           .then((res) => {
-            const result = res.data;
+            const result = res.data.cases;
             setAllBufferCases(result);
             console.log("result",result)
             setAllCases(result.map((c) => {
