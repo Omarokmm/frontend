@@ -189,7 +189,7 @@ const Cases = () => {
                 r.delivering.status.isEnd === false &&
                 r.isHold === false &&
                 r.isStudy === false)
-          )
+          ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
         );
         const casesWork = result.filter(
           (r) =>
@@ -253,7 +253,8 @@ const Cases = () => {
                     r.delivering.status.isEnd === false &&
                     r.isHold === false &&
                     r.isStudy === false
-                )
+                ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
+                
               )
             );
             setRedoCasesInClinics(
@@ -591,7 +592,7 @@ const Cases = () => {
                 r.delivering.status.isEnd === false &&
                 r.isHold === false &&
                 r.isStudy === false)
-          )
+          ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
         );
       }
     }
@@ -827,7 +828,7 @@ const Cases = () => {
                 r.delivering.status.isEnd === false &&
                 r.isHold === false &&
                 r.isStudy === false)
-          )
+          ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
         );
         setForWorkCases(
           result.filter(
