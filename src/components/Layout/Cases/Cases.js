@@ -103,6 +103,7 @@ const Cases = () => {
   const [clinics, setClinics] = useState([]);
   const [forShipments, setForShipments] = useState([]);
   const [inProcessCases, setInProcessCases] = useState([]);
+  const [notStartCasesListIds, setNotStartCasesListIds] = useState([]);
   const [holdingCases, setHoldingCases] = useState([]);
   const [holdingBuffCases, setHoldingBuffCases] = useState([]);
   const [urgentCases, setUrgentCases] = useState([]);
@@ -168,29 +169,32 @@ const Cases = () => {
         setBuffPackingCases(_global.groupAndSortCases(packingCasesbuff));
         // console.log('packingCases',packingCases)
         // && r.delivering.status.isEnd === false
+      const notStartCasesList =   result.filter(
+          (r) =>
+            (r.cadCam.actions.length <= 0 &&
+              r.delivering.status.isEnd === false &&
+              r.delivering.status.isEnd === false &&
+              r.isHold === false &&
+              r.isStudy === false) ||
+            (r.cadCam.actions.length > 0 &&
+              r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
+                "start" &&
+              r.cadCam.status.isStart === true &&
+              r.cadCam.status.isPause === false &&
+              r.cadCam.status.isEnd === false &&
+              r.historyHolding.length > 0 &&
+              r.historyHolding[r.historyHolding.length - 1].isHold ===
+                false &&
+              r.delivering.status.isEnd === false &&
+              r.delivering.status.isEnd === false &&
+              r.isHold === false &&
+              r.isStudy === false)
+        ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
         setNotStartCases(
-          result.filter(
-            (r) =>
-              (r.cadCam.actions.length <= 0 &&
-                r.delivering.status.isEnd === false &&
-                r.delivering.status.isEnd === false &&
-                r.isHold === false &&
-                r.isStudy === false) ||
-              (r.cadCam.actions.length > 0 &&
-                r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
-                  "start" &&
-                r.cadCam.status.isStart === true &&
-                r.cadCam.status.isPause === false &&
-                r.cadCam.status.isEnd === false &&
-                r.historyHolding.length > 0 &&
-                r.historyHolding[r.historyHolding.length - 1].isHold ===
-                  false &&
-                r.delivering.status.isEnd === false &&
-                r.delivering.status.isEnd === false &&
-                r.isHold === false &&
-                r.isStudy === false)
-          ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
+          notStartCasesList
         );
+         const notStartIds = new Set(notStartCasesList.map((r) => r._id));
+        setNotStartCasesListIds(notStartIds)
         const casesWork = result.filter(
           (r) =>
             r.cadCam.actions.length <= 0 &&
@@ -208,7 +212,7 @@ const Cases = () => {
               r.receptionPacking.status.isEnd === false &&
               r.isHold === false &&
               r.cadCam.actions.length > 0
-          )
+          ).filter((r) => !notStartIds.has(r._id))
         );
         setHoldingCases(holdingCases);
         setHoldingBuffCases(holdingCases);
@@ -617,7 +621,7 @@ const Cases = () => {
               r.receptionPacking.status.isEnd === false &&
               r.isHold === false &&
               r.cadCam.actions.length > 0
-          )
+          ).filter((r) => !notStartCasesListIds.has(r._id))
         );
       }
     }
@@ -848,7 +852,7 @@ const Cases = () => {
               r.receptionPacking.status.isEnd === false &&
               r.isHold === false &&
               r.cadCam.actions.length > 0
-          )
+          ).filter((r) => !notStartCasesListIds.has(r._id))
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
         console.log(
