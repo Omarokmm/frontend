@@ -336,7 +336,7 @@ const UserProfileView = () => {
           )}
 
           {/* Notes Section */}
-          {userData.notes && userData.notes.length > 0 && (
+          {/* {userData.notes && userData.notes.length > 0 && (
             <div className="col-lg-6 mb-4">
               <div className="info-card">
                 <div className="card-header-custom">
@@ -369,7 +369,7 @@ const UserProfileView = () => {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
         </div>
       </div>
