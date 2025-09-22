@@ -55,7 +55,8 @@
 .shipping-table .case-item-shipment {
   display: grid;
   margin: 5px 0;
-  font-size: 10px;
+  /* font-size: 10px; */
+  font-size: 12px !important;
   border: 1px solid #eaeaea;
   padding: 0 7px;
   border-radius: 5px;

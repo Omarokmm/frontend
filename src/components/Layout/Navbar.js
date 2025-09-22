@@ -70,7 +70,7 @@ const Navbar = () => {
         >
           <img src="/images/logo.png" alt="" />
           <span>Arak</span>
-          <sup>1.2.5</sup>
+          <sup>1.3.6</sup>
         </div>
       </div>
       {/* <div className="search_bar">
@@ -97,8 +97,8 @@ const Navbar = () => {
             <i class="fa-regular fa-user fx-1"></i>
           </button>
           <ul class="dropdown-menu dropstart">
-            <li>
-              <a class="dropdown-item" href="#">
+            <li onClick={() => navigate("/layout/user-profile-view")}>
+              <a class="dropdown-item" >
                 {user.firstName} {user.lastName}
               </a>
             </li>

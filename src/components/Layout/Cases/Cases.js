@@ -103,6 +103,8 @@ const Cases = () => {
   const [clinics, setClinics] = useState([]);
   const [forShipments, setForShipments] = useState([]);
   const [inProcessCases, setInProcessCases] = useState([]);
+  const [forAssignCases, setForAssignCases] = useState([]);
+  const [selectedCases, setSelectedCases] = useState([]);
   const [notStartCasesListIds, setNotStartCasesListIds] = useState([]);
   const [notStudyCasesListIds, setNotStudyCasesListIds] = useState([]);
   const [holdingCases, setHoldingCases] = useState([]);
@@ -137,6 +139,482 @@ const Cases = () => {
   ]);
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(0);
+  // Assign user to case state
+  const [assignUsers, setAssignUsers] = useState([]);
+  const [assignUsersByDept, setAssignUsersByDept] = useState({});
+  const [assignSearch, setAssignSearch] = useState("");
+  const [selectedAssignUsers, setSelectedAssignUsers] = useState({}); // {deptName: userId}
+  const [isAssignLoading, setIsAssignLoading] = useState(false);
+
+  const allowedAssignDepartments = new Set(["CadCam"]);
+
+  // State for tracking assignment actions
+  const [assignmentAction, setAssignmentAction] = useState("assign"); // 'assign', 'reassign', 'unassign'
+
+  // Helper function to get current assignments for a case
+  const getCurrentAssignments = (caseItem) => {
+    if (!caseItem) return {};
+    const assignments = {};
+
+    // Check actual assignments array first (most reliable)
+    if (caseItem.assignments && Array.isArray(caseItem.assignments)) {
+      caseItem.assignments.forEach((assignment) => {
+        if (assignment.department && assignment.userId) {
+          assignments[assignment.department] = assignment.userId;
+        }
+      });
+    }
+
+    // Check department flags as fallback
+    if (caseItem.isAssignedCadCam && !assignments.CadCam)
+      assignments.CadCam = "assigned";
+    if (caseItem.isAssignedFitting && !assignments.Fitting)
+      assignments.Fitting = "assigned";
+    if (caseItem.isAssignedCeramic && !assignments.Ceramic)
+      assignments.Ceramic = "assigned";
+
+    // Also check for assignedUserIds array
+    if (
+      caseItem.assignedUserIds &&
+      Array.isArray(caseItem.assignedUserIds) &&
+      caseItem.assignedUserIds.length > 0
+    ) {
+      // If we have assignedUserIds but no specific department assignments,
+      // we can assume there are assignments
+      if (Object.keys(assignments).length === 0) {
+        assignments["Unknown"] = "assigned";
+      }
+    }
+
+    // If still no assignments found, check if case is in process (might have assignments)
+    if (Object.keys(assignments).length === 0) {
+      // Check if case has any workflow status that indicates assignments
+      if (
+        caseItem.cadCam &&
+        (caseItem.cadCam.status?.isStart || caseItem.cadCam.actions?.length > 0)
+      ) {
+        assignments["CadCam"] = "assigned";
+      }
+      if (
+        caseItem.fitting &&
+        (caseItem.fitting.status?.isStart ||
+          caseItem.fitting.actions?.length > 0)
+      ) {
+        assignments["Fitting"] = "assigned";
+      }
+      if (
+        caseItem.ceramic &&
+        (caseItem.ceramic.status?.isStart ||
+          caseItem.ceramic.actions?.length > 0)
+      ) {
+        assignments["Ceramic"] = "assigned";
+      }
+    }
+
+    // If still no assignments found, create default assignments for testing
+    if (Object.keys(assignments).length === 0) {
+      // For testing purposes, assume all departments are assigned
+      assignments["CadCam"] = "assigned";
+      assignments["Fitting"] = "assigned";
+      assignments["Ceramic"] = "assigned";
+    }
+
+    return assignments;
+  };
+
+  // Helper function to determine if case has any assignments
+  const hasAssignments = (caseItem) => {
+    const assignments = getCurrentAssignments(caseItem);
+    const hasAssignmentsResult = Object.keys(assignments).length > 0;
+
+    return hasAssignmentsResult;
+  };
+
+  // Helper function to check if case is assigned to CadCam department specifically
+  const isAssignedToCadCam = (caseItem) => {
+    // Check multiple sources for CadCam assignment
+    if (caseItem.assignments && Array.isArray(caseItem.assignments)) {
+      return caseItem.assignments.some(
+        (assignment) =>
+          assignment.department &&
+          assignment.department.toLowerCase() === "cadcam"
+      );
+    }
+
+    // Check department flags
+    if (caseItem.isAssignedCadCam === true) {
+      return true;
+    }
+
+    // Check assignedUserIds for CadCam
+    if (caseItem.assignedUserIds && Array.isArray(caseItem.assignedUserIds)) {
+      return caseItem.assignedUserIds.length > 0;
+    }
+
+    // Check workflow status for CadCam
+    if (
+      caseItem.cadCam &&
+      caseItem.cadCam.status &&
+      caseItem.cadCam.status.isStart === true
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  // Helper function to get assignment status text
+  const getAssignmentStatusText = (caseItem) => {
+    const assignments = getCurrentAssignments(caseItem);
+    const assignedDepts = Object.keys(assignments);
+
+    if (assignedDepts.length === 0) return "Not Assigned";
+    if (assignedDepts.length === 1) return `Assigned to ${assignedDepts[0]}`;
+    return `Assigned to ${assignedDepts.join(", ")}`;
+  };
+
+  // Handle case selection for bulk assignment
+  const handleCaseSelection = (caseId, isSelected) => {
+    if (isSelected) {
+      setSelectedCases((prev) => [...prev, caseId]);
+    } else {
+      setSelectedCases((prev) => prev.filter((id) => id !== caseId));
+    }
+  };
+
+  const handleSelectAllCases = (isSelected) => {
+    if (isSelected) {
+      // Only select cases that are not assigned to CadCam
+      const selectableCases = forAssignCases
+        .filter((caseItem) => !isAssignedToCadCam(caseItem))
+        .map((caseItem) => caseItem._id);
+      setSelectedCases(selectableCases);
+    } else {
+      setSelectedCases([]);
+    }
+  };
+
+  const openAssignModal = (caseItem, action = "assign") => {
+    setBuffCase(caseItem);
+    setAssignmentAction(action);
+
+    // For reassign, pre-populate with current assignments
+    if (action === "reassign") {
+      const currentAssignments = getCurrentAssignments(caseItem);
+      const preSelectedUsers = {};
+
+      Object.entries(currentAssignments).forEach(([deptName, userId]) => {
+        if (userId && userId !== "assigned") {
+          preSelectedUsers[deptName] = userId;
+        }
+      });
+
+      setSelectedAssignUsers(preSelectedUsers);
+    } else {
+      // For assign and unassign, start with empty selections
+      setSelectedAssignUsers({});
+    }
+
+    if (assignUsers.length === 0) {
+      axios
+        .get(`${_global.BASE_URL}users`)
+        .then((res) => {
+          const list = (res.data || []).filter((u) => u.active === true);
+          setAssignUsers(list);
+          groupUsersByDepartment(list);
+        })
+        .catch(() => {});
+    } else {
+      groupUsersByDepartment(assignUsers);
+    }
+  };
+
+  const groupUsersByDepartment = (usersList) => {
+    const map = {};
+    usersList.forEach((u) => {
+      if (u.active !== true) return;
+      const deps = Array.isArray(u.departments) ? u.departments : [];
+      if (deps.length === 0) return; // skip users without department
+      deps.forEach((d) => {
+        const name = d?.name || d; // handle {_id,name} or id
+        if (!name || !allowedAssignDepartments.has(name)) return;
+        const key = name;
+        if (!map[key]) map[key] = [];
+        map[key].push(u);
+      });
+    });
+    setAssignUsersByDept(map);
+  };
+
+  const filteredUsersByDept = () => {
+    if (!assignSearch) return assignUsersByDept;
+    const q = assignSearch.toLowerCase();
+    const out = {};
+    Object.keys(assignUsersByDept).forEach((dep) => {
+      const list = assignUsersByDept[dep].filter(
+        (u) =>
+          (u.firstName + " " + u.lastName).toLowerCase().includes(q) ||
+          (u.email || "").toLowerCase().includes(q)
+      );
+      if (list.length > 0) out[dep] = list;
+    });
+    return out;
+  };
+
+  // Generic function to handle assign, reassign, and unassign actions
+  const handleCaseAssignment = async (
+    action = "assign",
+    caseIds = null,
+    assignments = null
+  ) => {
+    console.log("DEBUG - handleCaseAssignment called with:", {
+      action,
+      caseIds,
+      assignments,
+    });
+
+    const targetCaseIds = caseIds || (buffCase?._id ? [buffCase._id] : []);
+    console.log("DEBUG - targetCaseIds:", targetCaseIds);
+
+    let targetAssignments;
+    if (assignments) {
+      // Use provided assignments (for bulk operations)
+      targetAssignments = assignments;
+      console.log("DEBUG - using provided assignments:", targetAssignments);
+    } else {
+      // For assign, reassign, and unassign, use selected users
+      targetAssignments = Object.entries(selectedAssignUsers)
+        .filter(([deptName, userId]) => userId)
+        .map(([deptName, userId]) => ({
+          department: deptName,
+          userId: action === "unassign" ? null : userId,
+        }));
+      console.log(
+        `DEBUG - ${action} targetAssignments from selected users:`,
+        targetAssignments
+      );
+    }
+
+    if (targetCaseIds.length === 0) {
+      showToastMessage("No cases selected", "error");
+      return;
+    }
+    console.log("DEBUG - targetAssignments:", targetAssignments);
+    if (targetAssignments.length === 0) {
+      const message =
+        action === "unassign"
+          ? "No users selected for unassignment"
+          : "No users selected for assignment";
+      showToastMessage(message, "error");
+      return;
+    }
+
+    if (isAssignLoading) return;
+
+    setIsAssignLoading(true);
+    try {
+      const assignmentData = {
+        caseIds: targetCaseIds,
+        assignments: targetAssignments,
+        assignedBy: user._id,
+        assignedByName: `${user.firstName} ${user.lastName}`,
+        assignedAt: new Date().toISOString(),
+        action: action,
+      };
+
+      console.log(
+        "DEBUG - assignmentData being sent to backend:",
+        assignmentData
+      );
+      console.log(
+        "DEBUG - targetAssignments before sending:",
+        targetAssignments
+      );
+      console.log(
+        "DEBUG - assignmentData.assignments:",
+        assignmentData.assignments
+      );
+
+      const response = await fetch(`${_global.BASE_URL}cases/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(assignmentData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        const successMessage =
+          action === "unassign"
+            ? `Unassigned ${targetCaseIds.length} case(s) successfully`
+            : action === "reassign"
+            ? `Reassigned ${targetCaseIds.length} case(s) successfully`
+            : `Assigned ${targetAssignments.length} user(s) to ${targetCaseIds.length} case(s)`;
+
+        showToastMessage(successMessage, "success");
+
+        // Update local state based on action
+        if (action === "assign") {
+          // Remove assigned cases from For Assign tab
+          setForAssignCases((prev) =>
+            prev.filter((c) => !targetCaseIds.includes(c._id))
+          );
+        }
+
+        // Update case lists with assignment data
+        const updateCaseInList = (caseList) =>
+          caseList.map((c) => {
+            if (targetCaseIds.includes(c._id)) {
+              return {
+                ...c,
+                assignedUserIds:
+                  action === "unassign"
+                    ? []
+                    : targetAssignments.map((a) => a.userId),
+                assignments: action === "unassign" ? [] : targetAssignments,
+                lastAssignedBy: user._id,
+                lastAssignedByName: `${user.firstName} ${user.lastName}`,
+                lastAssignedAt: new Date().toISOString(),
+                // Update department flags based on action
+                isAssignedCadCam:
+                  action === "unassign"
+                    ? false
+                    : targetAssignments.some(
+                        (a) => a.department.toLowerCase() === "cadcam"
+                      ),
+                isAssignedFitting:
+                  action === "unassign"
+                    ? false
+                    : targetAssignments.some(
+                        (a) => a.department.toLowerCase() === "fitting"
+                      ),
+                isAssignedCeramic:
+                  action === "unassign"
+                    ? false
+                    : targetAssignments.some(
+                        (a) =>
+                          a.department.toLowerCase() === "ceramic" ||
+                          a.department.toLowerCase() === "caramic"
+                      ),
+              };
+            }
+            return c;
+          });
+
+        setAllCases(updateCaseInList);
+        setInProcessCases(updateCaseInList);
+
+        // Update buffCase if it's one of the affected cases
+        if (buffCase && targetCaseIds.includes(buffCase._id)) {
+          const updatedBuffCase = {
+            ...buffCase,
+            assignedUserIds:
+              action === "unassign"
+                ? []
+                : targetAssignments.map((a) => a.userId),
+            assignments: action === "unassign" ? [] : targetAssignments,
+            lastAssignedBy: user._id,
+            lastAssignedByName: `${user.firstName} ${user.lastName}`,
+            lastAssignedAt: new Date().toISOString(),
+          };
+          setBuffCase(updatedBuffCase);
+        }
+
+        // Clear selections after successful operation
+        setSelectedAssignUsers({});
+        if (caseIds) {
+          setSelectedCases([]);
+        }
+      } else {
+        showToastMessage(
+          result.error || result.message || `Failed to ${action} cases`,
+          "error"
+        );
+      }
+    } catch (e) {
+      console.error(`${action} assignment error:`, e);
+      showToastMessage(`Network error during ${action}`, "error");
+    } finally {
+      setIsAssignLoading(false);
+    }
+  };
+
+  // Handle assignment action based on current mode
+  const handleAssignmentAction = async () => {
+    console.log(
+      "DEBUG - handleAssignmentAction called with assignmentAction:",
+      assignmentAction
+    );
+    switch (assignmentAction) {
+      case "assign":
+        console.log("DEBUG - calling assignUserToCase");
+        await assignUserToCase();
+        break;
+      case "reassign":
+        console.log("DEBUG - calling reassignUserToCase");
+        await reassignUserToCase();
+        break;
+      case "unassign":
+        console.log("DEBUG - calling unassignUserFromCase");
+        await unassignUserFromCase();
+        break;
+      default:
+        console.log("DEBUG - default case, calling assignUserToCase");
+        await assignUserToCase();
+    }
+  };
+
+  // Assign users to a single case
+  const assignUserToCase = async () => {
+    await handleCaseAssignment("assign");
+  };
+
+  // Reassign users to a single case
+  const reassignUserToCase = async () => {
+    await handleCaseAssignment("reassign");
+  };
+
+  // Unassign users from a single case
+  const unassignUserFromCase = async () => {
+    console.log("DEBUG - unassignUserFromCase called");
+    await handleCaseAssignment("unassign");
+  };
+
+  // Bulk assign users to multiple selected cases
+  const bulkAssignUsersToCases = async () => {
+    const assignments = Object.entries(selectedAssignUsers)
+      .filter(([deptName, userId]) => userId)
+      .map(([deptName, userId]) => ({ department: deptName, userId }));
+
+    await handleCaseAssignment("assign", selectedCases, assignments);
+  };
+
+  // Bulk reassign users to multiple selected cases
+  const bulkReassignUsersToCases = async () => {
+    console.log(
+      "DEBUG -selectedAssignUsersselectedAssignUsersselectedAssignUsers ",
+      selectedAssignUsers
+    );
+    const assignments = Object.entries(selectedAssignUsers)
+      .filter(([deptName, userId]) => userId)
+      .map(([deptName, userId]) => ({ department: deptName, userId }));
+
+    await handleCaseAssignment("reassign", selectedCases, assignments);
+  };
+
+  // Bulk unassign users from multiple selected cases
+  const bulkUnassignUsersFromCases = async () => {
+    // For bulk unassign, use selected users (same as assign and reassign)
+    const assignments = Object.entries(selectedAssignUsers)
+      .filter(([deptName, userId]) => userId)
+      .map(([deptName, userId]) => ({
+        department: deptName,
+        userId: null, // For unassign, userId is null
+      }));
+
+    console.log("DEBUG - bulk unassign assignments:", assignments);
+    await handleCaseAssignment("unassign", selectedCases, assignments);
+  };
   useEffect(() => {
     // get cases
     axios
@@ -146,27 +624,29 @@ const Cases = () => {
         const holdingCases = res.data.holdingCases;
         const urgentCases = res.data.urgentCases;
         const redoCases = res.data.redoCases;
-        const studyCases = res.data.studyCases.filter(
-          (r) =>
-            (r.cadCam.actions.length <= 0 &&
-              r.delivering.status.isEnd === false &&
-              r.delivering.status.isEnd === false &&
-              r.isHold === false &&
-              r.isStudy === true) ||
-            (r.cadCam.actions.length > 0 &&
-              r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
-                "start" &&
-              r.cadCam.status.isStart === true &&
-              r.cadCam.status.isPause === false &&
-              r.cadCam.status.isEnd === false &&
-              r.historyHolding.length > 0 &&
-              r.historyHolding[r.historyHolding.length - 1].isHold ===
-                false &&
-              r.delivering.status.isEnd === false &&
-              r.delivering.status.isEnd === false &&
-              r.isHold === false &&
-              r.isStudy === true)
-        ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn));
+        const studyCases = res.data.studyCases
+          .filter(
+            (r) =>
+              (r.cadCam.actions.length <= 0 &&
+                r.delivering.status.isEnd === false &&
+                r.delivering.status.isEnd === false &&
+                r.isHold === false &&
+                r.isStudy === true) ||
+              (r.cadCam.actions.length > 0 &&
+                r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
+                  "start" &&
+                r.cadCam.status.isStart === true &&
+                r.cadCam.status.isPause === false &&
+                r.cadCam.status.isEnd === false &&
+                r.historyHolding.length > 0 &&
+                r.historyHolding[r.historyHolding.length - 1].isHold ===
+                  false &&
+                r.delivering.status.isEnd === false &&
+                r.delivering.status.isEnd === false &&
+                r.isHold === false &&
+                r.isStudy === true)
+          )
+          .sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn));
         setBuffUrgentCases(urgentCases);
         setRedoCases(redoCases);
         setRedoBuffCases(redoCases);
@@ -188,34 +668,34 @@ const Cases = () => {
         setBuffPackingCases(_global.groupAndSortCases(packingCasesbuff));
         // console.log('packingCases',packingCases)
         // && r.delivering.status.isEnd === false
-      const notStartCasesList =   result.filter(
-          (r) =>
-            (r.cadCam.actions.length <= 0 &&
-              r.delivering.status.isEnd === false &&
-              r.delivering.status.isEnd === false &&
-              r.isHold === false &&
-              r.isStudy === false) ||
-            (r.cadCam.actions.length > 0 &&
-              r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
-                "start" &&
-              r.cadCam.status.isStart === true &&
-              r.cadCam.status.isPause === false &&
-              r.cadCam.status.isEnd === false &&
-              r.historyHolding.length > 0 &&
-              r.historyHolding[r.historyHolding.length - 1].isHold ===
-                false &&
-              r.delivering.status.isEnd === false &&
-              r.delivering.status.isEnd === false &&
-              r.isHold === false &&
-              r.isStudy === false)
-        ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
-        setNotStartCases(
-          notStartCasesList
-        );
-         const notStartIds = new Set(notStartCasesList.map((r) => r._id));
+        const notStartCasesList = result
+          .filter(
+            (r) =>
+              (r.cadCam.actions.length <= 0 &&
+                r.delivering.status.isEnd === false &&
+                r.delivering.status.isEnd === false &&
+                r.isHold === false &&
+                r.isStudy === false) ||
+              (r.cadCam.actions.length > 0 &&
+                r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
+                  "start" &&
+                r.cadCam.status.isStart === true &&
+                r.cadCam.status.isPause === false &&
+                r.cadCam.status.isEnd === false &&
+                r.historyHolding.length > 0 &&
+                r.historyHolding[r.historyHolding.length - 1].isHold ===
+                  false &&
+                r.delivering.status.isEnd === false &&
+                r.delivering.status.isEnd === false &&
+                r.isHold === false &&
+                r.isStudy === false)
+          )
+          .sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn));
+        setNotStartCases(notStartCasesList);
+        const notStartIds = new Set(notStartCasesList.map((r) => r._id));
         const studyIds = new Set(studyCases.map((r) => r._id));
-        setNotStartCasesListIds(notStartIds)
-        setNotStudyCasesListIds(studyIds)
+        setNotStartCasesListIds(notStartIds);
+        setNotStudyCasesListIds(studyIds);
         const casesWork = result.filter(
           (r) =>
             r.cadCam.actions.length <= 0 &&
@@ -226,14 +706,16 @@ const Cases = () => {
         );
         // setForWorkCases(_global.groupAndSortCases(casesWork));
         setInProcessCases(
-          result.filter(
-            (r) =>
-              // r.cadCam.status.isStart === true &&
-              r.ceramic.status.isEnd === false &&
-              r.receptionPacking.status.isEnd === false &&
-              r.isHold === false &&
-              r.cadCam.actions.length > 0
-          ).filter((r) => !notStartIds.has(r._id) && !studyIds.has(r._id))
+          result
+            .filter(
+              (r) =>
+                // r.cadCam.status.isStart === true &&
+                r.ceramic.status.isEnd === false &&
+                r.receptionPacking.status.isEnd === false &&
+                r.isHold === false &&
+                r.cadCam.actions.length > 0
+            )
+            .filter((r) => !notStartIds.has(r._id) && !studyIds.has(r._id))
         );
         setHoldingCases(holdingCases);
         setHoldingBuffCases(holdingCases);
@@ -271,15 +753,16 @@ const Cases = () => {
             setForWorkCases(
               getClinicsWithActiveCasesNotStart(
                 resultClinics,
-                result.filter(
-                  (r) =>
-                    r.cadCam.actions.length <= 0 &&
-                    r.delivering.status.isEnd === false &&
-                    r.delivering.status.isEnd === false &&
-                    r.isHold === false &&
-                    r.isStudy === false
-                ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
-                
+                result
+                  .filter(
+                    (r) =>
+                      r.cadCam.actions.length <= 0 &&
+                      r.delivering.status.isEnd === false &&
+                      r.delivering.status.isEnd === false &&
+                      r.isHold === false &&
+                      r.isStudy === false
+                  )
+                  .sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
               )
             );
             setRedoCasesInClinics(
@@ -597,27 +1080,29 @@ const Cases = () => {
       } else {
         console.log("notStartCases");
         setNotStartCases(
-          buffAllCases.filter(
-            (r) =>
-              (r.cadCam.actions.length <= 0 &&
-                r.delivering.status.isEnd === false &&
-                r.delivering.status.isEnd === false &&
-                r.isHold === false &&
-                r.isStudy === false) ||
-              (r.cadCam.actions.length > 0 &&
-                r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
-                  "start" &&
-                r.cadCam.status.isStart === true &&
-                r.cadCam.status.isPause === false &&
-                r.cadCam.status.isEnd === false &&
-                r.historyHolding.length > 0 &&
-                r.historyHolding[r.historyHolding.length - 1].isHold ===
-                  false &&
-                r.delivering.status.isEnd === false &&
-                r.delivering.status.isEnd === false &&
-                r.isHold === false &&
-                r.isStudy === false)
-          ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
+          buffAllCases
+            .filter(
+              (r) =>
+                (r.cadCam.actions.length <= 0 &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false) ||
+                (r.cadCam.actions.length > 0 &&
+                  r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
+                    "start" &&
+                  r.cadCam.status.isStart === true &&
+                  r.cadCam.status.isPause === false &&
+                  r.cadCam.status.isEnd === false &&
+                  r.historyHolding.length > 0 &&
+                  r.historyHolding[r.historyHolding.length - 1].isHold ===
+                    false &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false)
+            )
+            .sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
         );
       }
     }
@@ -635,14 +1120,20 @@ const Cases = () => {
         setInProcessCases(filteredAllInPrgreesCases);
       } else {
         setInProcessCases(
-          buffAllCases.filter(
-            (r) =>
-              // r.cadCam.status.isStart === true &&
-              r.ceramic.status.isEnd === false &&
-              r.receptionPacking.status.isEnd === false &&
-              r.isHold === false &&
-              r.cadCam.actions.length > 0
-          ).filter((r) => !notStartCasesListIds.has(r._id) && !notStudyCasesListIds.has(r._id))
+          buffAllCases
+            .filter(
+              (r) =>
+                // r.cadCam.status.isStart === true &&
+                r.ceramic.status.isEnd === false &&
+                r.receptionPacking.status.isEnd === false &&
+                r.isHold === false &&
+                r.cadCam.actions.length > 0
+            )
+            .filter(
+              (r) =>
+                !notStartCasesListIds.has(r._id) &&
+                !notStudyCasesListIds.has(r._id)
+            )
         );
       }
     }
@@ -660,6 +1151,46 @@ const Cases = () => {
         setHoldingCases(filteredAllHoldingCases);
       } else {
         setHoldingCases(holdingBuffCases);
+      }
+    }
+    if (name === "forAssign") {
+      if (searchText !== "") {
+        const filteredForAssignCases = forAssignCases.filter(
+          (item) =>
+            item.caseNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item?.caseType?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setForAssignCases(filteredForAssignCases);
+      } else {
+        setForAssignCases(
+          buffAllCases
+            .filter(
+              (r) =>
+                (r.cadCam.actions.length <= 0 &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false) ||
+                (r.cadCam.actions.length > 0 &&
+                  r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
+                    "start" &&
+                  r.cadCam.status.isStart === true &&
+                  r.cadCam.status.isPause === false &&
+                  r.cadCam.status.isEnd === false &&
+                  r.historyHolding.length > 0 &&
+                  r.historyHolding[r.historyHolding.length - 1].isHold ===
+                    false &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false)
+            )
+            .sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
+        );
       }
     }
     if (name === "finished") {
@@ -833,27 +1364,29 @@ const Cases = () => {
         );
         // && r.delivering.status.isEnd === false
         setNotStartCases(
-          result.filter(
-            (r) =>
-              (r.cadCam.actions.length <= 0 &&
-                r.delivering.status.isEnd === false &&
-                r.delivering.status.isEnd === false &&
-                r.isHold === false &&
-                r.isStudy === false) ||
-              (r.cadCam.actions.length > 0 &&
-                r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
-                  "start" &&
-                r.cadCam.status.isStart === true &&
-                r.cadCam.status.isPause === false &&
-                r.cadCam.status.isEnd === false &&
-                r.historyHolding.length > 0 &&
-                r.historyHolding[r.historyHolding.length - 1].isHold ===
-                  false &&
-                r.delivering.status.isEnd === false &&
-                r.delivering.status.isEnd === false &&
-                r.isHold === false &&
-                r.isStudy === false)
-          ).sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
+          result
+            .filter(
+              (r) =>
+                (r.cadCam.actions.length <= 0 &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false) ||
+                (r.cadCam.actions.length > 0 &&
+                  r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
+                    "start" &&
+                  r.cadCam.status.isStart === true &&
+                  r.cadCam.status.isPause === false &&
+                  r.cadCam.status.isEnd === false &&
+                  r.historyHolding.length > 0 &&
+                  r.historyHolding[r.historyHolding.length - 1].isHold ===
+                    false &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false)
+            )
+            .sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
         );
         setForWorkCases(
           result.filter(
@@ -866,19 +1399,51 @@ const Cases = () => {
           )
         );
         setInProcessCases(
-          result.filter(
-            (r) =>
-              // r.cadCam.status.isStart === true &&
-              r.ceramic.status.isEnd === false &&
-              r.receptionPacking.status.isEnd === false &&
-              r.isHold === false &&
-              r.cadCam.actions.length > 0
-          ).filter((r) => !notStartCasesListIds.has(r._id) && !notStudyCasesListIds.has(r._id))
+          result
+            .filter(
+              (r) =>
+                // r.cadCam.status.isStart === true &&
+                r.ceramic.status.isEnd === false &&
+                r.receptionPacking.status.isEnd === false &&
+                r.isHold === false &&
+                r.cadCam.actions.length > 0
+            )
+            .filter(
+              (r) =>
+                !notStartCasesListIds.has(r._id) &&
+                !notStudyCasesListIds.has(r._id)
+            )
         );
         setHoldingCases(result.filter((r) => r.isHold === true));
         console.log(
           "Holding Cases",
           result.filter((r) => r.isHold === true)
+        );
+        // For Assign cases - same data as Not Start tab
+        setForAssignCases(
+          result
+            .filter(
+              (r) =>
+                (r.cadCam.actions.length <= 0 &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false) ||
+                (r.cadCam.actions.length > 0 &&
+                  r.cadCam.actions[r.cadCam.actions.length - 1].prfeix ===
+                    "start" &&
+                  r.cadCam.status.isStart === true &&
+                  r.cadCam.status.isPause === false &&
+                  r.cadCam.status.isEnd === false &&
+                  r.historyHolding.length > 0 &&
+                  r.historyHolding[r.historyHolding.length - 1].isHold ===
+                    false &&
+                  r.delivering.status.isEnd === false &&
+                  r.delivering.status.isEnd === false &&
+                  r.isHold === false &&
+                  r.isStudy === false)
+            )
+            .sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn))
         );
         const delayCasesfilter = result.filter((c) => filterDaley(c));
         console.log(delayCasesfilter);
@@ -1519,6 +2084,11 @@ const Cases = () => {
         totalLength += caseItem.teethNumbers.length;
       });
       return totalLength;
+    } else if (type === "ForAssign") {
+      forAssignCases.forEach((caseItem) => {
+        totalLength += caseItem.teethNumbers.length;
+      });
+      return totalLength;
     } else if (type === "progress") {
       inProcessCases.forEach((caseItem) => {
         totalLength += caseItem.teethNumbers.length;
@@ -1585,6 +2155,16 @@ const Cases = () => {
       });
     } else if (type === "Start") {
       notStartCases.forEach((singleCase) => {
+        singleCase.teethNumbers.forEach((teethNumber) => {
+          const { name } = teethNumber;
+          if (!result[name]) {
+            result[name] = 0;
+          }
+          result[name]++;
+        });
+      });
+    } else if (type === "ForAssign") {
+      forAssignCases.forEach((singleCase) => {
         singleCase.teethNumbers.forEach((teethNumber) => {
           const { name } = teethNumber;
           if (!result[name]) {
@@ -1671,7 +2251,6 @@ const Cases = () => {
   const buffCaseHandle = (item) => {
     const newItem = JSON.parse(JSON.stringify(item)); // Deep clone = new object ref
     setBuffCase(newItem);
-    console.log("buffCaseHandle", buffCase);
   };
   function extractAllCases(data) {
     if (!data || !Array.isArray(data.dentists)) return [];
@@ -1761,6 +2340,30 @@ const Cases = () => {
                 </button>
               </li>
             )}
+           {/* {user.roles[0] === _global.allRoles.admin &&    
+        <li
+              class="nav-item"
+              role="presentation"
+              onClick={() => {
+                setSearchText("");
+               
+              }}
+            >
+              <button
+                className={`nav-link ${activeTab === 15 ? "active " : ""}`}
+                style={{ backgroundColor: "#479f42", color: "white" }}
+                id="forAssign-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#forAssign-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="forAssign-tab-pane"
+                aria-selected={activeTab === 15}
+                onClick={() => handleTabChange(15)}
+              >
+                For Assign <small>({forAssignCases.length})</small>
+              </button>
+            </li>} */}
             <li
               class="nav-item"
               role="presentation"
@@ -2075,6 +2678,7 @@ const Cases = () => {
                       <th scope="col">#</th>
                       <th scope="col">Doctor </th>
                       <th scope="col">Patient</th>
+                      {/* <th scope="col">Assignment Status</th> */}
                       <th className="td-phone" scope="col">
                         #Unites
                       </th>
@@ -2124,6 +2728,19 @@ const Cases = () => {
                         </td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
+                        {/* <td>
+                          <div className="assignment-status">
+                            <span
+                              className={`badge ${
+                                hasAssignments(item)
+                                  ? "bg-success"
+                                  : "bg-secondary"
+                              }`}
+                            >
+                              {getAssignmentStatusText(item)}
+                            </span>
+                          </div>
+                        </td> */}
                         <td
                           className={`${
                             item.teethNumbers.length <= 0
@@ -2152,6 +2769,47 @@ const Cases = () => {
                             >
                               <i class="fa-solid fa-eye"></i>
                             </span>
+                            {/* {user.roles[0] === _global.allRoles.admin && (
+                              <>
+                                <span
+                                  className="c-primary"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#assignUserModal"
+                                  onClick={() =>
+                                    openAssignModal(item, "assign")
+                                  }
+                                  title="Assign User"
+                                >
+                                  <i class="fa-solid fa-user-plus"></i>
+                                </span>
+                                {hasAssignments(item) && (
+                                  <>
+                                    <span
+                                      className="c-warning"
+                                      data-bs-toggle="modal"
+                                      data-bs-target="#assignUserModal"
+                                      onClick={() =>
+                                        openAssignModal(item, "reassign")
+                                      }
+                                      title="Reassign User"
+                                    >
+                                      <i class="fa-solid fa-user-edit"></i>
+                                    </span>
+                                    <span
+                                      className="c-danger"
+                                      data-bs-toggle="modal"
+                                      data-bs-target="#assignUserModal"
+                                      onClick={() =>
+                                        openAssignModal(item, "unassign")
+                                      }
+                                      title="Unassign User"
+                                    >
+                                      <i class="fa-solid fa-user-minus"></i>
+                                    </span>
+                                  </>
+                                )}
+                              </>
+                            )} */}
                             <span
                               className="c-success"
                               onClick={() => viewCaseHandle(item, "process")}
@@ -2314,10 +2972,149 @@ const Cases = () => {
                   onChange={(e) => searchByName(e.target.value, "notStart")}
                 />
               </div>
+                {/* Selection Controls */}
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    {/* <div className="d-flex align-items-center">
+                      <input
+                        type="checkbox"
+                        className="form-check-input me-2"
+                        checked={(() => {
+                          const selectableCases = forAssignCases.filter(item => !isAssignedToCadCam(item));
+                          return selectedCases.length === selectableCases.length && selectableCases.length > 0;
+                        })()}
+                        onChange={(e) => handleSelectAllCases(e.target.checked)}
+                      />
+                      <label className="form-check-label">
+                        Select All ({selectedCases.length}/{forAssignCases.filter(item => !isAssignedToCadCam(item)).length} selectable)
+                      </label>
+                    </div> */}
+                    {selectedCases.length > 0 && (
+                      <div className="btn-group" role="group">
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => {
+                            setBuffCase(null); // Clear single case selection
+                            setAssignmentAction("assign");
+                            setSelectedAssignUsers({});
+                            // Load users if not already loaded
+                            if (assignUsers.length === 0) {
+                              axios
+                                .get(`${_global.BASE_URL}users`)
+                                .then((res) => {
+                                  const list = (res.data || []).filter(
+                                    (u) => u.active === true
+                                  );
+                                  setAssignUsers(list);
+                                  const usersByDept = {};
+                                  list.forEach((u) => {
+                                    if (Array.isArray(u.departments)) {
+                                      u.departments.forEach((d) => {
+                                        if (
+                                          allowedAssignDepartments.has(d.name)
+                                        ) {
+                                          if (!usersByDept[d.name])
+                                            usersByDept[d.name] = [];
+                                          usersByDept[d.name].push(u);
+                                        }
+                                      });
+                                    }
+                                  });
+                                  setAssignUsersByDept(usersByDept);
+                                })
+                                .catch((error) => {
+                                  console.error("Error fetching users:", error);
+                                });
+                            }
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#assignUserModal"
+                        >
+                          <i class="fa-solid fa-user-plus me-1"></i>
+                          Assign
+                        </button>
+                        {/* <button
+                          className="btn btn-warning btn-sm"
+                          onClick={() => {
+                            setBuffCase(null);
+                            setAssignmentAction('reassign');
+                            setSelectedAssignUsers({});
+                            // Load users if not already loaded
+                            if (assignUsers.length === 0) {
+                              axios
+                                .get(`${_global.BASE_URL}users`)
+                                .then((res) => {
+                                  const list = (res.data || []).filter((u) => u.active === true);
+                                  setAssignUsers(list);
+                                  const usersByDept = {};
+                                  list.forEach((u) => {
+                                    if (Array.isArray(u.departments)) {
+                                      u.departments.forEach((d) => {
+                                        if (allowedAssignDepartments.has(d.name)) {
+                                          if (!usersByDept[d.name]) usersByDept[d.name] = [];
+                                          usersByDept[d.name].push(u);
+                                        }
+                                      });
+                                    }
+                                  });
+                                  setAssignUsersByDept(usersByDept);
+                                })
+                                .catch((error) => {
+                                  console.error("Error fetching users:", error);
+                                });
+                            }
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#assignUserModal"
+                        >
+                          <i class="fa-solid fa-user-edit me-1"></i>
+                          Reassign
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => {
+                            setBuffCase(null);
+                            setAssignmentAction('unassign');
+                            setSelectedAssignUsers({});
+                            // Load users if not already loaded
+                            if (assignUsers.length === 0) {
+                              axios
+                                .get(`${_global.BASE_URL}users`)
+                                .then((res) => {
+                                  const list = (res.data || []).filter((u) => u.active === true);
+                                  setAssignUsers(list);
+                                  const usersByDept = {};
+                                  list.forEach((u) => {
+                                    if (Array.isArray(u.departments)) {
+                                      u.departments.forEach((d) => {
+                                        if (allowedAssignDepartments.has(d.name)) {
+                                          if (!usersByDept[d.name]) usersByDept[d.name] = [];
+                                          usersByDept[d.name].push(u);
+                                        }
+                                      });
+                                    }
+                                  });
+                                  setAssignUsersByDept(usersByDept);
+                                })
+                                .catch((error) => {
+                                  console.error("Error fetching users:", error);
+                                });
+                            }
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#assignUserModal"
+                        >
+                          <i class="fa-solid fa-user-minus me-1"></i>
+                          Unassign
+                        </button> */}
+                      </div>
+                    )}
+                  </div>
               {notStartCases.length > 0 && (
                 <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
+                    <th scope="col">Select</th>
+
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor Name</th>
                       <th scope="col">Patient Name</th>
@@ -2333,6 +3130,25 @@ const Cases = () => {
                   <tbody>
                     {notStartCases.map((item, index) => (
                       <tr key={item._id} className={checkNotStartDelay(item)}>
+                         <td>
+                            <input
+                              type="checkbox"
+                              className="form-check-input"
+                              checked={
+                                item.isAssignedCadCam ||
+                                selectedCases.includes(item._id)
+                              }
+                              disabled={item.isAssignedCadCam}
+                              onChange={(e) =>
+                                handleCaseSelection(item._id, e.target.checked)
+                              }
+                              title={
+                                isAssignedToCadCam(item)
+                                  ? "Case is assigned to CadCam - cannot be selected"
+                                  : "Select case for assignment"
+                              }
+                            />
+                          </td>
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
@@ -2353,6 +3169,32 @@ const Cases = () => {
                         </td>
                         <td>
                           <div className="actions-btns">
+                          {item.isAssignedCadCam && (
+                                <>
+                                  <span
+                                    className="c-warning"
+                                    onClick={() =>
+                                      openAssignModal(item, "reassign")
+                                    }
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#assignUserModal"
+                                    title="Reassign User"
+                                  >
+                                    <i class="fa-solid fa-user-edit"></i>
+                                  </span>
+                                  <span
+                                    className="c-danger"
+                                    onClick={() =>
+                                      openAssignModal(item, "unassign")
+                                    }
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#assignUserModal"
+                                    title="Unassign User"
+                                  >
+                                    <i class="fa-solid fa-user-minus"></i>
+                                  </span>
+                                </>
+                              )}
                             <span
                               className="c-success"
                               // onClick={() => viewCaseHandle(item, "view")}
@@ -2454,6 +3296,342 @@ const Cases = () => {
               )}
               {notStartCases.length <= 0 && (
                 <div className="no-content">No Cases Not Start yet!</div>
+              )}
+            </div>
+            {/* For Assign */}
+            <div
+              className={`tab-pane fade ${
+                activeTab === 15 ? "show active" : ""
+              }`}
+              id="forAssign-tab-pane"
+              role="tabpanel"
+              aria-labelledby="forAssign-tab"
+              tabIndex="15"
+            >
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="searchText"
+                  className="form-control"
+                  placeholder="Search by name | case number | case type "
+                  value={searchText}
+                  onChange={(e) => searchByName(e.target.value, "forAssign")}
+                />
+              </div>
+              {forAssignCases.length > 0 && (
+                <div>
+                  {/* Selection Controls */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    {/* <div className="d-flex align-items-center">
+                      <input
+                        type="checkbox"
+                        className="form-check-input me-2"
+                        checked={(() => {
+                          const selectableCases = forAssignCases.filter(item => !isAssignedToCadCam(item));
+                          return selectedCases.length === selectableCases.length && selectableCases.length > 0;
+                        })()}
+                        onChange={(e) => handleSelectAllCases(e.target.checked)}
+                      />
+                      <label className="form-check-label">
+                        Select All ({selectedCases.length}/{forAssignCases.filter(item => !isAssignedToCadCam(item)).length} selectable)
+                      </label>
+                    </div> */}
+                    {selectedCases.length > 0 && (
+                      <div className="btn-group" role="group">
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => {
+                            setBuffCase(null); // Clear single case selection
+                            setAssignmentAction("assign");
+                            setSelectedAssignUsers({});
+                            // Load users if not already loaded
+                            if (assignUsers.length === 0) {
+                              axios
+                                .get(`${_global.BASE_URL}users`)
+                                .then((res) => {
+                                  const list = (res.data || []).filter(
+                                    (u) => u.active === true
+                                  );
+                                  setAssignUsers(list);
+                                  const usersByDept = {};
+                                  list.forEach((u) => {
+                                    if (Array.isArray(u.departments)) {
+                                      u.departments.forEach((d) => {
+                                        if (
+                                          allowedAssignDepartments.has(d.name)
+                                        ) {
+                                          if (!usersByDept[d.name])
+                                            usersByDept[d.name] = [];
+                                          usersByDept[d.name].push(u);
+                                        }
+                                      });
+                                    }
+                                  });
+                                  setAssignUsersByDept(usersByDept);
+                                })
+                                .catch((error) => {
+                                  console.error("Error fetching users:", error);
+                                });
+                            }
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#assignUserModal"
+                        >
+                          <i class="fa-solid fa-user-plus me-1"></i>
+                          Assign
+                        </button>
+                        {/* <button
+                          className="btn btn-warning btn-sm"
+                          onClick={() => {
+                            setBuffCase(null);
+                            setAssignmentAction('reassign');
+                            setSelectedAssignUsers({});
+                            // Load users if not already loaded
+                            if (assignUsers.length === 0) {
+                              axios
+                                .get(`${_global.BASE_URL}users`)
+                                .then((res) => {
+                                  const list = (res.data || []).filter((u) => u.active === true);
+                                  setAssignUsers(list);
+                                  const usersByDept = {};
+                                  list.forEach((u) => {
+                                    if (Array.isArray(u.departments)) {
+                                      u.departments.forEach((d) => {
+                                        if (allowedAssignDepartments.has(d.name)) {
+                                          if (!usersByDept[d.name]) usersByDept[d.name] = [];
+                                          usersByDept[d.name].push(u);
+                                        }
+                                      });
+                                    }
+                                  });
+                                  setAssignUsersByDept(usersByDept);
+                                })
+                                .catch((error) => {
+                                  console.error("Error fetching users:", error);
+                                });
+                            }
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#assignUserModal"
+                        >
+                          <i class="fa-solid fa-user-edit me-1"></i>
+                          Reassign
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => {
+                            setBuffCase(null);
+                            setAssignmentAction('unassign');
+                            setSelectedAssignUsers({});
+                            // Load users if not already loaded
+                            if (assignUsers.length === 0) {
+                              axios
+                                .get(`${_global.BASE_URL}users`)
+                                .then((res) => {
+                                  const list = (res.data || []).filter((u) => u.active === true);
+                                  setAssignUsers(list);
+                                  const usersByDept = {};
+                                  list.forEach((u) => {
+                                    if (Array.isArray(u.departments)) {
+                                      u.departments.forEach((d) => {
+                                        if (allowedAssignDepartments.has(d.name)) {
+                                          if (!usersByDept[d.name]) usersByDept[d.name] = [];
+                                          usersByDept[d.name].push(u);
+                                        }
+                                      });
+                                    }
+                                  });
+                                  setAssignUsersByDept(usersByDept);
+                                })
+                                .catch((error) => {
+                                  console.error("Error fetching users:", error);
+                                });
+                            }
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#assignUserModal"
+                        >
+                          <i class="fa-solid fa-user-minus me-1"></i>
+                          Unassign
+                        </button> */}
+                      </div>
+                    )}
+                  </div>
+
+                  <table className="table table-responsive text-center table-bordered">
+                    <thead>
+                      <tr className="table-secondary">
+                        <th scope="col">Select</th>
+                        <th scope="col">#Case</th>
+                        <th scope="col">Doctor Name</th>
+                        <th scope="col">Patient Name</th>
+                        <th className="td-phone" scope="col">
+                          #Unites
+                        </th>
+                        <th scope="col">In</th>
+                        <th scope="col">Due</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {forAssignCases.map((item, index) => (
+                        <tr key={item._id} className={checkNotStartDelay(item)}>
+                          <td>
+                            <input
+                              type="checkbox"
+                              className="form-check-input"
+                              checked={
+                                item.isAssignedCadCam ||
+                                selectedCases.includes(item._id)
+                              }
+                              disabled={item.isAssignedCadCam}
+                              onChange={(e) =>
+                                handleCaseSelection(item._id, e.target.checked)
+                              }
+                              title={
+                                isAssignedToCadCam(item)
+                                  ? "Case is assigned to CadCam - cannot be selected"
+                                  : "Select case for assignment"
+                              }
+                            />
+                          </td>
+                          <td>{item.caseNumber}</td>
+                          <td>{item.dentistObj.name}</td>
+                          <td>{item.patientName}</td>
+                          <td
+                            className={`${
+                              item.teethNumbers.length <= 0
+                                ? "bg-danger"
+                                : "bg-white"
+                            } td-phone`}
+                          >
+                            {item.teethNumbers.length}
+                          </td>
+                          <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                          <td>
+                            {item.dateOut &&
+                              _global.formatDateToYYYYMMDD(item.dateOut)}
+                          </td>
+                          <td>
+                            <div className="actions-btns">
+                              {/* <span
+                                className="c-primary"
+                                onClick={() => openAssignModal(item, "assign")}
+                                data-bs-toggle="modal"
+                                data-bs-target="#assignUserModal"
+                                title="Assign User"
+                              >
+                                <i class="fa-solid fa-user-plus"></i>
+                              </span> */}
+                              {item.isAssignedCadCam && (
+                                <>
+                                  <span
+                                    className="c-warning"
+                                    onClick={() =>
+                                      openAssignModal(item, "reassign")
+                                    }
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#assignUserModal"
+                                    title="Reassign User"
+                                  >
+                                    <i class="fa-solid fa-user-edit"></i>
+                                  </span>
+                                  <span
+                                    className="c-danger"
+                                    onClick={() =>
+                                      openAssignModal(item, "unassign")
+                                    }
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#assignUserModal"
+                                    title="Unassign User"
+                                  >
+                                    <i class="fa-solid fa-user-minus"></i>
+                                  </span>
+                                </>
+                              )}
+                              <span
+                                className="c-success"
+                                onClick={() => {
+                                  buffCaseHandle(item);
+                                }}
+                                data-bs-toggle="modal"
+                                data-bs-target="#viewModal"
+                                title="View Case"
+                              >
+                                <i class="fa-solid fa-eye"></i>
+                              </span>
+                              <span
+                                className="c-success"
+                                onClick={() => viewCaseHandle(item, "process")}
+                              >
+                                <i class="fa-brands fa-squarespace"></i>
+                              </span>
+
+                              {((user.roles[0] ===
+                                _global.allRoles.technician &&
+                                user.lastName === "Jamous") ||
+                                (user.roles[0] === _global.allRoles.admin &&
+                                  departments[0].name === "QC")) && (
+                                <span
+                                  className="c-primary"
+                                  onClick={(e) => editCase(item._id)}
+                                >
+                                  <i class="fas fa-edit"></i>
+                                </span>
+                              )}
+                              {(user.firstName === "Fake" ||
+                                user.roles[0] === _global.allRoles.admin) && (
+                                <span
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#deleteCaseModal"
+                                  onClick={() => {
+                                    setBuffCase(item);
+                                  }}
+                                >
+                                  <i className="fa-solid fa-trash-can"></i>
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {user.roles[0] === _global.allRoles.admin && (
+                        <>
+                          <tr>
+                            <td className="f-bold c-success" colSpan={6}>
+                              <b>Total of Pieces</b>
+                            </td>
+                            <td
+                              className="bg-success p-2 text-dark bg-opacity-50"
+                              colSpan={2}
+                            >
+                              <b>{sumOfTeethNumbersLength("ForAssign")}</b>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colSpan={8}>
+                              <div className="summary-teeth-cases">
+                                {groupCasesTeethNumbersByName("ForAssign")?.map(
+                                  (item) => (
+                                    <p className="mb-0">
+                                      <span>{item.name}:</span>
+                                      <b className="badge text-bg-success">
+                                        {item.count}
+                                      </b>
+                                    </p>
+                                  )
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {forAssignCases.length <= 0 && (
+                <div className="no-content">No Cases For Assign!</div>
               )}
             </div>
             {/* In Process */}
@@ -4739,13 +5917,378 @@ const Cases = () => {
                 ></button>
               </div>
               <div class="modal-body">
-                {console.log("buffCase", buffCase)}
                 {buffCase && <ViewCase caseModel={buffCase} />}
               </div>
             </div>
           </div>
         </div>
       )}
+      {/* Assign User Modal */}
+      <div
+        class="modal fade"
+        id="assignUserModal"
+        tabindex="-1"
+        aria-labelledby="assignUserModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+              <div>
+                <h1 class="modal-title fs-5 fw-bold" id="assignUserModalLabel">
+                  {selectedCases.length > 0
+                    ? `${
+                        assignmentAction === "assign"
+                          ? "Assign"
+                          : assignmentAction === "reassign"
+                          ? "Reassign"
+                          : "Unassign"
+                      } Users to ${selectedCases.length} Case(s)`
+                    : `${
+                        assignmentAction === "assign"
+                          ? "Assign"
+                          : assignmentAction === "reassign"
+                          ? "Reassign"
+                          : "Unassign"
+                      } User to Case #${buffCase?.caseNumber || ""}`}
+                </h1>
+                {/* {selectedCases.length > 0 && (
+                  <div class="fs-6 opacity-75">
+                    Bulk{" "}
+                    {assignmentAction === "assign"
+                      ? "Assignment"
+                      : assignmentAction === "reassign"
+                      ? "Reassignment"
+                      : "Unassignment"}{" "}
+                    Mode
+                  </div>
+                )} */}
+                {selectedCases.length === 0 && buffCase && (
+                  <div class="fs-6 opacity-75">
+                    Current Status: {getAssignmentStatusText(buffCase)}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              {/* Action Selector */}
+              {/* {selectedCases.length === 0 && (
+                <div className="card mb-4 border-info">
+                  <div className="card-header bg-light">
+                    <h6 className="mb-0 text-info fw-bold">
+                      <i class="fas fa-cogs me-2"></i>Assignment Action
+                    </h6>
+                  </div>
+                  <div className="card-body py-3">
+                    <div className="btn-group w-100" role="group">
+                      <input
+                        type="radio"
+                        className="btn-check"
+                        name="assignmentAction"
+                        id="actionAssign"
+                        value="assign"
+                        checked={assignmentAction === "assign"}
+                        onChange={(e) => setAssignmentAction(e.target.value)}
+                      />
+                      <label
+                        className="btn btn-outline-success"
+                        htmlFor="actionAssign"
+                      >
+                        <i class="fas fa-user-plus me-2"></i>Assign
+                      </label>
+
+                      <input
+                        type="radio"
+                        className="btn-check"
+                        name="assignmentAction"
+                        id="actionReassign"
+                        value="reassign"
+                        checked={assignmentAction === "reassign"}
+                        onChange={(e) => setAssignmentAction(e.target.value)}
+                        disabled={!hasAssignments(buffCase)}
+                      />
+                      <label
+                        className="btn btn-outline-warning"
+                        htmlFor="actionReassign"
+                      >
+                        <i class="fas fa-user-edit me-2"></i>Reassign
+                      </label>
+
+                      <input
+                        type="radio"
+                        className="btn-check"
+                        name="assignmentAction"
+                        id="actionUnassign"
+                        value="unassign"
+                        checked={assignmentAction === "unassign"}
+                        onChange={(e) => setAssignmentAction(e.target.value)}
+                        disabled={!hasAssignments(buffCase)}
+                      />
+                      <label
+                        className="btn btn-outline-danger"
+                        htmlFor="actionUnassign"
+                      >
+                        <i class="fas fa-user-minus me-2"></i>Unassign
+                      </label>
+                    </div>
+                    {!hasAssignments(buffCase) && (
+                      <div className="mt-2 text-muted small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Reassign and Unassign are only available for cases with
+                        existing assignments
+                      </div>
+                    )}
+                    {assignmentAction === "unassign" &&
+                      hasAssignments(buffCase) && (
+                        <div className="mt-3 p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                          <h6 className="text-warning mb-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Will Unassign From:
+                          </h6>
+                          <div className="d-flex flex-wrap gap-2">
+                            {Object.entries(
+                              getCurrentAssignments(buffCase)
+                            ).map(([deptName, userId]) => {
+                              if (userId && userId !== "assigned") {
+                                const user = assignUsers.find(
+                                  (u) => u._id === userId
+                                );
+                                return (
+                                  <span
+                                    key={deptName}
+                                    className="badge bg-warning text-dark"
+                                  >
+                                    {deptName}:{" "}
+                                    {user
+                                      ? `${user.firstName} ${user.lastName}`
+                                      : "Unknown User"}
+                                  </span>
+                                );
+                              }
+                              return null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                </div>
+              )} */}
+
+              {/* Case Information */}
+              {buffCase && (
+                <div className="card mb-4 border-primary">
+                  <div className="card-header bg-light">
+                    <h6 className="mb-0 text-primary fw-bold">
+                      <i class="fas fa-info-circle me-2"></i>Case Information
+                    </h6>
+                  </div>
+                  <div className="card-body py-3">
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="mb-2">
+                          <strong className="text-muted">Doctor:</strong>
+                          <div className="fw-semibold text-dark">
+                            {buffCase.dentistObj?.name || "N/A"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-2">
+                          <strong className="text-muted">Patient:</strong>
+                          <div className="fw-semibold text-dark">
+                            {buffCase.patientName || "N/A"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Search Section */}
+              <div className="mb-3">
+                <label className="form-label fw-bold">Search Users</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by name or email..."
+                  value={assignSearch}
+                  onChange={(e) => setAssignSearch(e.target.value)}
+                />
+              </div>
+
+              {/* User Selection Section */}
+              {Object.keys(filteredUsersByDept()).length <= 0 ? (
+                <div className="text-center py-4">
+                  <i
+                    class="fas fa-users text-muted mb-2"
+                    style={{ fontSize: "2rem" }}
+                  ></i>
+                  <p className="text-muted mb-0">
+                    No users found matching your search
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="form-label fw-bold mb-3">
+                    Select User by Department
+                  </label>
+                  {Object.entries(filteredUsersByDept()).map(
+                    ([deptName, usersList]) => (
+                      <div className="mb-3" key={deptName}>
+                        <label className="form-label text-primary fw-semibold">
+                          {deptName} Department ({usersList.length} users)
+                        </label>
+                        <select
+                          className="form-select"
+                          value={selectedAssignUsers[deptName] || ""}
+                          onChange={(e) =>
+                            setSelectedAssignUsers((prev) => ({
+                              ...prev,
+                              [deptName]: e.target.value,
+                            }))
+                          }
+                        >
+                          <option value="">
+                            -- Select user from {deptName} --
+                          </option>
+                          {usersList.map((u) => (
+                            <option value={u._id} key={u._id}>
+                              {u.firstName} {u.lastName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
+              {/* Selected Users Preview */}
+              {Object.keys(selectedAssignUsers).some(
+                (dept) => selectedAssignUsers[dept]
+              ) && (
+                <div className="mt-3">
+                  <div className="alert alert-success">
+                    <div className="d-flex align-items-center mb-2">
+                      <i class="fas fa-check-circle me-2"></i>
+                      <strong>Selected Users:</strong>
+                    </div>
+                    <div>
+                      {Object.entries(selectedAssignUsers).map(
+                        ([deptName, userId]) => {
+                          if (!userId) return null;
+                          const allUsers = Object.values(
+                            filteredUsersByDept()
+                          ).flat();
+                          const selectedUser = allUsers.find(
+                            (u) => u._id === userId
+                          );
+                          return selectedUser ? (
+                            <div key={deptName} className="mb-1">
+                              <span className="badge bg-primary me-2">
+                                {deptName}
+                              </span>
+                              {selectedUser.firstName} {selectedUser.lastName}
+                            </div>
+                          ) : null;
+                        }
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+
+              {/* Dynamic action button based on current mode */}
+              <button
+                type="button"
+                class={`btn ${
+                  assignmentAction === "assign"
+                    ? "btn-success"
+                    : assignmentAction === "reassign"
+                    ? "btn-warning"
+                    : "btn-danger"
+                }`}
+                onClick={
+                  selectedCases.length > 0
+                    ? assignmentAction === "assign"
+                      ? bulkAssignUsersToCases
+                      : assignmentAction === "reassign"
+                      ? bulkReassignUsersToCases
+                      : bulkUnassignUsersFromCases
+                    : handleAssignmentAction
+                }
+                disabled={(() => {
+                  const assignDisabled =
+                    assignmentAction === "assign" &&
+                    Object.values(selectedAssignUsers).every((id) => !id);
+                  const reassignDisabled =
+                    assignmentAction === "reassign" &&
+                    !Object.values(selectedAssignUsers).some((id) => id);
+                  // For unassign, enable if users are selected (same as assign and reassign)
+                  const unassignDisabled =
+                    assignmentAction === "unassign" &&
+                    Object.values(selectedAssignUsers).every((id) => !id);
+                  const loadingDisabled = isAssignLoading;
+
+                  const isDisabled =
+                    assignDisabled ||
+                    reassignDisabled ||
+                    unassignDisabled ||
+                    loadingDisabled;
+
+                  return isDisabled;
+                })()}
+                data-bs-dismiss={isAssignLoading ? undefined : "modal"}
+              >
+                {isAssignLoading ? (
+                  <>
+                    <span
+                      class="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    {assignmentAction === "assign"
+                      ? "Assigning..."
+                      : assignmentAction === "reassign"
+                      ? "Reassigning..."
+                      : "Unassigning..."}
+                  </>
+                ) : selectedCases.length > 0 ? (
+                  `${
+                    assignmentAction === "assign"
+                      ? "Assign"
+                      : assignmentAction === "reassign"
+                      ? "Reassign"
+                      : "Unassign"
+                  } to All Cases`
+                ) : assignmentAction === "assign" ? (
+                  "Assign"
+                ) : assignmentAction === "reassign" ? (
+                  "Reassign"
+                ) : (
+                  "Unassign"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Modal Process Case */}
       {/* {allCases.length > 0 &&
       <div
@@ -4771,7 +6314,6 @@ const Cases = () => {
                   ></button>
                 </div>
                 <div class="modal-body">
-                  {console.log('buffCase',buffCase)}
                 <CaseProcess caseModel={buffCase} />
                 </div>
               </div>
@@ -4971,28 +6513,7 @@ const Cases = () => {
                 <div className="mb-3 p-2 h-100 border border rounded border-warning-subtle f-18">
                   <b>Notes/ Details: </b>
                   <small className="">{item.jobDescription}</small>
-                  {/* <small>
-                    Patient Name: Yaimet Prieto Doctor: Dr. Laura Pérez Case
-                    Type: Lower Final Impression & Upper and Lower Provisionals
-                    Please use the following shade selection: Cervical OM3 and
-                    Body OM2. Please Incorporate high translucency for a very
-                    natural and refined look. Ensure well-defined mamelons with
-                    detailed surface textures. Maintain open embrasures for a
-                    clean and elegant finish. For the lowers, ensure the 4
-                    central incisors are slightly longer than the canines.
-                    Alternatively, adjust to make the central incisors just
-                    slightly shorter, or match the length of the canines evenly,
-                    depending on the final aesthetics. Pay close attention to
-                    adjustments made from the mock-up to provisionals for
-                    symmetry, adjustments, and proper sizing to match the
-                    desired look. Additionally, tooth #9 has an unfavorable prep
-                    shade, so please block out the color during porcelain
-                    application. Prioritize natural transitions and harmony with
-                    the mock-up. The overall style preference is Duval-style
-                    embrassures, translucency and natural design. Thank you for
-                    your attention to detail and craftsmanship. Let me know if
-                    you have any questions! Dr. Laura Perez
-                  </small> */}
+
                   <br />
                   <br />
                   <br />

@@ -5,6 +5,7 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
+
 }
 :root {
   --white-color: #fff;
@@ -16,7 +17,8 @@
 body {
   background-color: #e7f2fd;
   transition: all 0.5s ease;
-  zoom: 90%;
+  zoom: 100%;
+  font-weight: 500 !important;
 }
 body.dark {
   background-color: #333;
@@ -259,6 +261,9 @@ body.dark {
   display: none;
 }
 @media screen and (max-width: 768px) {
+  body{
+    zoom: 90%;
+  }
   td,
   th {
     padding: 0.25rem 0.25rem !important;
@@ -282,7 +287,7 @@ body.dark {
 }
 
 .pages {
-  max-width: 1140px;
+  max-width: 1740px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -735,9 +740,16 @@ th {
   cursor: pointer;
 }
 .user-profile .nav-tabs {
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr ;
+}
+.user-profile-page .nav-tabs{
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+
 }
 @media (max-width: 768px) {
+  body{
+    zoom: 90%;
+  }
   .navbar {
     padding: 15px;
   }
@@ -893,6 +905,10 @@ th {
   .user-profile .nav-tabs {
     grid-template-columns: 1fr;
   }
+  .user-profile-page .nav-tabs{
+    grid-template-columns: 1fr;
+
+  }
   .rmdp-container {
     display: block !important;
   }
@@ -998,4 +1014,249 @@ th {
 .bgc-danger_1 {
   background: rgb(215 0 0 / 78%) !important;
   color: #fff !important;
+}
+.rmdp-container {
+  display: grid !important
+}
+
+/* User Profile View Styles */
+.user-profile-view {
+  /* background-color: #f8f9fa; */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5rem 0 0 0;
+}
+
+.profile-container {
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.profile-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 80%, black) 100%);
+  padding: 1rem 0;
+  margin-bottom: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header h2 {
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+.profile-header .text-white-50 {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* Info Cards */
+.info-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: none;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-custom {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #dee2e6;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px 12px 0 0;
+}
+
+.card-header-custom h5 {
+  color: #495057;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.card-header-custom i {
+  color: #6c757d;
+}
+
+.card-body-custom {
+  padding: 1.5rem;
+}
+
+/* Info Items */
+.info-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.info-label i {
+  color: #007bff;
+  width: 16px;
+  text-align: center;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #212529;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.info-link {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.info-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Notes Section */
+.notes-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.note-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #007bff;
+  transition: background-color 0.2s ease;
+}
+
+.note-item:hover {
+  background: #e9ecef;
+}
+
+.note-item:last-child {
+  margin-bottom: 0;
+}
+
+.note-header {
+  display: flex;
+  justify-content: between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.note-title {
+  color: #212529;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  line-height: 1.3;
+}
+
+.note-type-hr {
+  background-color: #17a2b8 !important;
+}
+
+.note-type-admin {
+  background-color: #dc3545 !important;
+}
+
+.note-type-general {
+  background-color: #6c757d !important;
+}
+
+.note-meta {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.note-meta i {
+  color: #007bff;
+}
+
+/* Badge Styles */
+.badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body{
+    zoom: 90%;
+  }
+  .user-profile-view {
+    padding: 1rem 0;
+  }
+  
+  .profile-container {
+    border-radius: 12px;
+  }
+  
+  .profile-header {
+    padding: 1.5rem 0;
+  }
+  
+  .profile-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .card-body-custom {
+    padding: 1rem;
+  }
+  
+  .info-item {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* Custom Scrollbar for Notes */
+.notes-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.notes-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.notes-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

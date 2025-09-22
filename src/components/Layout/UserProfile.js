@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import * as _global from "../../config/global";
 import ReactToPrint, { useReactToPrint } from "react-to-print";
 import ViewCase from "./Cases/ViewCase";
+import SEARCH_FIELDS from "../../enum/searchFieldEnum";
 const UserProfile = () => {
   const userRef = useRef();
   const userRef1 = useRef();
@@ -20,10 +21,14 @@ const UserProfile = () => {
   const [buffCasesUser, setBuffCasesUser] = useState([]);
   const [buffCasesStartingUser, setBuffStartingCasesUser] = useState([]);
   const [buffCasesHoldingUser, setBuffCasesHoldingUser] = useState([]);
+  const [assignedCases, setAssignedCases] = useState([]);
   const [userData, setUserData] = useState(state ? state : user);
   const [searchText, setSearchText] = useState("");
   const [searchTextStart, setSearchTextStart] = useState("");
   const [searchTextHold, setSearchTextHold] = useState("");
+  const [searchTextAssigned, setSearchTextAssigned] = useState("");
+  const [searchCaseNumber, setSearchCaseNumber] = useState("");
+  const [filterBy, setFilterBy] = useState(SEARCH_FIELDS.CASE_NUMBER);
   const [studyModel, setStudyModel] = useState({});
   const [printText, setPrintText] = useState("");
   const [startDate, setStartDat] = useState(new Date());
@@ -54,57 +59,149 @@ const UserProfile = () => {
         // const model = result.casesEnd.length > 0 ? result.casesEnd[0] : {} 
         // setBuffCase(model)
         // Cases Ended
-        setCasesUser(sortCases(result.casesEnd));
-        setBuffCasesUser(sortCases(result.casesEnd));
+        const casesEndData = sortCases(result.casesEnd);
+        setCasesUser(casesEndData);
+        setBuffCasesUser(casesEndData);
         console.log("hloding", result);
+        
         // Starting Cases
+        let startCasesData = [];
+        let pauseCasesData = [];
+        
         if (
           userData.isAdmin
             ? userData.departments[0].name === "CadCam"
             : departments[0].name === "CadCam"
         ) {
-          setStartCases(
-            result.casesStart.filter(
-              (item) =>
-                !item.isHold && // Ensure isHold is false
-                item.cadCam.actions.length > 0 && // Ensure actions array is not empty
-                item.cadCam.actions[item.cadCam.actions.length - 1].prfeix ===
-                  "start" && // Ensure last action's prfeix is "start"
-                !item.cadCam.status.isStart // Ensure status isStart is false
-            )
+          startCasesData = result.casesStart.filter(
+            (item) =>
+              !item.isHold && // Ensure isHold is false
+              item.cadCam.actions.length > 0 && // Ensure actions array is not empty
+              item.cadCam.actions[item.cadCam.actions.length - 1].prfeix ===
+                "start" && // Ensure last action's prfeix is "start"
+              !item.cadCam.status.isStart // Ensure status isStart is false
           );
-          setBuffStartingCasesUser(
-            result.casesStart.filter(
-              (item) =>
-                !item.isHold && // Ensure isHold is false
-                item.cadCam.actions.length > 0 && // Ensure actions array is not empty
-                item.cadCam.actions[item.cadCam.actions.length - 1].prfeix ===
-                  "start" && // Ensure last action's prfeix is "start"
-                !item.cadCam.status.isStart // Ensure status isStart is false
-            )
-          );
+          setStartCases(startCasesData);
+          setBuffStartingCasesUser(startCasesData);
+          
           // Pauseing Cases
-          setPauseCases(result.casesHolding);
-          setBuffCasesHoldingUser(result.casesHolding);
+          pauseCasesData = result.casesHolding;
+          setPauseCases(pauseCasesData);
+          setBuffCasesHoldingUser(pauseCasesData);
         } else {
-          setStartCases(result.casesStart);
-          setBuffStartingCasesUser(result.casesStart);
+          startCasesData = result.casesStart;
+          setStartCases(startCasesData);
+          setBuffStartingCasesUser(startCasesData);
+          
           // Pauseing Cases
-       if (userData.lastName === "Jamous") {
-            setPauseCases(result.casesHolding);
-            setBuffCasesHoldingUser(result.casesHolding);
+          if (userData.lastName === "Jamous") {
+            pauseCasesData = result.casesHolding;
+            setPauseCases(pauseCasesData);
+            setBuffCasesHoldingUser(pauseCasesData);
           } else {
             // Pauseing Cases
             console.log("pausing", result.casesPause);
-            setPauseCases(result.casesPause);
-            setBuffCasesHoldingUser(result.casesPause);
+            pauseCasesData = result.casesPause;
+            setPauseCases(pauseCasesData);
+            setBuffCasesHoldingUser(pauseCasesData);
           }
         }
+        
+        // Fetch assigned cases with filtering using the data we just processed
+        fetchAssignedCases(startCasesData, pauseCasesData, casesEndData);
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
       });
+
+ 
   }, []);
+
+
+  const fetchAssignedCases = (startCasesData = [], pauseCasesData = [], casesUserData = []) => {
+    const userId = state ? state._id : user._id;
+        
+    // Add null checks to prevent errors
+    if (!userId) {
+      console.error("No user ID available");
+      setAssignedCases([]);
+      return;
+    }
+    axios
+    .get(`${_global.BASE_URL}cases/assigned/user/${userId}`)
+    .then((res) => {
+      console.log("Assigned cases response:", res);
+      console.log("Assigned cases:", res.data.cases);
+      
+      // Get all assigned cases
+      const allAssignedCases = res.data.data.cases || [];
+      
+      // Use provided data or fallback to state arrays
+      const startCasesToUse = startCasesData.length > 0 ? startCasesData : startCases;
+      const pauseCasesToUse = pauseCasesData.length > 0 ? pauseCasesData : pauseCases;
+      const casesUserToUse = casesUserData.length > 0 ? casesUserData : casesUser;
+      
+      // Get IDs from other arrays to filter out
+      const startCaseIds = startCasesToUse.map(caseItem => caseItem._id);
+      const pauseCaseIds = pauseCasesToUse.map(caseItem => caseItem._id);
+      const casesUserIds = casesUserToUse.map(caseItem => caseItem._id);
+      
+      // Combine all IDs to exclude
+      const excludeIds = [...startCaseIds, ...pauseCaseIds, ...casesUserIds];
+      
+      // Filter out cases that exist in other arrays
+      const filteredAssignedCases = allAssignedCases.filter(caseItem => 
+        !excludeIds.includes(caseItem._id)
+      );
+      
+      console.log("Filtered assigned cases:", filteredAssignedCases);
+      console.log("Excluded case IDs:", excludeIds);
+      setAssignedCases(filteredAssignedCases);
+    })
+    .catch((error) => {
+      console.error("Error fetching assigned cases:", error);
+    });
+  }
+
+  // Function to refresh assigned cases when other arrays change
+  const refreshAssignedCases = () => {
+    fetchAssignedCases(startCases, pauseCases, casesUser);
+  }
+
+  // Function to fetch assigned cases for the user
+  // const fetchAssignedCases = async () => {
+  //   try {
+  //     const userId = state ? state._id : user._id;
+      
+  //     // Add null checks to prevent errors
+  //     if (!userId) {
+  //       console.error("No user ID available");
+  //       setAssignedCases([]);
+  //       return;
+  //     }
+      
+  //     const department = userData.isAdmin 
+  //       ? (userData.departments && userData.departments[0] ? userData.departments[0].name : null)
+  //       : (departments && departments[0] ? departments[0].name : null);
+      
+  //     if (!department) {
+  //       console.error("No department available");
+  //       setAssignedCases([]);
+  //       return;
+  //     }
+      
+      
+  //     const response = await axios.get(
+  //       `${_global.BASE_URL}cases/assigned/user/${userId}`
+  //     );
+      
+  //     console.log("Assigned cases response:", response.data);
+  //     setAssignedCases(response.data || []);
+  //   } catch (error) {
+  //     console.error("Error fetching assigned cases:", error);
+  //     setAssignedCases([]);
+  //   }
+  // };
   function groupTeethNumbersByName(teethNumbers) {
     const result = {};
     teethNumbers.forEach((teethNumber) => {
@@ -171,6 +268,39 @@ const UserProfile = () => {
       return totalLength;
     }
   }
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      searchByNameOrNumber(searchCaseNumber, "startCases");
+    }
+  };
+
+  const searchbyIcon = () => {
+    if (searchCaseNumber !== "") {
+      searchByNameOrNumber(searchCaseNumber, "startCases");
+    }
+  };
+
+  const searchByNameOrNumber = (searchText, type) => {
+    if (searchText !== "") {
+      axios
+        .get(
+          `${_global.BASE_URL}cases/search?search=${searchText}&searchField=${filterBy}`
+        )
+        .then((res) => {
+          const result = res.data;
+          console.log("result", result);
+          if (type === "startCases") {
+            setStartCases(result);
+          }
+        })
+        .catch((error) => {
+          console.error("Search error:", error);
+        });
+    } else {
+      setStartCases(buffCasesStartingUser);
+    }
+  };
+
   const searchByName = (searchText, type) => {
     console.log(searchText, type);
     if (type === "Start") {
@@ -219,6 +349,23 @@ const UserProfile = () => {
         setCasesUser(filteredCases);
       } else {
         setCasesUser(buffCasesUser);
+      }
+    }
+    if (type === "Assigned") {
+      setSearchTextAssigned(searchText);
+      if (searchText !== "") {
+        const filteredCases = assignedCases.filter(
+          (item) =>
+            item.caseNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.dentistObj?.name
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setAssignedCases(filteredCases);
+      } else {
+        // Reset to original assigned cases when search is cleared
+        // fetchAssignedCases();
       }
     }
   };
@@ -1310,7 +1457,7 @@ const UserProfile = () => {
       setBuffCase(newItem);  
     };
   return (
-    <div className="content user-profile">
+    <div className="content user-profile-page">
       <div className="card">
         <h6 class="card-title">
           <span>
@@ -1337,9 +1484,26 @@ const UserProfile = () => {
           <div className="row"></div>
           <div>
             <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button
+                  className={`nav-link bgc-info ${activeTab === 0 ? "active " : ""}`}     
+                  id="assignedCases-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#assignedCases-tab-pane"
+                  type="button"
+                  role="tab"
+                  aria-controls="assignedCases-tab-pane"
+                  aria-selected="false"
+                  // onClick={() => {
+                  //   handleTabChange(3, () => fetchAssignedCases())
+                  // }}
+                >
+                  Assigned Cases <small>({assignedCases?.length})</small>
+                </button>
+              </li>
               <li class="nav-item" role="presentation">
                 <button
-                   className={`nav-link bgc-primary ${activeTab === 0 ? "active " : ""}`}      
+                   className={`nav-link bgc-primary ${activeTab === 1 ? "active " : ""}`}      
                   id="startCases-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#startCases-tab-pane"
@@ -1347,8 +1511,9 @@ const UserProfile = () => {
                   role="tab"
                   aria-controls="startCases-tab-pane"
                   onClick={() => {
-                    handleTabChange(0)
-                    searchByName("", "Start")
+                    handleTabChange(1)
+                    setSearchCaseNumber("")
+                    setStartCases(buffCasesStartingUser)
                   }}
                   aria-selected={activeTab === 0}
                 >
@@ -1361,7 +1526,7 @@ const UserProfile = () => {
                 onClick={() => searchByName("", "Pause")}
               >
                 <button
-                  className={`nav-link bgc-danger ${activeTab === 1 ? "active " : ""}`}     
+                  className={`nav-link bgc-danger ${activeTab === 2 ? "active " : ""}`}     
                   id="holdCases-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#holdCases-tab-pane"
@@ -1370,7 +1535,7 @@ const UserProfile = () => {
                   aria-controls="holdCases-tab-pane"
                   aria-selected="true"
                   onClick={() => {
-                    handleTabChange(1)
+                    handleTabChange(2)
                     searchByName("", "Pause")
                   }}
                 >
@@ -1383,7 +1548,7 @@ const UserProfile = () => {
                 onClick={() => searchByName("", "End")}
               >
                 <button
-                  className={`nav-link bgc-success ${activeTab === 2 ? "active " : ""}`}     
+                  className={`nav-link bgc-success ${activeTab === 3 ? "active " : ""}`}     
                   id="endCases-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#endCases-tab-pane"
@@ -1392,13 +1557,14 @@ const UserProfile = () => {
                   aria-controls="endCases-tab-pane"
                   aria-selected="true"
                   onClick={() => {
-                    handleTabChange(2)
+                    handleTabChange(3)
                     searchByName("", "End")
                   }}
                 >
                   End <small>({casesUser?.length})</small>
                 </button>
               </li>
+           
             </ul>
           </div>
           <div
@@ -1408,28 +1574,140 @@ const UserProfile = () => {
               setSearchText("");
               setSearchTextHold("");
               setSearchTextStart("");
+              setSearchTextAssigned("");
+              setSearchCaseNumber("");
+              setStartCases(buffCasesStartingUser);
             }}
           >
+
+              {/* Assigned Cases */}
+              <div
+              className={`tab-pane fade ${activeTab === 0 ? "show active" : ""}`}
+              id="assignedCases-tab-pane"
+              role="tabpanel"
+              aria-labelledby="assignedCases-tab"
+              tabIndex="0"
+            >
+              <div className="row">
+                <div className="col-lg-12 mb-3">
+                  <input
+                    type="text"
+                    name="searchTextAssigned"
+                    className="form-control"
+                    placeholder="Search by case number, doctor name, or patient name..."
+                    value={searchTextAssigned}
+                    onChange={(e) => searchByName(e.target.value, "Assigned")}
+                  />
+                </div>
+              </div>
+              {assignedCases?.length > 0 && (
+                <table className="table table-responsive text-center table-bordered">
+                  <thead>
+                    <tr className="table-secondary">
+                      <th scope="col">#Case</th>
+                      <th scope="col">Doctor Name</th>
+                      <th scope="col">Patient Name</th>
+                      <th scope="col">#Unites</th>
+                      <th scope="col">In</th>
+                      <th scope="col">Due</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assignedCases.map((item, index) => (
+                      <tr key={item._id}>
+                        <td>{item.caseNumber}</td>
+                        <td>{item.dentistObj?.name}</td>
+                        <td>{item.patientName}</td>
+                        <td
+                          className={`${
+                            item.teethNumbers.length <= 0
+                              ? "bg-danger"
+                              : "bg-white"
+                          } td-phone`}
+                        >
+                          {item.teethNumbers.length}
+                        </td>
+                        <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                        <td>
+                          {item.dateOut &&
+                            _global.formatDateToYYYYMMDD(item.dateOut)}
+                        </td>
+                        <td>
+                          <div className="actions-btns">
+                            <span
+                              className="c-success"
+                              onClick={() => {
+                                buffCaseHandle(item);
+                              }}
+                              data-bs-toggle="modal"
+                              data-bs-target="#viewModal"
+                              title="View Case"
+                            >
+                              <i class="fa-solid fa-eye"></i>
+                            </span>
+                            <span
+                              className="c-success"
+                              onClick={() => viewCase(item, "process")}
+                              title="Process Case"
+                            >
+                              <i class="fa-brands fa-squarespace"></i>
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {assignedCases?.length <= 0 && (
+                <div className="text-center">
+                  <h6>No Assigned Cases</h6>
+                </div>
+              )}
+            </div>
             <div
               id="startCases-tab-pane"
               role="tabpanel"
               aria-labelledby="startCases-tab"
-              tabIndex="0"
-              className={`tab-pane fade ${activeTab === 0 ? "show active" : ""}`}
+              tabIndex="1"
+              className={`tab-pane fade ${activeTab === 1 ? "show active" : ""}`}
             >
               <div className="row">
-                <div className="col-lg-7 mb-3 ">
-                  <input
-                    type="text"
-                    name="searchTextStart"
-                    className="form-control"
-                    placeholder="Search by name | case number | case type "
-                    value={searchTextStart}
-                    onChange={(e) => searchByName(e.target.value, "Start")}
-                  />
+                <div className="col-md-9">
+                  <div className="input-group mb-3">
+                    <input
+                      type="text"
+                      name="searchCaseNumber"
+                      className="form-control"
+                      placeholder="Search by name | case number | case type "
+                      onKeyDown={handleKeyDown}
+                      onChange={(e) => setSearchCaseNumber(e.target.value)}
+                      value={searchCaseNumber}
+                    />
+                    <button
+                      className="btn btn-outline-secondary"
+                      type="button"
+                      id="button-addon2"
+                      onClick={() => searchbyIcon()}
+                    >
+                      <i className="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                  </div>
+                </div>
+                <div className="col-md-3 mb-3">
+                  <select
+                    className="form-select"
+                    value={filterBy}
+                    onChange={(e) => setFilterBy(e.target.value)}
+                  >
+                    <option value={SEARCH_FIELDS.CASE_NUMBER}>Case Number</option>
+                    <option value={SEARCH_FIELDS.DOCTOR}>Doctor</option>
+                    <option value={SEARCH_FIELDS.PATIENT}>Patient</option>
+                  </select>
                 </div>
                 {/* Start Date */}
-                <div className="col-lg-3 ">
+                {/* <div className="col-lg-3 ">
                   <div className="form-group">
                     <input
                       type="date"
@@ -1438,8 +1716,8 @@ const UserProfile = () => {
                       onChange={(e) => searchStartByDate(e)}
                     />
                   </div>
-                </div>
-                <div className="col-lg-2 mb-3 print-btn">
+                </div> */}
+                {/* <div className="col-lg-2 mb-3 print-btn">
                   <button
                     className="btn btn-sm btn-primary "
                     onClick={() => {
@@ -1450,7 +1728,7 @@ const UserProfile = () => {
                     {" "}
                     <i class="fas fa-print"></i> print
                   </button>
-                </div>
+                </div> */}
               </div>
               <div ref={userRef1} style={{ width: "100%" }}>
                 {startCases?.length > 0 && (
@@ -1579,11 +1857,11 @@ const UserProfile = () => {
             </div>
             {/* Holding Cases */}
             <div
-              className={`tab-pane fade ${activeTab === 1 ? "show active" : ""}`}
+              className={`tab-pane fade ${activeTab === 2 ? "show active" : ""}`}
               id="holdCases-tab-pane"
               role="tabpanel"
               aria-labelledby="holdCases-tab"
-              tabIndex="0"
+              tabIndex="2"
             >
               <div className="row">
                 <div className="col-7 mb-3 ">
@@ -1738,11 +2016,11 @@ const UserProfile = () => {
             </div>
             {/* Finished Cases */}
             <div
-              className={`tab-pane fade ${activeTab === 2 ? "show active" : ""}`}
+              className={`tab-pane fade ${activeTab === 3 ? "show active" : ""}`}
               id="endCases-tab-pane"
               role="tabpanel"
               aria-labelledby="endCases-tab"
-              tabIndex="0"
+              tabIndex="3"
             >
               <div className="row">
                 {/* Search Input */}
@@ -1903,6 +2181,7 @@ const UserProfile = () => {
                 </div>
               )}
             </div>
+          
           </div>
         </div>
       </div>

@@ -14,6 +14,7 @@ import ViewCase from "./components/Layout/Cases/ViewCase";
 import AddNewCase from "./components/Layout/Cases/AddNewCase";
 import CaseProcess from "./components/Layout/Cases/CaseProcess/CaseProcess";
 import UserProfile from "./components/Layout/UserProfile";
+import UserProfileView from "./components/Layout/UserProfileView";
 import EditCase from "./components/Layout/Cases/EditCase";
 import NotesUser from "./components/NotesUser";
 import DocotrCases from "./components/Layout/DoctorCases.js";
@@ -33,6 +34,7 @@ function App() {
               <Route path="layout" element={<Layout />}>
                 <Route path="users" element={<Users />} />
                 <Route path="user-profile" element={<UserProfile />} />
+                <Route path="user-profile-view" element={<UserProfileView />} />
                 <Route path="departments" element={<Departments />} />
                 <Route path="clinics" element={<Clinics />} />
                 <Route path="cases-in-departments" element={<CasesInDepartments />} />
