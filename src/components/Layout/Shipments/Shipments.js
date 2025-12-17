@@ -573,6 +573,17 @@ const Shipments = () => {
                             <span className="c-primary ml-3" data-bs-toggle="modal" data-bs-target="#updatShipmentModal" onClick={() => editBuffShipment(item)}>
                               <i class="fas fa-edit"></i>
                             </span>
+                              {item.trackingNumber && item.courierCompany === 'DHL' && (
+                              <a
+                                href={`https://mydhl.express.dhl/ae/en/tracking.html#/results?id=${item.trackingNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="action-icon-modern generic"
+                                title="Track Shipment"
+                              >
+                                <i class="fa-solid fa-truck-fast"></i>
+                              </a>
+                            )}
                           </div>
                         </td>
                       </tr>
