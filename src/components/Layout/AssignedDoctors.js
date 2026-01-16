@@ -306,6 +306,11 @@ const AssignedDoctors = () => {
                                     <button className="btn btn-sm btn-light text-primary rounded-circle shadow-sm" style={{ width: '32px', height: '32px' }} onClick={() => setBuffCase(item)} data-bs-toggle="modal" data-bs-target="#viewModal" title="View Details">
                                         <i className="fa-solid fa-eye small"></i>
                                     </button>
+                                    {item?.historyHolding?.length > 0 && (
+                                        <button className="btn btn-sm btn-light text-primary rounded-circle shadow-sm ms-1" style={{ width: '32px', height: '32px' }} onClick={() => setBuffCase(item)} data-bs-toggle="modal" data-bs-target="#caseHoldHistoryModal" title="History">
+                                            <i className="fas fa-history small"></i>
+                                        </button>
+                                    )}
                                 </div>
                             </td>
                         </tr>
@@ -785,6 +790,77 @@ const AssignedDoctors = () => {
             </div>
 
             {/* Reassign Modal */}
+            {/* Modal Hold History Case */}
+            <div
+                className="modal fade"
+                id="caseHoldHistoryModal"
+                tabIndex="-1"
+                aria-hidden="true"
+            >
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div className="modal-header bg-light border-0 py-3 px-4">
+                            <h5 className="modal-title fw-bold text-dark">
+                                <i className="fas fa-history me-2 text-primary"></i>
+                                Case History #{buffCase?.caseNumber}
+                            </h5>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
+                        </div>
+                        <div className="modal-body p-4">
+                            <div className="d-flex flex-column gap-3">
+                                {buffCase?.historyHolding?.length > 0 ? (
+                                    buffCase.historyHolding.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className={`p-3 rounded-3 border ${item.isHold
+                                                    ? "bg-light-danger border-danger border-opacity-10"
+                                                    : "bg-light-success border-success border-opacity-10"
+                                                }`}
+                                            style={{
+                                                backgroundColor: item.isHold ? "#fff5f5" : "#f0fff4"
+                                            }}
+                                        >
+                                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                                <span className={`badge ${item.isHold ? "bg-danger" : "bg-success"} rounded-pill`}>
+                                                    {item.isHold ? "Hold" : "UnHold"}
+                                                </span>
+                                                <span className="text-muted small fw-medium">
+                                                    {item.date ? format(new Date(item.date), "dd MMM yyyy, HH:mm") : "-"}
+                                                </span>
+                                            </div>
+                                            <div className="text-dark fw-medium small mb-1">
+                                                By: {item.name || "Unknown"}
+                                            </div>
+                                            <div className="text-muted small">
+                                                <strong>Reason:</strong> {item.msg || "No message provided"}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-4 text-muted small fst-italic">
+                                        No history records found
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="modal-footer border-0 p-4 pt-0 bg-transparent">
+                            <button
+                                type="button"
+                                className="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Reassign Modal */}
             <div className="modal fade" id="reassignModal" tabIndex="-1">
                 <div className="modal-dialog modal-dialog-centered">
