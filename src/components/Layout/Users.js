@@ -595,7 +595,7 @@ const Users = () => {
                             <i class="fa-solid fa-eye c-success"></i>
                           </span>
 
-                          {item.roles.includes(_global.allRoles.Reception) && (
+                          {item.roles.includes(_global.allRoles.Reception) && item.active &&(
                             <span
                               onClick={() => navigate('/layout/assigned-doctors', { state: { ...item } })}
                               title="Assigned Doctors"
