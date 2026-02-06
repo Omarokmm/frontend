@@ -1,0 +1,156 @@
+.shipments .modal .form-group {
+    margin-bottom: 2rem;
+}
+
+.shipments .nav-tabs {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* Tracking Timeline Styles */
+.tracking-timeline {
+    padding: 1rem 0;
+}
+
+.shipment-header {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #0d6efd;
+}
+
+.shipment-header h6 {
+    color: #0d6efd;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin-top: 1rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 2rem;
+    padding-left: 2rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -1.5rem;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px #dee2e6;
+    z-index: 1;
+}
+
+.timeline-content {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.timeline-date {
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.timeline-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.timeline-description {
+    color: #212529;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-location {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.timeline-location i {
+    color: #dc3545;
+}
+
+/* Tracking Icon Button */
+.actions-btns .c-warning {
+    color: #ffc107;
+    transition: all 0.3s ease;
+}
+
+.actions-btns .c-warning:hover {
+    color: #ffca2c;
+    transform: scale(1.1);
+}
+
+@media (max-width:768px) {
+    .shipments .nav-tabs {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .timeline {
+        padding-left: 1.5rem;
+    }
+
+    .timeline-item {
+        padding-left: 1.5rem;
+    }
+
+    .timeline-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .shipment-header {
+        padding: 1rem;
+    }
+}
+
+/* Danger/Hold Case Style */
+.shipment-header.danger-case {
+    background: #f8d7da;
+    border-left-color: #dc3545;
+}
+
+.shipment-header.danger-case h6 {
+    color: #842029;
+}
