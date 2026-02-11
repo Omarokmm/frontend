@@ -169,9 +169,18 @@ const Cases = () => {
         aValue = a.dentistObj?.name?.toLowerCase() || "";
         bValue = b.dentistObj?.name?.toLowerCase() || "";
       } else if (key === "technicianName") {
-        const getTechName = (item) =>
-          item.assignmentHistory?.[item.assignmentHistory.length - 1]
-            ?.newAssignment?.slice(-1)[0]?.userName?.toLowerCase() || "";
+        const getTechName = (item) => {
+          if (!item.assignmentHistory || item.assignmentHistory.length === 0) return "";
+          for (let i = item.assignmentHistory.length - 1; i >= 0; i--) {
+            const historyEntry = item.assignmentHistory[i];
+            const assignments = historyEntry.newAssignment;
+            if (assignments && Array.isArray(assignments)) {
+              const cadCam = assignments.find(a => a.department === "CadCam");
+              if (cadCam) return cadCam.userName?.toLowerCase() || "";
+            }
+          }
+          return "";
+        };
         aValue = getTechName(a);
         bValue = getTechName(b);
       } else if (key === "dateIn") {
