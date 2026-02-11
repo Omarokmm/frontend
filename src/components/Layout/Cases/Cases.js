@@ -3488,22 +3488,24 @@ const Cases = () => {
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
                         <td>
-                          {item.isAssignedCadCam && item.assignmentHistory &&
-                            item.assignmentHistory.length > 0 &&
-                            item.assignmentHistory[
-                              item.assignmentHistory.length - 1
-                            ].newAssignment &&
-                            item.assignmentHistory[
-                              item.assignmentHistory.length - 1
-                            ].newAssignment.length > 0
-                            ? item.assignmentHistory[
-                              item.assignmentHistory.length - 1
-                            ].newAssignment[
-                              item.assignmentHistory[
-                                item.assignmentHistory.length - 1
-                              ].newAssignment.length - 1
-                            ].userName
-                            : "-"}
+                          <div className="text-start small">
+                            {(() => {
+                              const assignments = getCadCamAndCeramicAssignments(item);
+                              return (
+                                <>
+                                  {assignments.cadCam && (
+                                    <div><strong>{assignments.cadCam}</strong></div>
+                                  )}
+                                  {/* {assignments.ceramic && item.isAssignedCeramic && (
+                                    <div className="text-center"><  strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                  )} */}
+                                  {!assignments.cadCam && (
+                                    <div className="text-center"><strong>-</strong></div>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
                         </td>
                         <td>
                           <div className="text-start small">
