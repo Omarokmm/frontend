@@ -177,6 +177,17 @@ const Cases = () => {
       } else if (key === "dateIn") {
         aValue = new Date(a.dateIn).getTime();
         bValue = new Date(b.dateIn).getTime();
+      } else if (key === "holdBy") {
+        // Extract name from last item in historyHolding array
+        const aLastHold = a.historyHolding && a.historyHolding.length > 0
+          ? a.historyHolding[a.historyHolding.length - 1]
+          : null;
+        const bLastHold = b.historyHolding && b.historyHolding.length > 0
+          ? b.historyHolding[b.historyHolding.length - 1]
+          : null;
+
+        aValue = aLastHold?.name?.toLowerCase() || "";
+        bValue = bLastHold?.name?.toLowerCase() || "";
       } else {
         return 0;
       }
@@ -264,7 +275,43 @@ const Cases = () => {
     );
   };
 
-  const allowedAssignDepartments = new Set(["CadCam"]);
+  const allowedAssignDepartments = new Set(["CadCam", "Caramic"]);
+
+  // Helper function to get CadCam and Ceramic assignments
+  const getCadCamAndCeramicAssignments = (caseItem) => {
+    if (!caseItem?.assignmentHistory || caseItem.assignmentHistory.length === 0) {
+      return { cadCam: null, ceramic: null };
+    }
+
+    let cadCamUser = null;
+    let ceramicUser = null;
+
+    // Search through assignmentHistory in reverse to find the most recent assignments
+    for (let i = caseItem.assignmentHistory.length - 1; i >= 0; i--) {
+      const historyEntry = caseItem.assignmentHistory[i];
+      const assignments = historyEntry?.newAssignment || [];
+
+      // Look for CadCam assignment if we haven't found one yet
+      if (!cadCamUser) {
+        const cadCam = assignments.find(a => a.department === "CadCam");
+        if (cadCam) cadCamUser = cadCam.userName;
+      }
+
+      // Look for Ceramic assignment if we haven't found one yet
+      if (!ceramicUser) {
+        const ceramic = assignments.find(a => a.department === "Caramic");
+        if (ceramic) ceramicUser = ceramic.userName;
+      }
+
+      // If we found both, we can stop searching
+      if (cadCamUser && ceramicUser) break;
+    }
+
+    return {
+      cadCam: cadCamUser,
+      ceramic: ceramicUser
+    };
+  };
 
   // State for tracking assignment actions
   const [assignmentAction, setAssignmentAction] = useState("assign"); // 'assign', 'reassign', 'unassign'
@@ -3400,8 +3447,9 @@ const Cases = () => {
                       </th>
                       <th scope="col">Patient Name</th>
                       <th scope="col" onClick={() => handleSort("technicianName")} style={{ cursor: "pointer" }}>
-                        Technician {renderSortIcon("technicianName")}
+                        Cad Cam {renderSortIcon("technicianName")}
                       </th>
+                      <th scope="col">Ceramic</th>
                       {/* <th scope="col">Type</th> */}
                       <th className="td-phone" scope="col">
                         #Unites
@@ -3440,7 +3488,7 @@ const Cases = () => {
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
                         <td>
-                          {item.assignmentHistory &&
+                          {item.isAssignedCadCam && item.assignmentHistory &&
                             item.assignmentHistory.length > 0 &&
                             item.assignmentHistory[
                               item.assignmentHistory.length - 1
@@ -3456,6 +3504,26 @@ const Cases = () => {
                               ].newAssignment.length - 1
                             ].userName
                             : "-"}
+                        </td>
+                        <td>
+                          <div className="text-start small">
+                            {(() => {
+                              const assignments = getCadCamAndCeramicAssignments(item);
+                              return (
+                                <>
+                                  {/* {assignments.cadCam && (
+                                    <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                  )} */}
+                                  {assignments.ceramic && item.isAssignedCeramic && (
+                                    <div className="text-center"><  strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                  )}
+                                  {!assignments.ceramic && (
+                                    <div className="text-center"><strong>-</strong></div>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
                         </td>
                         {/* <td>{item.caseType}</td> */}
                         <td
@@ -3473,7 +3541,7 @@ const Cases = () => {
                         </td>
                         <td>
                           <div className="actions-btns">
-                            {item.isAssignedCadCam && (
+                            {(item.isAssignedCadCam || item.isAssignedCeramic) &&
                               <>
                                 <span
                                   className="c-warning"
@@ -3498,7 +3566,7 @@ const Cases = () => {
                                   <i class="fa-solid fa-user-minus"></i>
                                 </span>
                               </>
-                            )}
+                            }
                             <span
                               className="c-success"
                               // onClick={() => viewCaseHandle(item, "view")}
@@ -4098,6 +4166,10 @@ const Cases = () => {
                           In {renderSortIcon("dateIn")}
                         </th>
                         <th scope="col">Due</th>
+                        <th scope="col">Holding Info</th>
+                        <th scope="col" onClick={() => handleSort("holdBy")} style={{ cursor: "pointer" }}>
+                          Hold By {renderSortIcon("holdBy")}
+                        </th>
                         <th scope="col">Actions</th>
                       </tr>
                     </thead>
@@ -4120,6 +4192,40 @@ const Cases = () => {
                           <td>
                             {item.dateOut &&
                               _global.formatDateToYYYYMMDD(item.dateOut)}
+                          </td>
+                          <td>
+                            <div className="text-start">
+                              {item.historyHolding && item.historyHolding.length > 0 && (() => {
+                                const lastHold = item.historyHolding[item.historyHolding.length - 1];
+                                return (
+                                  <>
+                                    {lastHold && (
+                                      <div className="mb-1">
+                                        <strong>Reason:</strong> {lastHold.msg}
+                                      </div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                              {(!item.historyHolding || item.historyHolding.length === 0) && "-"}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="text-start">
+                              {item.historyHolding && item.historyHolding.length > 0 && (() => {
+                                const lastHold = item.historyHolding[item.historyHolding.length - 1];
+                                return (
+                                  <>
+                                    {lastHold && (
+                                      <div>
+                                        <strong>By:</strong> {lastHold.name}
+                                      </div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                              {(!item.historyHolding || item.historyHolding.length === 0) && "-"}
+                            </div>
                           </td>
                           <td>
                             <div className="actions-btns">
@@ -4719,6 +4825,7 @@ const Cases = () => {
                       <th scope="col" onClick={() => handleSort("technicianName")} style={{ cursor: "pointer" }}>
                         Technician {renderSortIcon("technicianName")}
                       </th>
+                      {/* <th scope="col">Assigned To</th> */}
                       <th scope="col">#Unites</th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
@@ -4773,6 +4880,24 @@ const Cases = () => {
                             ].userName
                             : "-"}
                         </td>
+                        {/* <td>
+                          <div className="text-start small">
+                            {(() => {
+                              const assignments = getCadCamAndCeramicAssignments(item);
+                              return (
+                                <>
+                                  {assignments.cadCam && (
+                                    <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                  )}
+                                  {assignments.ceramic && (
+                                    <div><strong>Ceramic:</strong> {assignments.ceramic}</div>
+                                  )}
+                                  {!assignments.cadCam && !assignments.ceramic && "-"}
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </td> */}
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -6738,6 +6863,52 @@ const Cases = () => {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* CadCam and Ceramic Assignments */}
+              {buffCase && (
+                <div className="card mb-4 border-primary">
+                  <div className="card-header bg-light">
+                    <h6 className="mb-0 text-primary fw-bold">
+                      <i className="fas fa-users-cog me-2"></i>Current Department Assignments
+                    </h6>
+                  </div>
+                  <div className="card-body py-3">
+                    <div className="row">
+                      {(() => {
+                        const { cadCam, ceramic } = getCadCamAndCeramicAssignments(buffCase);
+                        return (
+                          <>
+                            <div className="col-md-6">
+                              <div className="mb-2">
+                                <strong className="text-muted">CadCam:</strong>
+                                <div className="fw-semibold text-dark">
+                                  {cadCam && buffCase.isAssignedCadCam ? (
+                                    <span className="badge bg-info text-dark">{cadCam}</span>
+                                  ) : (
+                                    <span className="text-muted fst-italic">Not Assigned</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-6">
+                              <div className="mb-2">
+                                <strong className="text-muted">Ceramic:</strong>
+                                <div className="fw-semibold text-dark">
+                                  {ceramic && buffCase.isAssignedCeramic ? (
+                                    <span className="badge bg-info text-dark">{ceramic}</span>
+                                  ) : (
+                                    <span className="text-muted fst-italic">Not Assigned</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

@@ -155,7 +155,10 @@ const UserProfile = () => {
           // 1. Existing exclusion logic
           if (excludeIds.includes(caseItem._id)) return false;
 
-          // 2. Strict filter: deadlineCadCam OR isTopPriority OR isUrgent
+          // 2. Exclude hold cases
+          if (caseItem.isHold === true) return false;
+
+          // 3. Strict filter: deadlineCadCam OR isTopPriority OR isUrgent
           const hasDeadline = caseItem.deadlineCadCam;
           const isPriority = caseItem.isTopPriority === true;
           const isUrgent = caseItem.isUrgent === true;
@@ -165,7 +168,13 @@ const UserProfile = () => {
 
         // For admin: also store all assigned cases without priority/deadline filter
         const allCasesWithoutStatusFilter = allAssignedCases.filter((caseItem) => {
-          return !excludeIds.includes(caseItem._id);
+          // Exclude cases in other arrays
+          if (excludeIds.includes(caseItem._id)) return false;
+
+          // Exclude hold cases
+          if (caseItem.isHold === true) return false;
+
+          return true;
         });
 
         console.log("Filtered assigned cases:", filteredAssignedCases);
