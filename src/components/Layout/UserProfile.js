@@ -5,6 +5,8 @@ import * as _global from "../../config/global";
 import ReactToPrint, { useReactToPrint } from "react-to-print";
 import ViewCase from "./Cases/ViewCase";
 import SEARCH_FIELDS from "../../enum/searchFieldEnum";
+import { showToastMessage } from "../../helper/toaster";
+import DatePicker from "react-multi-date-picker";
 const UserProfile = () => {
   const userRef = useRef();
   const userRef1 = useRef();
@@ -35,6 +37,11 @@ const UserProfile = () => {
   const [startDate, setStartDat] = useState(new Date());
   const [pauseDate, setPauseDate] = useState(new Date());
   const [buffCase, setBuffCase] = useState(null);
+  const [scheduleConfig, setScheduleConfig] = useState({
+    cadCam: { selected: false, date: new Date() },
+    fitting: { selected: false, date: new Date() },
+    ceramic: { selected: false, date: new Date() },
+  });
 
   console.log("User Data", userData);
   const [activeTab, setActiveTab] = useState(0);
@@ -286,7 +293,82 @@ const UserProfile = () => {
   //     console.error("Error fetching assigned cases:", error);
   //     setAssignedCases([]);
   //   }
-  // };
+  /* Priority & Schedule Handlers */
+  const togglePriority = async (item) => {
+    const newPriority = !item.isTopPriority;
+
+    // Optimistic Update
+    const updateList = (list) => list.map(c => c._id === item._id ? { ...c, isTopPriority: newPriority } : c);
+    setAllAssignedCasesUnfiltered(prev => updateList(prev));
+    setAssignedCases(prev => updateList(prev));
+
+    try {
+      await axios.put(`${_global.BASE_URL}cases/${item._id}/top-priority/${newPriority}`, [
+        {
+          id: user._id,
+          name: `${user.firstName}, ${user.lastName}`,
+          date: new Date(),
+          isTopPriority: newPriority,
+          msg: `Case marked as ${newPriority ? 'Top Priority' : 'Normal'}`,
+        }
+      ]);
+      showToastMessage(`Case marked as ${newPriority ? 'Top Priority' : 'Normal'}`, "success");
+    } catch (error) {
+      console.error("Error toggling priority:", error);
+      showToastMessage("Error updating priority", "error");
+      // Revert optimistic update
+      const revertList = (list) => list.map(c => c._id === item._id ? { ...c, isTopPriority: item.isTopPriority } : c);
+      setAllAssignedCasesUnfiltered(prev => revertList(prev));
+      setAssignedCases(prev => revertList(prev));
+    }
+  };
+
+  const handleScheduleSave = async () => {
+    // Determine target(s)
+    let targets = [];
+    if (buffCase) {
+      targets = [buffCase._id];
+    } else {
+      return;
+    }
+
+    // Build payload
+    const payload = {};
+    if (scheduleConfig.cadCam.selected) payload.deadlineCadCam = scheduleConfig.cadCam.date;
+    if (scheduleConfig.fitting.selected) payload.deadlineFitting = scheduleConfig.fitting.date;
+    if (scheduleConfig.ceramic.selected) payload.deadlineCeramic = scheduleConfig.ceramic.date;
+
+    if (Object.keys(payload).length === 0) {
+      showToastMessage("Please select at least one department", "error");
+      return;
+    }
+
+    try {
+      await Promise.all(targets.map(id =>
+        axios.patch(`${_global.BASE_URL}cases/${id}`, payload)
+      ));
+
+      // Update local state (Optimistic-ish, assumed success)
+      const updateStateList = (list) => list.map(item => {
+        if (targets.includes(item._id)) {
+          return { ...item, ...payload };
+        }
+        return item;
+      });
+
+      setAllAssignedCasesUnfiltered(prev => updateStateList(prev));
+      setAssignedCases(prev => updateStateList(prev));
+
+      showToastMessage("Cases scheduled successfully", "success");
+      setBuffCase(null); // Clear buffer
+
+      const closeBtn = document.getElementById("closeScheduleModalBtn");
+      if (closeBtn) closeBtn.click();
+    } catch (error) {
+      console.error("Error scheduling cases:", error);
+      showToastMessage("Error scheduling cases", "error");
+    }
+  };
   function groupTeethNumbersByName(teethNumbers) {
     const result = {};
     teethNumbers.forEach((teethNumber) => {
@@ -1814,6 +1896,24 @@ const UserProfile = () => {
                               <td>
                                 <div className="actions-btns">
                                   <span
+                                    className={item.isTopPriority ? "c-danger" : "c-warning"}
+                                    onClick={() => togglePriority(item)}
+                                    title="Top Priority"
+                                  >
+                                    {item.isTopPriority ? <i className="fa-solid fa-star"></i> : <i className="fa-regular fa-star"></i>}
+                                  </span>
+                                  <span
+                                    className="c-primary"
+                                    onClick={() => {
+                                      setBuffCase(item);
+                                    }}
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#scheduleModal"
+                                    title="Schedule"
+                                  >
+                                    <i className="fa-regular fa-calendar"></i>
+                                  </span>
+                                  <span
                                     className="c-success"
                                     onClick={() => {
                                       buffCaseHandle(item);
@@ -2443,6 +2543,123 @@ const UserProfile = () => {
               )}
             </div>
 
+          </div>
+        </div>
+      </div>
+      {/* Schedule Modal */}
+      <div
+        className="modal fade"
+        id="scheduleModal"
+        tabIndex="-1"
+        aria-labelledby="scheduleModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="scheduleModalLabel">Schedule Cases</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                id="closeScheduleModalBtn"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="d-flex flex-column gap-3">
+                {/* Cad Cam */}
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="checkCadCam"
+                      checked={scheduleConfig.cadCam.selected}
+                      onChange={(e) => setScheduleConfig(prev => ({ ...prev, cadCam: { ...prev.cadCam, selected: e.target.checked } }))}
+                    />
+                    <label className="form-check-label" htmlFor="checkCadCam">Cad Cam</label>
+                  </div>
+                  {scheduleConfig.cadCam.selected && (
+                    <DatePicker
+                      value={scheduleConfig.cadCam.date}
+                      onChange={(date) => setScheduleConfig(prev => ({ ...prev, cadCam: { ...prev.cadCam, date } }))}
+                      format="DD/MM/YYYY"
+                      calendarPosition="bottom-center"
+                      className="form-control"
+                      containerStyle={{ width: "200px" }}
+                      style={{ width: "100%", height: "35px" }}
+                    />
+                  )}
+                </div>
+
+                {/* Fitting */}
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="checkFitting"
+                      checked={scheduleConfig.fitting.selected}
+                      onChange={(e) => setScheduleConfig(prev => ({ ...prev, fitting: { ...prev.fitting, selected: e.target.checked } }))}
+                    />
+                    <label className="form-check-label" htmlFor="checkFitting">Fitting</label>
+                  </div>
+                  {scheduleConfig.fitting.selected && (
+                    <DatePicker
+                      value={scheduleConfig.fitting.date}
+                      onChange={(date) => setScheduleConfig(prev => ({ ...prev, fitting: { ...prev.fitting, date } }))}
+                      format="DD/MM/YYYY"
+                      calendarPosition="bottom-center"
+                      className="form-control"
+                      containerStyle={{ width: "200px" }}
+                      style={{ width: "100%", height: "35px" }}
+                    />
+                  )}
+                </div>
+
+                {/* Ceramic */}
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="checkCeramic"
+                      checked={scheduleConfig.ceramic.selected}
+                      onChange={(e) => setScheduleConfig(prev => ({ ...prev, ceramic: { ...prev.ceramic, selected: e.target.checked } }))}
+                    />
+                    <label className="form-check-label" htmlFor="checkCeramic">Ceramic</label>
+                  </div>
+                  {scheduleConfig.ceramic.selected && (
+                    <DatePicker
+                      value={scheduleConfig.ceramic.date}
+                      onChange={(date) => setScheduleConfig(prev => ({ ...prev, ceramic: { ...prev.ceramic, date } }))}
+                      format="DD/MM/YYYY"
+                      calendarPosition="bottom-center"
+                      className="form-control"
+                      containerStyle={{ width: "200px" }}
+                      style={{ width: "100%", height: "35px" }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleScheduleSave}
+              >
+                Save changes
+              </button>
+            </div>
           </div>
         </div>
       </div>
