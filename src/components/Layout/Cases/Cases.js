@@ -3513,6 +3513,7 @@ const Cases = () => {
                               const assignments = getCadCamAndCeramicAssignments(item);
                               return (
                                 <>
+                                  {/* <strong>{assignments.ceramic}</strong> */}
                                   {/* {assignments.cadCam && (
                                     <div><strong>CadCam:</strong> {assignments.cadCam}</div>
                                   )} */}
