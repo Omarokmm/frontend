@@ -5,6 +5,10 @@ import * as _global from "../../config/global";
 import { format } from "date-fns";
 import { useLocation } from "react-router-dom";
 import ViewCase from "./Cases/ViewCase";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
+import AssignedDoctorsListReport from "./Reports/AssignedDoctorsListReport";
+import DoctorCasesReport from "./Reports/DoctorCasesReport";
 
 const AssignedDoctors = () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -34,6 +38,68 @@ const AssignedDoctors = () => {
     const [searchText, setSearchText] = useState("");
     const [isCasesLoading, setIsCasesLoading] = useState(false);
     const [buffCase, setBuffCase] = useState(null);
+
+    // Print Data State
+    const [printData, setPrintData] = useState({}); // { [doctorId]: { selected: true, paid: '', paymentDate: '', balance: '' } }
+
+    const handlePreparePrint = () => {
+        // Initialize print data if empty
+        if (Object.keys(printData).length === 0) {
+            const initialData = {};
+            assignments.forEach(a => {
+                initialData[a.doctorId._id] = { selected: true, paid: '', paymentDate: '', balance: '' };
+            });
+            setPrintData(initialData);
+        }
+    };
+
+    const updatePrintData = (doctorId, field, value) => {
+        setPrintData(prev => ({
+            ...prev,
+            [doctorId]: {
+                ...prev[doctorId],
+                [field]: value
+            }
+        }));
+    };
+
+    const togglePrintSelection = (doctorId) => {
+        setPrintData(prev => ({
+            ...prev,
+            [doctorId]: {
+                ...prev[doctorId],
+                selected: !prev[doctorId]?.selected
+            }
+        }));
+    };
+
+    const toggleSelectAllIds = (checked) => {
+        setPrintData(prev => {
+            const newState = { ...prev };
+            assignments.forEach(a => {
+                const docId = a.doctorId._id;
+                newState[docId] = {
+                    ...(newState[docId] || { paid: '', paymentDate: '', balance: '' }),
+                    selected: checked
+                };
+            });
+            return newState;
+        });
+    };
+
+    // Print Refs
+    const doctorsReportRef = useRef();
+    const casesReportRef = useRef();
+
+    const handlePrintDoctors = useReactToPrint({
+        content: () => doctorsReportRef.current,
+        documentTitle: "Assigned Doctors List",
+    });
+
+    const handlePrintCases = useReactToPrint({
+        content: () => casesReportRef.current,
+        documentTitle: `Director Cases - ${selectedDoctor?.firstName} ${selectedDoctor?.lastName}`,
+    });
 
     useEffect(() => {
         fetchAssignedDoctors();
@@ -614,6 +680,16 @@ const AssignedDoctors = () => {
                             <span className="badge bg-light text-secondary border rounded-pill px-3">
                                 {assignments.length} Total
                             </span>
+                            <button
+                                className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                                onClick={handlePreparePrint}
+                                data-bs-toggle="modal"
+                                data-bs-target="#preparePrintModal"
+                                title="Print All Doctors"
+                            >
+                                <i className="fa-solid fa-print"></i>
+                                <span className="small">Print</span>
+                            </button>
                         </div>
                     </div>
 
@@ -695,7 +771,7 @@ const AssignedDoctors = () => {
                                     </div>
                                 </div>
 
-                                <div className="d-flex gap-2">
+                                <div className="d-flex gap-2 align-items-center">
                                     <ul className="nav nav-pills-premium mb-0">
                                         <li className="nav-item">
                                             <button className="nav-link active" data-bs-toggle="tab" data-bs-target="#all">All Cases</button>
@@ -713,6 +789,14 @@ const AssignedDoctors = () => {
                                             <button className="nav-link" data-bs-toggle="tab" data-bs-target="#finished">Finished ({finishedCases.length})</button>
                                         </li>
                                     </ul>
+                                    <button
+                                        className="btn btn-primary btn-sm shadow-sm d-flex align-items-center gap-2"
+                                        onClick={handlePrintCases}
+                                        title="Print Cases"
+                                    >
+                                        <i className="fa-solid fa-print"></i>
+                                        <span>Print</span>
+                                    </button>
                                 </div>
                             </div>
 
@@ -818,8 +902,8 @@ const AssignedDoctors = () => {
                                         <div
                                             key={index}
                                             className={`p-3 rounded-3 border ${item.isHold
-                                                    ? "bg-light-danger border-danger border-opacity-10"
-                                                    : "bg-light-success border-success border-opacity-10"
+                                                ? "bg-light-danger border-danger border-opacity-10"
+                                                : "bg-light-success border-success border-opacity-10"
                                                 }`}
                                             style={{
                                                 backgroundColor: item.isHold ? "#fff5f5" : "#f0fff4"
@@ -933,6 +1017,117 @@ const AssignedDoctors = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Prepare Print Modal */}
+            <div className="modal fade" id="preparePrintModal" tabIndex="-1">
+                <div className="modal-dialog modal-xl modal-dialog-centered">
+                    <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div className="modal-header bg-light border-0 py-3 px-4">
+                            <h5 className="modal-title fw-bold text-dark">Prepare Print Report</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div className="modal-body p-4">
+                            <div className="table-responsive" style={{ maxHeight: '60vh' }}>
+                                <table className="table table-hover align-middle">
+                                    <thead className="table-light sticky-top">
+                                        <tr>
+                                            <th style={{ width: '40px' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input"
+                                                    onChange={(e) => toggleSelectAllIds(e.target.checked)}
+                                                    checked={assignments.length > 0 && assignments.every(a => printData[a.doctorId._id]?.selected)}
+                                                />
+                                            </th>
+                                            <th>Doctor Name</th>
+                                            <th style={{ width: '150px' }}>Paid Amount</th>
+                                            <th style={{ width: '150px' }}>Payment Date</th>
+                                            <th style={{ width: '150px' }}>Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {assignments.map(item => {
+                                            const docId = item.doctorId._id;
+                                            const data = printData[docId] || { selected: true, paid: '', paymentDate: '', balance: '' };
+                                            return (
+                                                <tr key={docId} className={data.selected ? '' : 'opacity-50'}>
+                                                    <td>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="form-check-input"
+                                                            checked={!!data.selected}
+                                                            onChange={() => togglePrintSelection(docId)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <div className="fw-medium">{item.doctorId.firstName} {item.doctorId.lastName}</div>
+                                                        <div className="small text-muted">{item.doctorId.clinicName}</div>
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control form-control-sm"
+                                                            placeholder="0.00"
+                                                            value={data.paid || ''}
+                                                            onChange={(e) => updatePrintData(docId, 'paid', e.target.value)}
+                                                            disabled={!data.selected}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control form-control-sm"
+                                                            placeholder="DD/MM/YYYY"
+                                                            value={data.paymentDate || ''}
+                                                            onChange={(e) => updatePrintData(docId, 'paymentDate', e.target.value)}
+                                                            disabled={!data.selected}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control form-control-sm"
+                                                            placeholder="0.00"
+                                                            value={data.balance || ''}
+                                                            onChange={(e) => updatePrintData(docId, 'balance', e.target.value)}
+                                                            disabled={!data.selected}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div className="modal-footer border-0 p-4 pt-0 bg-transparent">
+                            <button className="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                            <button
+                                className="btn btn-primary rounded-pill px-5 fw-bold shadow-sm"
+                                onClick={handlePrintDoctors}
+                            >
+                                <i className="fa-solid fa-print me-2"></i>
+                                Print Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Hidden Print Components */}
+            <div style={{ display: "none" }}>
+                <AssignedDoctorsListReport
+                    ref={doctorsReportRef}
+                    assignments={assignments}
+                    viewingUser={viewingUser}
+                    printData={printData}
+                />
+                <DoctorCasesReport
+                    ref={casesReportRef}
+                    doctor={selectedDoctor}
+                    cases={doctorCases}
+                />
             </div>
         </div>
     );

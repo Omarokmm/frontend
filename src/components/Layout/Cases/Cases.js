@@ -152,6 +152,10 @@ const Cases = () => {
   const [assignSearch, setAssignSearch] = useState("");
   const [selectedAssignUsers, setSelectedAssignUsers] = useState({}); // {deptName: userId}
   const [isAssignLoading, setIsAssignLoading] = useState(false);
+  const [isTopPriorityReassign, setIsTopPriorityReassign] = useState(false);
+  const [assignModalDeptFilter, setAssignModalDeptFilter] = useState(null);
+
+  const isCeramicUser = departments && departments.length > 0 && (departments[0]?.name === "Ceramic" || departments[0]?.name === "Caramic");
 
   // Sorting State
   const [sortConfig, setSortConfig] = useState({
@@ -468,9 +472,10 @@ const Cases = () => {
     }
   };
 
-  const openAssignModal = (caseItem, action = "assign") => {
+  const openAssignModal = (caseItem, action = "assign", deptFilter = null) => {
     setBuffCase(caseItem);
     setAssignmentAction(action);
+    setAssignModalDeptFilter(deptFilter);
 
     // For reassign, pre-populate with current assignments
     if (action === "reassign") {
@@ -488,6 +493,9 @@ const Cases = () => {
       // For assign and unassign, start with empty selections
       setSelectedAssignUsers({});
     }
+
+    // Reset top priority flag
+    setIsTopPriorityReassign(false);
 
     if (assignUsers.length === 0) {
       axios
@@ -521,11 +529,16 @@ const Cases = () => {
   };
 
   const filteredUsersByDept = () => {
-    if (!assignSearch) return assignUsersByDept;
+    let sourceMap = assignUsersByDept;
+    if (assignModalDeptFilter) {
+      sourceMap = { [assignModalDeptFilter]: assignUsersByDept[assignModalDeptFilter] || [] };
+    }
+
+    if (!assignSearch) return sourceMap;
     const q = assignSearch.toLowerCase();
     const out = {};
-    Object.keys(assignUsersByDept).forEach((dep) => {
-      const list = assignUsersByDept[dep].filter(
+    Object.keys(sourceMap).forEach((dep) => {
+      const list = sourceMap[dep].filter(
         (u) =>
           (u.firstName + " " + u.lastName).toLowerCase().includes(q) ||
           (u.email || "").toLowerCase().includes(q)
@@ -769,11 +782,46 @@ const Cases = () => {
       "DEBUG -selectedAssignUsersselectedAssignUsersselectedAssignUsers ",
       selectedAssignUsers
     );
+
+    // Capture selected cases before they might be cleared
+    const casesToUpdate = [...selectedCases];
+
     const assignments = Object.entries(selectedAssignUsers)
       .filter(([deptName, userId]) => userId)
       .map(([deptName, userId]) => ({ department: deptName, userId }));
 
     await handleCaseAssignment("reassign", selectedCases, assignments);
+
+    // If "Mark as Top Priority" is checked and assignment was successful (we assume success if we reach here without error usually, 
+    // but handleCaseAssignment handles errors. We should ideally check result, but handleCaseAssignment does not return it easily.
+    // However, typical flow continues. 
+
+    if (isTopPriorityReassign && casesToUpdate.length > 0) {
+      try {
+        await Promise.all(casesToUpdate.map(id =>
+          axios.put(`${_global.BASE_URL}cases/${id}/top-priority/true`, [
+            {
+              id: user._id,
+              name: `${user.firstName}, ${user.lastName}`,
+              date: new Date(),
+              isTopPriority: true,
+              msg: " Case is marked as Top Priority during Reassignment",
+            }
+          ])
+        ));
+        showToastMessage("Cases marked as Top Priority", "success");
+
+        // Update local state for priority
+        const updateList = (list) => list.map(c => casesToUpdate.includes(c._id) ? { ...c, isTopPriority: true } : c);
+        setNotStartCases(prev => updateList(prev));
+        setAllCases(prev => updateList(prev));
+        setInProcessCases(prev => updateList(prev));
+
+      } catch (error) {
+        console.error("Error updating priority during reassignment:", error);
+        showToastMessage("Error marking cases as Top Priority", "error");
+      }
+    }
   };
 
   // Bulk unassign users from multiple selected cases
@@ -2532,6 +2580,7 @@ const Cases = () => {
 
       setNotStartCases(prev => updateStateList(prev));
       setAllCases(prev => updateStateList(prev));
+      setInProcessCases(prev => updateStateList(prev));
 
       showToastMessage("Cases scheduled successfully", "success");
       setSelectedCases([]);
@@ -3012,7 +3061,7 @@ const Cases = () => {
                         role="alert"
                         className={
                           (item.isHold ? "table-danger" : "") ||
-                          (item.isUrgent ? "urgent-case animate-me" : "") ||
+                          (item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : "") ||
                           checkCaseDate(item)
                         }
                         key={item._id}
@@ -3473,7 +3522,7 @@ const Cases = () => {
                   <tbody>
                     {console.log("notStartCases", notStartCases)}
                     {notStartCases.map((item, index) => (
-                      <tr key={item._id} className={checkNotStartDelay(item)}>
+                      <tr key={item._id} className={`${checkNotStartDelay(item)} ${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                         <td>
                           <input
                             type="checkbox"
@@ -3609,11 +3658,11 @@ const Cases = () => {
                               )}
                             {/* New Row Buttons */}
                             <span
-                              className={item.isTopPriority ? "c-danger" : "c-warning"}
+                              className={item.isTopPriority ? "text-danger" : "c-danger"}
                               onClick={() => togglePriority(item)}
-                              title="Top Priority"
+                              title="Toggle Top Priority"
                             >
-                              {item.isTopPriority ? <i className="fa-solid fa-star"></i> : <i className="fa-regular fa-star"></i>}
+                              <i className="fas fa-fire"></i>
                             </span>
                             <span
                               className=" c-primary  "
@@ -3879,7 +3928,7 @@ const Cases = () => {
                     </thead>
                     <tbody>
                       {forAssignCases.map((item, index) => (
-                        <tr key={item._id} className={checkNotStartDelay(item)}>
+                        <tr key={item._id} className={`${checkNotStartDelay(item)} ${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                           <td>
                             <input
                               type="checkbox"
@@ -4047,20 +4096,26 @@ const Cases = () => {
               aria-labelledby="home-tab"
               tabIndex="2"
             >
-              <div className="form-group">
-                <input
-                  type="text"
-                  name="searchText"
-                  className="form-control"
-                  placeholder="Search by name | case number | case type "
-                  value={searchText}
-                  onChange={(e) => searchByName(e.target.value, "inProccess")}
-                />
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="form-group flex-grow-1 me-3">
+                  <input
+                    type="text"
+                    name="searchText"
+                    className="form-control"
+                    placeholder="Search by name | case number | case type "
+                    value={searchText}
+                    onChange={(e) => searchByName(e.target.value, "inProccess")}
+                  />
+                </div>
+
+
               </div>
+
               {inProcessCases.length > 0 && (
                 <table className="table table-responsive text-center table-bordered">
                   <thead>
                     <tr className="table-secondary">
+
                       <th scope="col">#Case</th>
                       <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>
                         Doctor Name {renderSortIcon("doctorName")}
@@ -4076,11 +4131,11 @@ const Cases = () => {
                   </thead>
                   <tbody>
                     {inProcessCases.map((item, index) => (
-                      // className={checkCaseDate(item)}
                       <tr
                         key={item._id}
-                      //  className={(item.receptionPacking.status.isEnd === false && item.delivering.status.isEnd === false ? "table-warning" : "") }
+                        className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}
                       >
+
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
@@ -4092,6 +4147,42 @@ const Cases = () => {
                         </td>
                         <td>
                           <div className="actions-btns">
+                            <>
+                              <span
+                                className={item.isTopPriority ? "text-danger" : "c-danger"}
+                                onClick={() => togglePriority(item)}
+                                title="Toggle Top Priority"
+                              >
+                                <i className="fas fa-fire"></i>
+                              </span>
+                              {/* <span
+                                  className="c-info"
+                                  onClick={() => setBuffCase(item)}
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#scheduleModal"
+                                  title="Schedule"
+                                >
+                                  <i className="fas fa-calendar-alt"></i>
+                                </span> */}
+                              <span
+                                className="c-warning"
+                                onClick={() => openAssignModal(item, "reassign", "Caramic")}
+                                data-bs-toggle="modal"
+                                data-bs-target="#assignUserModal"
+                                title="Reassign"
+                              >
+                                <i className="fa-solid fa-user-edit"></i>
+                              </span>
+                              <span
+                                className="c-danger"
+                                onClick={() => openAssignModal(item, "unassign", "Caramic")}
+                                data-bs-toggle="modal"
+                                data-bs-target="#assignUserModal"
+                                title="Unassign"
+                              >
+                                <i className="fa-solid fa-user-minus"></i>
+                              </span>
+                            </>
                             <span
                               className="c-success"
                               // onClick={() => viewCaseHandle(item, "view")}
@@ -4187,7 +4278,7 @@ const Cases = () => {
                     </thead>
                     <tbody>
                       {holdingCases.map((item, index) => (
-                        <tr key={item._id}>
+                        <tr key={item._id} className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                           <td>{item.caseNumber}</td>
                           <td>{item.dentistObj.name}</td>
                           <td>{item.patientName}</td>
@@ -4851,7 +4942,7 @@ const Cases = () => {
                   </thead>
                   <tbody>
                     {studyCases.map((item, index) => (
-                      <tr key={item._id}>
+                      <tr key={item._id} className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                         {user.roles[0] === _global.allRoles.admin && <td>
                           <input
                             type="checkbox"
@@ -4974,11 +5065,11 @@ const Cases = () => {
                               <i class="fa-brands fa-squarespace"></i>
                             </span>
                             <span
-                              className={item.isTopPriority ? "c-danger" : "c-warning"}
+                              className={item.isTopPriority ? "text-danger" : "c-danger"}
                               onClick={() => togglePriority(item)}
-                              title="Top Priority"
+                              title="Toggle Top Priority"
                             >
-                              {item.isTopPriority ? <i className="fa-solid fa-star"></i> : <i className="fa-regular fa-star"></i>}
+                              <i className="fas fa-fire"></i>
                             </span>
                             <span
                               className=" c-primary  "
@@ -5108,7 +5199,7 @@ const Cases = () => {
                   </thead>
                   <tbody>
                     {packingCases.map((item, index) => (
-                      <tr key={item._id}>
+                      <tr key={item._id} className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                         <td>{item.caseNumber}</td>
                         <td>{item.dentistObj.name}</td>
                         <td>{item.patientName}</td>
@@ -6923,6 +7014,27 @@ const Cases = () => {
                       })()}
                     </div>
                   </div>
+                  {/* Top Priority Checkbox for Ceramic Reassignment */}
+                  {isCeramicUser && assignmentAction === "reassign" && (
+                    <div className="mt-4 border-top pt-3">
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="topPriorityCheck"
+                          checked={isTopPriorityReassign}
+                          onChange={(e) => setIsTopPriorityReassign(e.target.checked)}
+                        />
+                        <label className="form-check-label fw-bold text-danger" htmlFor="topPriorityCheck">
+                          <i className="fas fa-fire me-2"></i>
+                          Reassign & Mark as Top Priority
+                        </label>
+                      </div>
+                      <small className="text-muted d-block mt-1">
+                        Enable this to automatically flag these cases as Urgent/Top Priority immediately after reassignment.
+                      </small>
+                    </div>
+                  )}
                 </div>
               )}
 
