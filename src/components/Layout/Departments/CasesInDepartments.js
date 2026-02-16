@@ -248,6 +248,41 @@ const CasesInDepartments = () => {
       return "-";
     }
   };
+
+  const getCadCamAndCeramicAssignments = (caseItem) => {
+    if (!caseItem?.assignmentHistory || caseItem.assignmentHistory.length === 0) {
+      return { cadCam: null, ceramic: null };
+    }
+
+    let cadCamUser = null;
+    let ceramicUser = null;
+
+    // Search through assignmentHistory in reverse to find the most recent assignments
+    for (let i = caseItem.assignmentHistory.length - 1; i >= 0; i--) {
+      const historyEntry = caseItem.assignmentHistory[i];
+      const assignments = historyEntry?.newAssignment || [];
+
+      // Look for CadCam assignment if we haven't found one yet
+      if (!cadCamUser) {
+        const cadCam = assignments.find(a => a.department === "CadCam");
+        if (cadCam) cadCamUser = cadCam.userName;
+      }
+
+      // Look for Ceramic assignment if we haven't found one yet
+      if (!ceramicUser) {
+        const ceramic = assignments.find(a => a.department === "Caramic");
+        if (ceramic) ceramicUser = ceramic.userName;
+      }
+
+      // If we found both, we can stop searching
+      if (cadCamUser && ceramicUser) break;
+    }
+
+    return {
+      cadCam: cadCamUser,
+      ceramic: ceramicUser
+    };
+  };
   function groupTeethNumbersByName(teethNumbers) {
     const result = {};
     teethNumbers.forEach((teethNumber) => {
@@ -1390,6 +1425,7 @@ const CasesInDepartments = () => {
                         </th>
                         <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
                         <th scope="col">Patient</th>
+                        <th scope="col">Assignments</th>
                         {/* <th>Actions</th> */}
                         <th scope="col">#teeth</th>
                         {/* <th scope="col">Actions</th> */}
@@ -1413,6 +1449,27 @@ const CasesInDepartments = () => {
                           <td>{getTechnicainName(item)}</td>
                           <td>{item?.dentistObj?.name}</td>
                           <td>{item.patientName}</td>
+                          <td>
+                            <div className="text-start small">
+                              {(() => {
+                                const assignments = getCadCamAndCeramicAssignments(item);
+                                return (
+                                  <>
+                                    {/* <strong>{assignments.ceramic}</strong> */}
+                                    {/* {assignments.cadCam && (
+                                              <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                          )} */}
+                                    {assignments.ceramic && item.isAssignedCeramic && (
+                                      <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                    )}
+                                    {!assignments.ceramic && (
+                                      <div className="text-center"><strong>-</strong></div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </td>
                           {userData.isAdmin && (
                             <td className="teeth-pieces">
                               {groupTeethNumbersByName(item.teethNumbers)?.map(
