@@ -1560,7 +1560,7 @@ const Doctors = () => {
                 <span className="badge bg-light text-secondary border rounded-pill px-3">
                   {doctors.length} Total
                 </span>
-                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.super_admin) && (
+                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.super_admin || user.lastName === "Jamous") && (
                   <div className="d-flex gap-2">
                     <button
                       className="btn btn-outline-secondary btn-sm rounded-pill shadow-sm"
@@ -2337,8 +2337,8 @@ const Doctors = () => {
                     <div
                       key={index}
                       className={`p-3 rounded-3 border ${item.isHold
-                          ? "bg-light-danger border-danger border-opacity-10"
-                          : "bg-light-success border-success border-opacity-10"
+                        ? "bg-light-danger border-danger border-opacity-10"
+                        : "bg-light-success border-success border-opacity-10"
                         }`}
                       style={{
                         backgroundColor: item.isHold ? "#fff5f5" : "#f0fff4"

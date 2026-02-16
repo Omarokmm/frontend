@@ -1583,6 +1583,39 @@ const UserProfile = () => {
       return "-";
     }
   };
+  // Helper function to get CadCam and Ceramic assignments
+  const getCadCamAndCeramicAssignments = (caseItem) => {
+    if (!caseItem?.assignmentHistory || caseItem.assignmentHistory.length === 0) {
+      return { cadCam: null, ceramic: null };
+    }
+
+    let cadCamUser = null;
+    let ceramicUser = null;
+
+    // Search through assignmentHistory in reverse to find the most recent assignments
+    for (let i = caseItem.assignmentHistory.length - 1; i >= 0; i--) {
+      const historyEntry = caseItem.assignmentHistory[i];
+      const assignments = historyEntry?.newAssignment || [];
+
+      // Look for CadCam assignment if we haven't found one yet
+      if (!cadCamUser) {
+        const cadCam = assignments.find(a => a.department === "CadCam");
+        if (cadCam) cadCamUser = cadCam.userName;
+      }
+
+      // Look for Ceramic assignment if we haven't found one yet
+      if (!ceramicUser) {
+        const ceramic = assignments.find(a => a.department === "Caramic");
+        if (ceramic) ceramicUser = ceramic.userName;
+      }
+
+      // If we found both, we can stop searching
+      if (cadCamUser && ceramicUser) break;
+    }
+
+    return { cadCam: cadCamUser, ceramic: ceramicUser };
+  };
+
   const handlePrint = useReactToPrint({
     content: () => userRef.current,
     documentTitle: ` ${userData.firstName}   ${userData.lastName} (Finished Cases)`,
@@ -1786,6 +1819,7 @@ const UserProfile = () => {
                             <th scope="col">#Unites</th>
                             <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>In {renderSortIcon("dateIn")}</th>
                             <th scope="col">Due</th>
+                            <th scope="col">Ceramic</th>
                             <th scope="col">Deadline CadCam</th>
                             <th scope="col">Actions</th>
                           </tr>
@@ -1813,6 +1847,27 @@ const UserProfile = () => {
                               <td>
                                 {item.dateOut &&
                                   _global.formatDateToYYYYMMDD(item.dateOut)}
+                              </td>
+                              <td>
+                                <div className="text-start small">
+                                  {(() => {
+                                    const assignments = getCadCamAndCeramicAssignments(item);
+                                    return (
+                                      <>
+                                        {/* <strong>{assignments.ceramic}</strong> */}
+                                        {/* {assignments.cadCam && (
+                                            <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                        )} */}
+                                        {assignments.ceramic && item.isAssignedCeramic && (
+                                          <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                        )}
+                                        {!assignments.ceramic && (
+                                          <div className="text-center"><strong>-</strong></div>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
+                                </div>
                               </td>
                               <td>
                                 {item.isUrgent ? <span className="fw-bold text-danger">Urgent</span> : (item.isTopPriority ? <span className="fw-bold text-danger">Top Priority</span> : (item.deadlineCadCam ? _global.formatDateToYYYYMMDD(item.deadlineCadCam) : "-"))}
@@ -1862,6 +1917,7 @@ const UserProfile = () => {
                             <th scope="col">#Unites</th>
                             <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>In {renderSortIcon("dateIn")}</th>
                             <th scope="col">Due</th>
+                            <th scope="col">Ceramic</th>
                             <th scope="col">Deadline CadCam</th>
                             <th scope="col">Actions</th>
                           </tr>
@@ -1889,6 +1945,27 @@ const UserProfile = () => {
                               <td>
                                 {item.dateOut &&
                                   _global.formatDateToYYYYMMDD(item.dateOut)}
+                              </td>
+                              <td>
+                                <div className="text-start small">
+                                  {(() => {
+                                    const assignments = getCadCamAndCeramicAssignments(item);
+                                    return (
+                                      <>
+                                        {/* <strong>{assignments.ceramic}</strong> */}
+                                        {/* {assignments.cadCam && (
+                                            <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                        )} */}
+                                        {assignments.ceramic && item.isAssignedCeramic && (
+                                          <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                        )}
+                                        {!assignments.ceramic && (
+                                          <div className="text-center"><strong>-</strong></div>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
+                                </div>
                               </td>
                               <td>
                                 {item.isUrgent ? <span className="fw-bold text-danger">Urgent</span> : (item.isTopPriority ? <span className="fw-bold text-danger">Top Priority</span> : (item.deadlineCadCam ? _global.formatDateToYYYYMMDD(item.deadlineCadCam) : "-"))}
@@ -1959,6 +2036,7 @@ const UserProfile = () => {
                           <th scope="col">#Unites</th>
                           <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>In {renderSortIcon("dateIn")}</th>
                           <th scope="col">Due</th>
+                          <th scope="col">Ceramic</th>
                           <th scope="col">Deadline CadCam</th>
                           <th scope="col">Actions</th>
                         </tr>
@@ -1986,6 +2064,27 @@ const UserProfile = () => {
                             <td>
                               {item.dateOut &&
                                 _global.formatDateToYYYYMMDD(item.dateOut)}
+                            </td>
+                            <td>
+                              <div className="text-start small">
+                                {(() => {
+                                  const assignments = getCadCamAndCeramicAssignments(item);
+                                  return (
+                                    <>
+                                      {/* <strong>{assignments.ceramic}</strong> */}
+                                      {/* {assignments.cadCam && (
+                                            <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                        )} */}
+                                      {assignments.ceramic && item.isAssignedCeramic && (
+                                        <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                      )}
+                                      {!assignments.ceramic && (
+                                        <div className="text-center"><strong>-</strong></div>
+                                      )}
+                                    </>
+                                  );
+                                })()}
+                              </div>
                             </td>
                             <td>
                               {item.isUrgent ? <span className="fw-bold text-danger">Urgent</span> : (item.isTopPriority ? <span className="fw-bold text-danger">Top Priority</span> : (item.deadlineCadCam ? _global.formatDateToYYYYMMDD(item.deadlineCadCam) : "-"))}
@@ -2098,6 +2197,7 @@ const UserProfile = () => {
                         <th scope="col">StartedAt</th>
                         <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
                         <th scope="col">Patient</th>
+                        <th scope="col">Ceramic</th>
                         <th scope="col">#teeth</th>
                         <th>Actions</th>
                         {/* <th scope="col">Actions</th> */}
@@ -2112,6 +2212,27 @@ const UserProfile = () => {
                           <td>{getStartingDate(item)}</td>
                           <td>{item?.dentistObj?.name}</td>
                           <td>{item.patientName}</td>
+                          <td>
+                            <div className="text-start small">
+                              {(() => {
+                                const assignments = getCadCamAndCeramicAssignments(item);
+                                return (
+                                  <>
+                                    {/* <strong>{assignments.ceramic}</strong> */}
+                                    {/* {assignments.cadCam && (
+                                        <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                    )} */}
+                                    {assignments.ceramic && item.isAssignedCeramic && (
+                                      <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                    )}
+                                    {!assignments.ceramic && (
+                                      <div className="text-center"><strong>-</strong></div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </td>
                           <td className="teeth-pieces">
                             {groupTeethNumbersByName(item.teethNumbers)?.map(
                               (item) => (
@@ -2157,7 +2278,7 @@ const UserProfile = () => {
                       {userData.isAdmin && (
                         <>
                           <tr>
-                            <td className="f-bold c-success" colSpan={4}>
+                            <td className="f-bold c-success" colSpan={5}>
                               <b>Total of Pieces</b>
                             </td>
                             <td
@@ -2172,7 +2293,7 @@ const UserProfile = () => {
                             (userData.isAdmin &&
                               userData.departments[0].name === "Fitting")) && (
                               <tr>
-                                <td className="f-bold c-success" colSpan={4}>
+                                <td className="f-bold c-success" colSpan={5}>
                                   <b>Total Without Study</b>
                                 </td>
                                 <td
@@ -2189,7 +2310,7 @@ const UserProfile = () => {
                               </tr>
                             )}
                           <tr>
-                            <td colSpan={5}>
+                            <td colSpan={6}>
                               <div className="summary-teeth-cases">
                                 {groupCasesTeethNumbersByName("Start")?.map(
                                   (item) => (
@@ -2267,6 +2388,7 @@ const UserProfile = () => {
                         <th scope="col">HeldAt</th>
                         <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
                         <th scope="col">Patient</th>
+                        <th scope="col">Ceramic</th>
                         <th scope="col">Reason</th>
                         <th scope="col">#teeth</th>
                         <th scope="col">Actions</th>
@@ -2283,6 +2405,27 @@ const UserProfile = () => {
                           <td>{getHoldingDate(item)}</td>
                           <td>{item?.dentistObj?.name}</td>
                           <td>{item.patientName}</td>
+                          <td>
+                            <div className="text-start small">
+                              {(() => {
+                                const assignments = getCadCamAndCeramicAssignments(item);
+                                return (
+                                  <>
+                                    {/* <strong>{assignments.ceramic}</strong> */}
+                                    {/* {assignments.cadCam && (
+                                        <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                    )} */}
+                                    {assignments.ceramic && item.isAssignedCeramic && (
+                                      <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                    )}
+                                    {!assignments.ceramic && (
+                                      <div className="text-center"><strong>-</strong></div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </td>
                           <td>{getHoldingreason(item)}</td>
                           <td className="teeth-pieces">
                             {groupTeethNumbersByName(item.teethNumbers)?.map(
@@ -2322,7 +2465,7 @@ const UserProfile = () => {
                       {userData.isAdmin && (
                         <>
                           <tr>
-                            <td className="f-bold c-success" colSpan={5}>
+                            <td className="f-bold c-success" colSpan={6}>
                               <b>Total of Pieces</b>
                             </td>
                             <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
@@ -2334,7 +2477,7 @@ const UserProfile = () => {
                             (userData.isAdmin &&
                               userData.departments[0].name === "Fitting")) && (
                               <tr>
-                                <td className="f-bold c-success" colSpan={5}>
+                                <td className="f-bold c-success" colSpan={6}>
                                   <b>Total Without Study</b>
                                 </td>
                                 <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
@@ -2348,7 +2491,7 @@ const UserProfile = () => {
                               </tr>
                             )}
                           <tr>
-                            <td colSpan={7}>
+                            <td colSpan={8}>
                               <div className="summary-teeth-cases">
                                 {groupCasesTeethNumbersByName("Pause")?.map(
                                   (item) => (
