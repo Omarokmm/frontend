@@ -148,6 +148,17 @@ const Sidebar = () => {
                   ]}
                 />
               )}
+            {(user.roles[0] === _global.allRoles.admin ||
+              user.roles[0] === _global.allRoles.Reception ||
+              user.roles[0] === _global.allRoles.super_admin) && (
+                <SubmenuItem
+                  title="Reports"
+                  iconClass="bx bxs-user"
+                  icon="fas fa-file-invoice"
+                  link="/layout/reports"
+                  sublinks={[]}
+                />
+              )}
           </li>
           {/* <li>
             <a href="/users">users</a>

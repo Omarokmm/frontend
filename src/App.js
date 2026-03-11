@@ -23,6 +23,7 @@ import CasesInDepartments from "./components/Layout/Departments/CasesInDepartmen
 import Clinics from "./components/Layout/Clinics/Clinics.js";
 import RedoCase from "./components/Layout/Cases/RedoCase.js";
 import AssignedDoctors from "./components/Layout/AssignedDoctors.js";
+import Reports from "./components/Layout/Reports/Reports.js";
 function App() {
   return (
     <div className="App">
@@ -49,6 +50,7 @@ function App() {
                 <Route path="user-notes" element={<NotesUser />} />
                 <Route path="cases-by-doctors" element={<DocotrCases />} />
                 <Route path="shipments" element={<Shipments />} />
+                <Route path="reports" element={<Reports />} />
                 <Route path="assigned-doctors" element={<AssignedDoctors />} />
               </Route>
             </Route>
