@@ -1,0 +1,30 @@
+.form-group-case{
+    display: grid;
+    grid-template-columns: .25fr 1fr;
+    align-items: baseline;
+}
+.form-group-case input{
+    width: 75%;
+}
+.btn-add-case{
+    text-align: center;
+    margin: 1rem 0;
+}
+.teeth-block{
+    text-align: center;
+    padding: 1rem;
+}
+@media(max-width:768px){
+    .form-group-case {
+     grid-template-columns: 1fr;
+     margin-bottom: 1rem;
+    }
+    .form-group-case input{
+    width: 100%;
+}
+.teeth-block{
+    display: flex;
+    justify-content: space-around;
+    padding: .5rem;
+}
+}
