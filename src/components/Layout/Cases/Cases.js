@@ -1927,14 +1927,16 @@ const Cases = () => {
     return response;
   };
   const checkNotStartDelay = (item) => {
-    if (
-      item.cadCam.actions.length <= 0 &&
-      item.delivering.status.isEnd === true
-    ) {
-      return "table-info";
-    }
-    if (item.isRedo) {
-      return "table-warning";
+    if (user.roles[0] === _global.allRoles.technician && departments[0].name === "CadCam") {
+      if (
+        item.cadCam.actions.length <= 0 &&
+        item.delivering.status.isEnd === true
+      ) {
+        return "table-info";
+      }
+      if (item.isRedo) {
+        return "table-warning";
+      }
     }
   };
   function groupTeethNumbersByName(teethNumbers) {
@@ -3146,7 +3148,7 @@ const Cases = () => {
                         role="alert"
                         className={
                           (item.isHold ? "table-danger" : "") ||
-                          (item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : "") ||
+                          (item.isTopPriority ? "urgent-case animate-me" : "") &&
                           checkCaseDate(item)
                         }
                         key={item._id}
@@ -3632,7 +3634,7 @@ const Cases = () => {
                     {notStartCases.map((item, index) => (
                       <tr
                         key={item._id}
-                        className={`${checkNotStartDelay(item)} ${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""} ${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight" : ""}`}
+                        className={`${checkNotStartDelay(item)} ${item.isTopPriority ? "urgent-case animate-me" : ""} ${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight" : ""}`}
                       >
                         <td>
                           <input
@@ -4093,7 +4095,7 @@ const Cases = () => {
                     </thead>
                     <tbody>
                       {forAssignCases.map((item, index) => (
-                        <tr key={item._id} className={`${checkNotStartDelay(item)} ${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
+                        <tr key={item._id} className={`${checkNotStartDelay(item)} ${item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                           <td>
                             <input
                               type="checkbox"
@@ -4341,7 +4343,7 @@ const Cases = () => {
                     {inProcessCases.map((item, index) => (
                       <tr
                         key={item._id}
-                        className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}
+                        className={`${item.isTopPriority ? "urgent-case animate-me" : ""}`}
                       >
 
                         <td>{item.caseNumber}</td>
@@ -4567,7 +4569,7 @@ const Cases = () => {
                     </thead>
                     <tbody>
                       {holdingCases.map((item, index) => (
-                        <tr key={item._id} className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
+                        <tr key={item._id} className={`${item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                           <td>{item.caseNumber}</td>
                           <td>
                             {item.dentistObj.name}
@@ -5313,7 +5315,7 @@ const Cases = () => {
                   </thead>
                   <tbody>
                     {studyCases.map((item, index) => (
-                      <tr key={item._id} className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
+                      <tr key={item._id} className={`${item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                         {user.roles[0] === _global.allRoles.admin && <td>
                           <input
                             type="checkbox"
@@ -5623,7 +5625,7 @@ const Cases = () => {
                   </thead>
                   <tbody>
                     {packingCases.map((item, index) => (
-                      <tr key={item._id} className={`${item.isUrgent || item.isTopPriority ? "urgent-case animate-me" : ""}`}>
+                      <tr key={item._id} className={`${item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                         <td>{item.caseNumber}</td>
                         <td>
                           {item.dentistObj.name}

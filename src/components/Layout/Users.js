@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { showToastMessage } from "../../helper/toaster";
 import { format } from "date-fns";
 import * as _global from "../../config/global";
 import Select from "react-select";
+import { useReactToPrint } from "react-to-print";
 
 const Users = () => {
   const user = JSON.parse(localStorage.getItem("user"))
@@ -54,6 +55,10 @@ const Users = () => {
   const [hrDeletingKey, setHrDeletingKey] = useState(null);
   const [newPassword, setNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("active");
+  const [viewMode, setViewMode] = useState("department"); // "status" or "department"
+  const [departmentTab, setDepartmentTab] = useState("");
+  const activeUsersRef = useRef();
 
   const navigate = useNavigate();
   const roles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -414,6 +419,41 @@ const Users = () => {
     }
   };
 
+  const toggleUserActive = async (userId, currentActive) => {
+    const newActive = !currentActive;
+    try {
+      const response = await fetch(`${_global.BASE_URL}users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: newActive }),
+      });
+      const json = await response.json();
+      if (response.ok) {
+        showToastMessage(
+          newActive ? "User activated successfully" : "User deactivated successfully",
+          "success"
+        );
+        const updated = users.map((u) =>
+          u._id === userId ? { ...u, active: newActive } : u
+        );
+        setUsers(updated);
+        const updatedBuff = buffUsers.map((u) =>
+          u._id === userId ? { ...u, active: newActive } : u
+        );
+        setBuffUsers(updatedBuff);
+      } else {
+        showToastMessage(json?.message || "Error updating user", "error");
+      }
+    } catch (e) {
+      showToastMessage("Network error updating user", "error");
+    }
+  };
+
+  const getFilteredUsers = () => {
+    const isActive = activeTab === "active";
+    return users.filter((u) => (isActive ? u.active !== false : u.active === false));
+  };
+
   const searchByName = (searchText) => {
     setSearchText(searchText);
     console.log(searchText);
@@ -500,13 +540,170 @@ const Users = () => {
 
   //   return result;
   // }
+  const filteredUsers = getFilteredUsers();
+  const activeCount = users.filter((u) => u.active !== false).length;
+  const inactiveCount = users.filter((u) => u.active === false).length;
+
+  const handlePrintActiveUsers = useReactToPrint({
+    content: () => activeUsersRef.current,
+    documentTitle: `Active Users List`,
+  });
+
+  // Group active users by department
+  const getUsersByDepartment = () => {
+    const map = {};
+    // "No Department" bucket
+    map["__none__"] = { name: "No Department", users: [] };
+    departments.forEach((dep) => {
+      map[dep._id] = { name: dep.name, users: [] };
+    });
+    users
+      .filter((u) => u.active !== false)
+      .forEach((u) => {
+        const depts = Array.isArray(u.departments) && u.departments.length > 0 ? u.departments : [];
+        if (depts.length === 0) {
+          map["__none__"].users.push(u);
+        } else {
+          depts.forEach((d) => {
+            const depId = d?._id || d;
+            if (map[depId]) {
+              map[depId].users.push(u);
+            } else {
+              map["__none__"].users.push(u);
+            }
+          });
+        }
+      });
+    // return only buckets that have users, none first if populated
+    const result = Object.values(map).filter((b) => b.users.length > 0);
+    return result;
+  };
+
+  const departmentGroups = getUsersByDepartment();
+  const activeDepartmentTab = departmentTab || (departmentGroups[0]?.name ?? "");
+  const activeDeptGroup = departmentGroups.find((g) => g.name === activeDepartmentTab);
+
+  // ── Inline styles ──────────────────────────────────────────────────────────
+  const styles = {
+    viewToggleBar: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 16,
+      background: "#f1f5f9",
+      borderRadius: 12,
+      padding: "5px 6px",
+    },
+    viewToggleBtn: {
+      flex: 1,
+      padding: "8px 14px",
+      border: "none",
+      borderRadius: 9,
+      background: "transparent",
+      color: "#64748b",
+      fontWeight: 600,
+      fontSize: 14,
+      cursor: "pointer",
+      transition: "all 0.2s",
+    },
+    viewToggleBtnActive: {
+      background: "#fff",
+      color: "#1e293b",
+      boxShadow: "0 1px 6px rgba(0,0,0,0.12)",
+    },
+    subTabBar: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 16,
+      flexWrap: "wrap",
+    },
+    subTabBtn: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "7px 18px",
+      border: "2px solid #e2e8f0",
+      borderRadius: 50,
+      background: "#fff",
+      color: "#475569",
+      fontWeight: 600,
+      fontSize: 14,
+      cursor: "pointer",
+      transition: "all 0.2s",
+    },
+    subTabBtnActive: (color) => ({
+      borderColor: color,
+      background: color,
+      color: "#fff",
+      boxShadow: `0 2px 10px ${color}55`,
+    }),
+    countBadge: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: 22,
+      height: 22,
+      borderRadius: 50,
+      background: "#64748b",
+      color: "#fff",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "0 5px",
+    },
+    deptTabBar: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 16,
+      flexWrap: "wrap",
+    },
+    deptTabBtn: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "7px 16px",
+      border: "2px solid",
+      borderRadius: 50,
+      fontWeight: 600,
+      fontSize: 13,
+      cursor: "pointer",
+      transition: "all 0.22s",
+    },
+    deptHeader: {
+      fontWeight: 700,
+      fontSize: 17,
+      color: "#1e293b",
+      marginBottom: 14,
+      paddingBottom: 8,
+      borderBottom: "2px solid #e2e8f0",
+      display: "flex",
+      alignItems: "center",
+    },
+    table: {
+      fontSize: 14,
+      borderRadius: 8,
+      overflow: "hidden",
+    },
+    tableHead: {
+      background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+      color: "#fff",
+    },
+    searchIcon: {
+      background: "#f1f5f9",
+      border: "1px solid #e2e8f0",
+      color: "#64748b",
+    },
+    printBtn: {
+      borderRadius: 8,
+      fontWeight: 600,
+    },
+  };
+
   return (
     <>
       <div className="content">
         <div className="card">
           <h5 class="card-title">
             <span>
-              Users <small>({users.length})</small>
+              Users <small>({filteredUsers.length})</small>
             </span>
             {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) &&
               <span className="add-user-icon">
@@ -518,108 +715,302 @@ const Users = () => {
             }
           </h5>
           <div className="card-body">
-            <div className="form-group">
-              <input
-                type="text"
-                name="searchText"
-                className="form-control"
-                placeholder="Search by name"
-                value={searchText}
-                onChange={(e) => searchByName(e.target.value)}
-              />
+
+            {/* ── View Mode Toggle ─────────────────────────────────── */}
+            <div style={styles.viewToggleBar}>
+              <button
+                style={{
+                  ...styles.viewToggleBtn,
+                  ...(viewMode === "department" ? styles.viewToggleBtnActive : {})
+                }}
+                onClick={() => setViewMode("department")}
+                type="button"
+              >
+                <i className="fa-solid fa-layer-group me-2"></i>By Department
+              </button>
+              <button
+                style={{
+                  ...styles.viewToggleBtn,
+                  ...(viewMode === "status" ? styles.viewToggleBtnActive : {})
+                }}
+                onClick={() => setViewMode("status")}
+                type="button"
+              >
+                <i className="fa-solid fa-users me-2"></i>By Status
+              </button>
             </div>
-            {users.length > 0 && (
-              <table className="table text-center table-bordered">
-                <thead>
-                  <tr className="table-secondary">
-                    <th scope="col">Name</th>
-                    <th className="td-phone" scope="col">Email</th>
-                    <th className="td-phone" scope="col">Phone</th>
-                    <th scope="col">Role</th>
-                    <th scope="col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((item) => (
-                    // <tr key={item._id}>
-                    // <tr
-                    //   key={item._id}
-                    //   className={` ${
-                    //     item.notes.length > 0 ? "table-danger" : "table-default"
-                    //   }`}
-                    // >
-                    <tr
-                      key={item._id}
-                      className={`${item.notes.length > 3 ? "table-danger" : "table-default"
-                        }`}
-                    >
-                      <td>
-                        {item.firstName} {item.lastName}
-                      </td>
-                      <td className="td-phone">
-                        {item.email}
-                      </td>
-                      <td className="td-phone">{item.phone}</td>
-                      <td>
-                        {item.roles.map((roleId, index) => (
-                          <span className="text-capitalize" key={index}>
-                            {Roles[roleId]}
-                            {index !== item.roles.length - 1 && ", "}
-                          </span>
+
+            {/* ── STATUS VIEW ─────────────────────────────────────── */}
+            {viewMode === "status" && (
+              <>
+                {/* Status sub-tabs */}
+                <div style={styles.subTabBar}>
+                  <button
+                    style={{
+                      ...styles.subTabBtn,
+                      ...(activeTab === "active" ? styles.subTabBtnActive("#16a34a") : {})
+                    }}
+                    onClick={() => setActiveTab("active")}
+                    type="button"
+                  >
+                    <i className="fa-solid fa-user-check me-1"></i>
+                    Active
+                    <span style={{ ...styles.countBadge, background: "#16a34a" }}>{activeCount}</span>
+                  </button>
+                  <button
+                    style={{
+                      ...styles.subTabBtn,
+                      ...(activeTab === "inactive" ? styles.subTabBtnActive("#6b7280") : {})
+                    }}
+                    onClick={() => setActiveTab("inactive")}
+                    type="button"
+                  >
+                    <i className="fa-solid fa-user-xmark me-1"></i>
+                    Inactive
+                    <span style={{ ...styles.countBadge, background: "#6b7280" }}>{inactiveCount}</span>
+                  </button>
+                </div>
+
+                {/* Search + Print */}
+                <div className="row mb-3 align-items-center">
+                  <div className="col">
+                    <div className="input-group">
+                      <span className="input-group-text" style={styles.searchIcon}>
+                        <i className="fa-solid fa-magnifying-glass"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by name…"
+                        value={searchText}
+                        onChange={(e) => searchByName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  {activeTab === "active" && (
+                    <div className="col-auto">
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => handlePrintActiveUsers()}
+                        style={styles.printBtn}
+                      >
+                        <i className="fas fa-print me-1"></i> Print
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Users Table */}
+                <div ref={activeUsersRef} style={{ width: "100%" }}>
+                  {filteredUsers.length > 0 ? (
+                    <table className="table text-center table-bordered" style={styles.table}>
+                      <thead>
+                        <tr style={styles.tableHead}>
+                          <th scope="col">Name</th>
+                          <th className="td-phone" scope="col">Email</th>
+                          <th className="td-phone" scope="col">Phone</th>
+                          <th scope="col">Role</th>
+                          <th scope="col" className="non-print">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredUsers.map((item) => (
+                          <tr key={item._id} className={item.notes.length > 3 ? "table-danger" : ""}>
+                            <td style={{ fontWeight: 500 }}>{item.firstName} {item.lastName}</td>
+                            <td className="td-phone">{item.email}</td>
+                            <td className="td-phone">{item.phone}</td>
+                            <td>
+                              {item.roles.map((roleId, index) => (
+                                <span className="text-capitalize" key={index}>
+                                  {Roles[roleId]}{index !== item.roles.length - 1 && ", "}
+                                </span>
+                              ))}
+                            </td>
+                            <td className="non-print">
+                              <div className="actions-btns">
+                                <span data-bs-toggle="modal" data-bs-target="#addNoteModal" onClick={() => setBuffUser(item)}>
+                                  <i className="fa-solid fa-circle-plus c-success"></i>
+                                </span>
+                                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && (
+                                  <span data-bs-toggle="modal" data-bs-target="#editUserModal" onClick={() => openEditModal(item)}>
+                                    <i className="fa-solid fa-pen-to-square c-primary"></i>
+                                  </span>
+                                )}
+                                <span onClick={() => navigate('/layout/user-notes', { state: { ...item } })}>
+                                  <i className="fa-solid fa-eye c-success"></i>
+                                </span>
+                                {item.roles.includes(_global.allRoles.Reception) && item.active && (
+                                  <span onClick={() => navigate('/layout/assigned-doctors', { state: { ...item } })} title="Assigned Doctors">
+                                    <i className="fa-solid fa-user-doctor c-primary"></i>
+                                  </span>
+                                )}
+                                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && (
+                                  <span onClick={() => navigate("/layout/user-profile", { state: { ...item, isAdmin: true } })}>
+                                    <i className="fa-solid fa-chart-column c-success"></i>
+                                  </span>
+                                )}
+                                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && (
+                                  <span onClick={() => toggleUserActive(item._id, item.active)} title={item.active !== false ? "Deactivate User" : "Activate User"} style={{ cursor: "pointer" }}>
+                                    {item.active !== false
+                                      ? <i className="fa-solid fa-user-slash" style={{ color: "#dc3545" }}></i>
+                                      : <i className="fa-solid fa-user-check" style={{ color: "#198754" }}></i>}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
                         ))}
-                      </td>
-                      <td>
-                        <div className="actions-btns">
-                          <span
-                            data-bs-toggle="modal"
-                            data-bs-target="#addNoteModal"
-                            onClick={() => setBuffUser(item)}
-                          >
-                            <i class="fa-solid fa-circle-plus c-success"></i>
-                          </span>
-                          {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && (
-                            <span
-                              data-bs-toggle="modal"
-                              data-bs-target="#editUserModal"
-                              onClick={() => openEditModal(item)}
-                            >
-                              <i class="fa-solid fa-pen-to-square c-primary"></i>
-                            </span>
-                          )}
-                          {/* <span onClick={(e) => deleteUser(item._id)}>
-                            <i className="fa-solid fa-trash-can"></i>
-                          </span> */}
-                          <span
-                            onClick={() => navigate('/layout/user-notes', { state: { ...item } })}
-                          >
-                            <i class="fa-solid fa-eye c-success"></i>
-                          </span>
-
-                          {item.roles.includes(_global.allRoles.Reception) && item.active &&(
-                            <span
-                              onClick={() => navigate('/layout/assigned-doctors', { state: { ...item } })}
-                              title="Assigned Doctors"
-                            >
-                              <i className="fa-solid fa-user-doctor c-primary"></i>
-                            </span>
-                          )}
-
-                          {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && <span
-                            onClick={() => navigate("/layout/user-profile", { state: { ...item, isAdmin: true } })}
-                          >
-                            <i class="fa-solid fa-chart-column c-success"></i>
-                          </span>
-                          }
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="no-content">
+                      {activeTab === "active" ? "No active users found!" : "No inactive users found!"}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
-            {users.length <= 0 && (
-              <div className="no-content">No Users Added yet!</div>
+
+            {/* ── DEPARTMENT VIEW ─────────────────────────────────── */}
+            {viewMode === "department" && (
+              <>
+                {/* Department sub-tabs */}
+                <div style={styles.deptTabBar}>
+                  {departmentGroups.map((grp, idx) => {
+                    // Special branding for key departments
+                    const DEPT_BRAND = {
+                      cadcam: { color: "#0ea5e9", icon: "fa-solid fa-microchip" },
+                      "cad cam": { color: "#0ea5e9", icon: "fa-solid fa-microchip" },
+                      "cad-cam": { color: "#0ea5e9", icon: "fa-solid fa-microchip" },
+                      ceramic: { color: "#f97316", icon: "fa-solid fa-fire-flame-curved" },
+                      ceramics: { color: "#f97316", icon: "fa-solid fa-fire-flame-curved" },
+                    };
+                    const fallbackColors = ["#7c3aed", "#db2777", "#059669", "#ca8a04", "#0891b2", "#2563eb"];
+                    const key = grp.name.toLowerCase().trim();
+                    const brand = DEPT_BRAND[key];
+                    const color = brand?.color ?? fallbackColors[idx % fallbackColors.length];
+                    const icon = brand?.icon ?? "fa-solid fa-layer-group";
+                    const isActive = activeDepartmentTab === grp.name;
+                    return (
+                      <button
+                        key={grp.name}
+                        style={{
+                          ...styles.deptTabBtn,
+                          borderColor: color,
+                          color: isActive ? "#fff" : color,
+                          background: isActive ? color : "transparent",
+                          boxShadow: isActive ? `0 3px 12px ${color}55` : "none",
+                          transform: isActive ? "translateY(-1px)" : "none",
+                        }}
+                        onClick={() => setDepartmentTab(grp.name)}
+                        type="button"
+                      >
+                        <i className={`${icon} me-1`} style={{ fontSize: 13 }}></i>
+                        {grp.name}
+                        <span style={{ ...styles.countBadge, background: isActive ? "rgba(255,255,255,0.3)" : color }}>
+                          {grp.users.length}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {departmentGroups.length === 0 && (
+                    <span style={{ color: "#9ca3af", fontSize: 14 }}>No departments with active users</span>
+                  )}
+                </div>
+
+                {/* Active dept group table */}
+                {activeDeptGroup && (
+                  <>
+                    <div style={styles.deptHeader}>
+                      {(() => {
+                        const DEPT_BRAND = {
+                          cadcam: { color: "#0ea5e9", icon: "fa-solid fa-microchip" },
+                          "cad cam": { color: "#0ea5e9", icon: "fa-solid fa-microchip" },
+                          "cad-cam": { color: "#0ea5e9", icon: "fa-solid fa-microchip" },
+                          ceramic: { color: "#f97316", icon: "fa-solid fa-fire-flame-curved" },
+                          ceramics: { color: "#f97316", icon: "fa-solid fa-fire-flame-curved" },
+                        };
+                        const brand = DEPT_BRAND[activeDeptGroup.name.toLowerCase().trim()];
+                        return (
+                          <i
+                            className={`${brand?.icon ?? "fa-solid fa-layer-group"} me-2`}
+                            style={{ color: brand?.color ?? "#64748b" }}
+                          ></i>
+                        );
+                      })()}
+                      {activeDeptGroup.name}
+                      <span style={{ marginLeft: 10, fontSize: 14, opacity: 0.7 }}>
+                        {activeDeptGroup.users.length} member{activeDeptGroup.users.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <table className="table text-center table-bordered" style={styles.table}>
+                      <thead>
+                        <tr style={styles.tableHead}>
+                          <th scope="col">Name</th>
+                          <th className="td-phone" scope="col">Email</th>
+                          <th className="td-phone" scope="col">Phone</th>
+                          <th scope="col">Role</th>
+                          <th scope="col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeDeptGroup.users.map((item) => (
+                          <tr key={item._id} className={item.notes.length > 3 ? "table-danger" : ""}>
+                            <td style={{ fontWeight: 500 }}>{item.firstName} {item.lastName}</td>
+                            <td className="td-phone">{item.email}</td>
+                            <td className="td-phone">{item.phone}</td>
+                            <td>
+                              {item.roles.map((roleId, index) => (
+                                <span className="text-capitalize" key={index}>
+                                  {Roles[roleId]}{index !== item.roles.length - 1 && ", "}
+                                </span>
+                              ))}
+                            </td>
+                            <td>
+                              <div className="actions-btns">
+                                <span data-bs-toggle="modal" data-bs-target="#addNoteModal" onClick={() => setBuffUser(item)}>
+                                  <i className="fa-solid fa-circle-plus c-success"></i>
+                                </span>
+                                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && (
+                                  <span data-bs-toggle="modal" data-bs-target="#editUserModal" onClick={() => openEditModal(item)}>
+                                    <i className="fa-solid fa-pen-to-square c-primary"></i>
+                                  </span>
+                                )}
+                                <span onClick={() => navigate('/layout/user-notes', { state: { ...item } })}>
+                                  <i className="fa-solid fa-eye c-success"></i>
+                                </span>
+                                {item.roles.includes(_global.allRoles.Reception) && item.active && (
+                                  <span onClick={() => navigate('/layout/assigned-doctors', { state: { ...item } })} title="Assigned Doctors">
+                                    <i className="fa-solid fa-user-doctor c-primary"></i>
+                                  </span>
+                                )}
+                                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && (
+                                  <span onClick={() => navigate("/layout/user-profile", { state: { ...item, isAdmin: true } })}>
+                                    <i className="fa-solid fa-chart-column c-success"></i>
+                                  </span>
+                                )}
+                                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.manager || user.roles[0] === _global.allRoles.super_admin) && (
+                                  <span onClick={() => toggleUserActive(item._id, item.active)} title={item.active !== false ? "Deactivate" : "Activate"} style={{ cursor: "pointer" }}>
+                                    {item.active !== false
+                                      ? <i className="fa-solid fa-user-slash" style={{ color: "#dc3545" }}></i>
+                                      : <i className="fa-solid fa-user-check" style={{ color: "#198754" }}></i>}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+
+                {departmentGroups.length === 0 && (
+                  <div className="no-content">No active users with departments found!</div>
+                )}
+              </>
             )}
+
           </div>
         </div>
       </div>
@@ -940,8 +1331,8 @@ const Users = () => {
                         id="licenseExpireDate"
                         name="licenseExpireDate"
                         className={`form-control ${emptyFields.includes("licenseExpireDate")
-                            ? "error"
-                            : ""
+                          ? "error"
+                          : ""
                           }`}
                         onChange={(e) => {
                           setLicenseExpireDate(e.target.value);
@@ -1341,8 +1732,8 @@ const Users = () => {
                         id="editLicenseExpireDate"
                         name="editLicenseExpireDate"
                         className={`form-control ${editEmptyFields.includes("licenseExpireDate")
-                            ? "error"
-                            : ""
+                          ? "error"
+                          : ""
                           }`}
                         onChange={(e) => setEditLicenseExpireDate(e.target.value)}
                         value={editLicenseExpireDate}
