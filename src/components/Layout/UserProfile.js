@@ -25,7 +25,9 @@ const UserProfile = () => {
   const [buffCasesStartingUser, setBuffStartingCasesUser] = useState([]);
   const [buffCasesHoldingUser, setBuffCasesHoldingUser] = useState([]);
   const [assignedCases, setAssignedCases] = useState([]);
-  const [allAssignedCasesUnfiltered, setAllAssignedCasesUnfiltered] = useState([]);
+  const [allAssignedCasesUnfiltered, setAllAssignedCasesUnfiltered] = useState(
+    [],
+  );
   const [userData, setUserData] = useState(state ? state : user);
   const [searchText, setSearchText] = useState("");
   const [searchTextStart, setSearchTextStart] = useState("");
@@ -49,7 +51,6 @@ const UserProfile = () => {
   const [currentNoteCase, setCurrentNoteCase] = useState(null);
   const [newNoteText, setNewNoteText] = useState("");
 
-
   console.log("User Data", userData);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -71,7 +72,7 @@ const UserProfile = () => {
       .then((res) => {
         const result = res.data;
         console.log("result", result);
-        // const model = result.casesEnd.length > 0 ? result.casesEnd[0] : {} 
+        // const model = result.casesEnd.length > 0 ? result.casesEnd[0] : {}
         // setBuffCase(model)
         // Cases Ended
         const casesEndData = sortCases(result.casesEnd);
@@ -93,8 +94,8 @@ const UserProfile = () => {
               !item.isHold && // Ensure isHold is false
               item.cadCam.actions.length > 0 && // Ensure actions array is not empty
               item.cadCam.actions[item.cadCam.actions.length - 1].prfeix ===
-              "start" && // Ensure last action's prfeix is "start"
-              !item.cadCam.status.isStart // Ensure status isStart is false
+                "start" && // Ensure last action's prfeix is "start"
+              !item.cadCam.status.isStart, // Ensure status isStart is false
           );
           setStartCases(startCasesData);
           setBuffStartingCasesUser(startCasesData);
@@ -128,12 +129,13 @@ const UserProfile = () => {
       .catch((error) => {
         console.error("Error fetching users:", error);
       });
-
-
   }, []);
 
-
-  const fetchAssignedCases = (startCasesData = [], pauseCasesData = [], casesUserData = []) => {
+  const fetchAssignedCases = (
+    startCasesData = [],
+    pauseCasesData = [],
+    casesUserData = [],
+  ) => {
     const userId = state ? state._id : user._id;
 
     // Add null checks to prevent errors
@@ -152,14 +154,17 @@ const UserProfile = () => {
         const allAssignedCases = res.data.data.cases || [];
 
         // Use provided data or fallback to state arrays
-        const startCasesToUse = startCasesData.length > 0 ? startCasesData : startCases;
-        const pauseCasesToUse = pauseCasesData.length > 0 ? pauseCasesData : pauseCases;
-        const casesUserToUse = casesUserData.length > 0 ? casesUserData : casesUser;
+        const startCasesToUse =
+          startCasesData.length > 0 ? startCasesData : startCases;
+        const pauseCasesToUse =
+          pauseCasesData.length > 0 ? pauseCasesData : pauseCases;
+        const casesUserToUse =
+          casesUserData.length > 0 ? casesUserData : casesUser;
 
         // Get IDs from other arrays to filter out
-        const startCaseIds = startCasesToUse.map(caseItem => caseItem._id);
-        const pauseCaseIds = pauseCasesToUse.map(caseItem => caseItem._id);
-        const casesUserIds = casesUserToUse.map(caseItem => caseItem._id);
+        const startCaseIds = startCasesToUse.map((caseItem) => caseItem._id);
+        const pauseCaseIds = pauseCasesToUse.map((caseItem) => caseItem._id);
+        const casesUserIds = casesUserToUse.map((caseItem) => caseItem._id);
 
         // Combine all IDs to exclude
         const excludeIds = [...startCaseIds, ...pauseCaseIds, ...casesUserIds];
@@ -181,18 +186,23 @@ const UserProfile = () => {
         });
 
         // For admin: also store all assigned cases without priority/deadline filter
-        const allCasesWithoutStatusFilter = allAssignedCases.filter((caseItem) => {
-          // Exclude cases in other arrays
-          if (excludeIds.includes(caseItem._id)) return false;
+        const allCasesWithoutStatusFilter = allAssignedCases.filter(
+          (caseItem) => {
+            // Exclude cases in other arrays
+            if (excludeIds.includes(caseItem._id)) return false;
 
-          // Exclude hold cases
-          if (caseItem.isHold === true) return false;
+            // Exclude hold cases
+            if (caseItem.isHold === true) return false;
 
-          return true;
-        });
+            return true;
+          },
+        );
 
         console.log("Filtered assigned cases:", filteredAssignedCases);
-        console.log("All assigned cases (unfiltered):", allCasesWithoutStatusFilter);
+        console.log(
+          "All assigned cases (unfiltered):",
+          allCasesWithoutStatusFilter,
+        );
         console.log("Excluded case IDs:", excludeIds);
 
         setAssignedCases(filteredAssignedCases);
@@ -201,7 +211,7 @@ const UserProfile = () => {
       .catch((error) => {
         console.error("Error fetching assigned cases:", error);
       });
-  }
+  };
 
   // Sorting State
   const [sortConfig, setSortConfig] = useState({
@@ -265,7 +275,7 @@ const UserProfile = () => {
   // Function to refresh assigned cases when other arrays change
   const refreshAssignedCases = () => {
     fetchAssignedCases(startCases, pauseCases, casesUser);
-  }
+  };
 
   // Function to fetch assigned cases for the user
   // const fetchAssignedCases = async () => {
@@ -279,7 +289,7 @@ const UserProfile = () => {
   //       return;
   //     }
 
-  //     const department = userData.isAdmin 
+  //     const department = userData.isAdmin
   //       ? (userData.departments && userData.departments[0] ? userData.departments[0].name : null)
   //       : (departments && departments[0] ? departments[0].name : null);
 
@@ -288,7 +298,6 @@ const UserProfile = () => {
   //       setAssignedCases([]);
   //       return;
   //     }
-
 
   //     const response = await axios.get(
   //       `${_global.BASE_URL}cases/assigned/user/${userId}`
@@ -305,28 +314,40 @@ const UserProfile = () => {
     const newPriority = !item.isTopPriority;
 
     // Optimistic Update
-    const updateList = (list) => list.map(c => c._id === item._id ? { ...c, isTopPriority: newPriority } : c);
-    setAllAssignedCasesUnfiltered(prev => updateList(prev));
-    setAssignedCases(prev => updateList(prev));
+    const updateList = (list) =>
+      list.map((c) =>
+        c._id === item._id ? { ...c, isTopPriority: newPriority } : c,
+      );
+    setAllAssignedCasesUnfiltered((prev) => updateList(prev));
+    setAssignedCases((prev) => updateList(prev));
 
     try {
-      await axios.put(`${_global.BASE_URL}cases/${item._id}/top-priority/${newPriority}`, [
-        {
-          id: user._id,
-          name: `${user.firstName}, ${user.lastName}`,
-          date: new Date(),
-          isTopPriority: newPriority,
-          msg: `Case marked as ${newPriority ? 'Top Priority' : 'Normal'}`,
-        }
-      ]);
-      showToastMessage(`Case marked as ${newPriority ? 'Top Priority' : 'Normal'}`, "success");
+      await axios.put(
+        `${_global.BASE_URL}cases/${item._id}/top-priority/${newPriority}`,
+        [
+          {
+            id: user._id,
+            name: `${user.firstName}, ${user.lastName}`,
+            date: new Date(),
+            isTopPriority: newPriority,
+            msg: `Case marked as ${newPriority ? "Top Priority" : "Normal"}`,
+          },
+        ],
+      );
+      showToastMessage(
+        `Case marked as ${newPriority ? "Top Priority" : "Normal"}`,
+        "success",
+      );
     } catch (error) {
       console.error("Error toggling priority:", error);
       showToastMessage("Error updating priority", "error");
       // Revert optimistic update
-      const revertList = (list) => list.map(c => c._id === item._id ? { ...c, isTopPriority: item.isTopPriority } : c);
-      setAllAssignedCasesUnfiltered(prev => revertList(prev));
-      setAssignedCases(prev => revertList(prev));
+      const revertList = (list) =>
+        list.map((c) =>
+          c._id === item._id ? { ...c, isTopPriority: item.isTopPriority } : c,
+        );
+      setAllAssignedCasesUnfiltered((prev) => revertList(prev));
+      setAssignedCases((prev) => revertList(prev));
     }
   };
 
@@ -341,9 +362,12 @@ const UserProfile = () => {
 
     // Build payload
     const payload = {};
-    if (scheduleConfig.cadCam.selected) payload.deadlineCadCam = scheduleConfig.cadCam.date;
-    if (scheduleConfig.fitting.selected) payload.deadlineFitting = scheduleConfig.fitting.date;
-    if (scheduleConfig.ceramic.selected) payload.deadlineCeramic = scheduleConfig.ceramic.date;
+    if (scheduleConfig.cadCam.selected)
+      payload.deadlineCadCam = scheduleConfig.cadCam.date;
+    if (scheduleConfig.fitting.selected)
+      payload.deadlineFitting = scheduleConfig.fitting.date;
+    if (scheduleConfig.ceramic.selected)
+      payload.deadlineCeramic = scheduleConfig.ceramic.date;
 
     if (Object.keys(payload).length === 0) {
       showToastMessage("Please select at least one department", "error");
@@ -351,20 +375,23 @@ const UserProfile = () => {
     }
 
     try {
-      await Promise.all(targets.map(id =>
-        axios.patch(`${_global.BASE_URL}cases/${id}`, payload)
-      ));
+      await Promise.all(
+        targets.map((id) =>
+          axios.patch(`${_global.BASE_URL}cases/${id}`, payload),
+        ),
+      );
 
       // Update local state (Optimistic-ish, assumed success)
-      const updateStateList = (list) => list.map(item => {
-        if (targets.includes(item._id)) {
-          return { ...item, ...payload };
-        }
-        return item;
-      });
+      const updateStateList = (list) =>
+        list.map((item) => {
+          if (targets.includes(item._id)) {
+            return { ...item, ...payload };
+          }
+          return item;
+        });
 
-      setAllAssignedCasesUnfiltered(prev => updateStateList(prev));
-      setAssignedCases(prev => updateStateList(prev));
+      setAllAssignedCasesUnfiltered((prev) => updateStateList(prev));
+      setAssignedCases((prev) => updateStateList(prev));
 
       showToastMessage("Cases scheduled successfully", "success");
       setBuffCase(null); // Clear buffer
@@ -378,7 +405,7 @@ const UserProfile = () => {
   };
   const handleResetUnschedule = async (item) => {
     const isConfirmed = window.confirm(
-      "Are you sure you want to reset CadCam, Fitting, and Ceramic schedule?"
+      "Are you sure you want to reset CadCam, Fitting, and Ceramic schedule?",
     );
     if (!isConfirmed) return;
 
@@ -392,13 +419,13 @@ const UserProfile = () => {
       await axios.patch(`${_global.BASE_URL}cases/${item._id}`, payload);
       const updateStateList = (list) =>
         list.map((caseItem) =>
-          caseItem._id === item._id ? { ...caseItem, ...payload } : caseItem
+          caseItem._id === item._id ? { ...caseItem, ...payload } : caseItem,
         );
 
       setAllAssignedCasesUnfiltered((prev) => updateStateList(prev));
       setAssignedCases((prev) => updateStateList(prev));
       setBuffCase((prev) =>
-        prev && prev._id === item._id ? { ...prev, ...payload } : prev
+        prev && prev._id === item._id ? { ...prev, ...payload } : prev,
       );
       showToastMessage("Schedule reset successfully", "success");
     } catch (error) {
@@ -488,7 +515,7 @@ const UserProfile = () => {
     if (searchText !== "") {
       axios
         .get(
-          `${_global.BASE_URL}cases/search?search=${searchText}&searchField=${filterBy}`
+          `${_global.BASE_URL}cases/search?search=${searchText}&searchField=${filterBy}`,
         )
         .then((res) => {
           const result = res.data;
@@ -516,7 +543,7 @@ const UserProfile = () => {
             item.dentistObj?.name
               .toLowerCase()
               .includes(searchText.toLowerCase()) ||
-            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase()),
         );
         setStartCases(filteredCases);
       } else {
@@ -532,7 +559,7 @@ const UserProfile = () => {
             item.dentistObj?.name
               .toLowerCase()
               .includes(searchText.toLowerCase()) ||
-            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase()),
         );
         setPauseCases(filteredCases);
       } else {
@@ -548,7 +575,7 @@ const UserProfile = () => {
             item.dentistObj?.name
               .toLowerCase()
               .includes(searchText.toLowerCase()) ||
-            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase()),
         );
         setCasesUser(filteredCases);
       } else {
@@ -564,7 +591,7 @@ const UserProfile = () => {
             item.dentistObj?.name
               .toLowerCase()
               .includes(searchText.toLowerCase()) ||
-            item?.patientName.toLowerCase().includes(searchText.toLowerCase())
+            item?.patientName.toLowerCase().includes(searchText.toLowerCase()),
         );
         setAssignedCases(filteredCases);
       } else {
@@ -586,7 +613,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.cadCam.actions.find((i) => i.dateEnd).dateEnd
+              item.cadCam.actions.find((i) => i.dateEnd).dateEnd,
             ) === date
           );
         });
@@ -595,16 +622,19 @@ const UserProfile = () => {
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-          userData.lastName === "Jamous"
+            userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         const filteredCases = buffCasesUser.filter((item) => {
-
           if (item.cadCam.actions.length > 0) {
-            console.log('item.cadCam.actions', item.cadCam.actions.length, item.caseNumber)
+            console.log(
+              "item.cadCam.actions",
+              item.cadCam.actions.length,
+              item.caseNumber,
+            );
             return (
               _global.formatDateToYYYYMMDD(
-                item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd
+                item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd,
               ) === date
             );
           }
@@ -619,7 +649,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.ceramic.actions.find((i) => i.dateEnd).dateEnd
+              item.ceramic.actions.find((i) => i.dateEnd).dateEnd,
             ) === date
           );
         });
@@ -634,7 +664,7 @@ const UserProfile = () => {
           if (item.fitting.actions.length > 0)
             return (
               _global.formatDateToYYYYMMDD(
-                item.fitting.actions.find((i) => i.dateEnd).dateEnd
+                item.fitting.actions.find((i) => i.dateEnd).dateEnd,
               ) === date
             );
         });
@@ -649,7 +679,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.plaster.actions.find((i) => i.dateEnd).dateEnd
+              item.plaster.actions.find((i) => i.dateEnd).dateEnd,
             ) === date
           );
         });
@@ -664,7 +694,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
+              item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd,
             ) === date
           );
         });
@@ -679,7 +709,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.designing.actions.find((i) => i.dateEnd).dateEnd
+              item.designing.actions.find((i) => i.dateEnd).dateEnd,
             ) === date
           );
         });
@@ -694,7 +724,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
+              item.qualityControl.actions.find((i) => i.dateEnd).dateEnd,
             ) === date
           );
         });
@@ -709,7 +739,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.delivering.actions.find((i) => i.dateEnd).dateEnd
+              item.delivering.actions.find((i) => i.dateEnd).dateEnd,
             ) === date
           );
         });
@@ -733,7 +763,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+              item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart,
             ) === date
           );
         });
@@ -747,7 +777,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+              item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart,
             ) === date
           );
         });
@@ -762,7 +792,8 @@ const UserProfile = () => {
           if (item.fitting.actions.length > 0)
             return (
               _global.formatDateToYYYYMMDD(
-                item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+                item.fitting.actions[item.fitting.actions.length - 1]
+                  ?.dateStart,
               ) === date
             );
         });
@@ -777,7 +808,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesStartingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+              item.plaster.actions[item.plaster.actions.length - 1]?.dateStart,
             ) === date
           );
         });
@@ -794,7 +825,7 @@ const UserProfile = () => {
             _global.formatDateToYYYYMMDD(
               item.receptionPacking.actions[
                 item.receptionPacking.actions.length - 1
-              ]?.dateStart
+              ]?.dateStart,
             ) === date
           );
         });
@@ -810,7 +841,7 @@ const UserProfile = () => {
           return (
             _global.formatDateToYYYYMMDD(
               item.designing.actions[item.designing.actions.length - 1]
-                ?.dateStart
+                ?.dateStart,
             ) === date
           );
         });
@@ -827,7 +858,7 @@ const UserProfile = () => {
             _global.formatDateToYYYYMMDD(
               item.qualityControl.actions[
                 item.qualityControl.actions.length - 1
-              ]?.dateStart
+              ]?.dateStart,
             ) === date
           );
         });
@@ -843,7 +874,7 @@ const UserProfile = () => {
           return (
             _global.formatDateToYYYYMMDD(
               item.delivering.actions[item.delivering.actions.length - 1]
-                ?.dateStart
+                ?.dateStart,
             ) === date
           );
         });
@@ -867,7 +898,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesHoldingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+              item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart,
             ) === date
           );
         });
@@ -881,7 +912,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesHoldingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+              item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart,
             ) === date
           );
         });
@@ -896,7 +927,8 @@ const UserProfile = () => {
           if (item.fitting.actions.length > 0)
             return (
               _global.formatDateToYYYYMMDD(
-                item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+                item.fitting.actions[item.fitting.actions.length - 1]
+                  ?.dateStart,
               ) === date
             );
         });
@@ -911,7 +943,7 @@ const UserProfile = () => {
         const filteredCases = buffCasesHoldingUser.filter((item) => {
           return (
             _global.formatDateToYYYYMMDD(
-              item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+              item.plaster.actions[item.plaster.actions.length - 1]?.dateStart,
             ) === date
           );
         });
@@ -928,7 +960,7 @@ const UserProfile = () => {
             _global.formatDateToYYYYMMDD(
               item.receptionPacking.actions[
                 item.receptionPacking.actions.length - 1
-              ]?.dateStart
+              ]?.dateStart,
             ) === date
           );
         });
@@ -944,7 +976,7 @@ const UserProfile = () => {
           return (
             _global.formatDateToYYYYMMDD(
               item.designing.actions[item.designing.actions.length - 1]
-                ?.dateStart
+                ?.dateStart,
             ) === date
           );
         });
@@ -961,7 +993,7 @@ const UserProfile = () => {
             _global.formatDateToYYYYMMDD(
               item.qualityControl.actions[
                 item.qualityControl.actions.length - 1
-              ]?.dateStart
+              ]?.dateStart,
             ) === date
           );
         });
@@ -977,7 +1009,7 @@ const UserProfile = () => {
           return (
             _global.formatDateToYYYYMMDD(
               item.delivering.actions[item.delivering.actions.length - 1]
-                ?.dateStart
+                ?.dateStart,
             ) === date
           );
         });
@@ -1001,7 +1033,7 @@ const UserProfile = () => {
             : departments[0].name === "CadCam"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.cadCam.actions.find((i) => i.dateEnd).dateEnd
+            item.cadCam.actions.find((i) => i.dateEnd).dateEnd,
           );
         }
         if (
@@ -1010,7 +1042,7 @@ const UserProfile = () => {
             : departments[0].name === "Caramic"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.ceramic.actions.find((i) => i.dateEnd).dateEnd
+            item.ceramic.actions.find((i) => i.dateEnd).dateEnd,
           );
         }
         if (
@@ -1019,7 +1051,7 @@ const UserProfile = () => {
             : departments[0].name === "Fitting"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.fitting.actions.find((i) => i.dateEnd)?.dateEnd
+            item.fitting.actions.find((i) => i.dateEnd)?.dateEnd,
           );
         }
         if (
@@ -1028,7 +1060,7 @@ const UserProfile = () => {
             : departments[0].name === "Plaster"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.plaster.actions.find((i) => i.dateEnd).dateEnd
+            item.plaster.actions.find((i) => i.dateEnd).dateEnd,
           );
         }
         if (
@@ -1037,7 +1069,7 @@ const UserProfile = () => {
             : departments[0].name === "Reception"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
+            item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd,
           );
         }
         if (
@@ -1046,7 +1078,7 @@ const UserProfile = () => {
             : departments[0].name === "Marketing"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.designing.actions.find((i) => i.dateEnd).dateEnd
+            item.designing.actions.find((i) => i.dateEnd).dateEnd,
           );
         }
         if (
@@ -1055,7 +1087,7 @@ const UserProfile = () => {
             : departments[0].name === "QC"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
+            item.qualityControl.actions.find((i) => i.dateEnd).dateEnd,
           );
         }
         if (
@@ -1064,7 +1096,7 @@ const UserProfile = () => {
             : departments[0].name === "Drivers"
         ) {
           endDateStr = _global.formatDateToYYYYMMDD(
-            item.delivering.actions.find((i) => i.dateEnd).dateEnd
+            item.delivering.actions.find((i) => i.dateEnd).dateEnd,
           );
         }
 
@@ -1089,7 +1121,7 @@ const UserProfile = () => {
           const endActions = actions.filter((action) => action.dateEnd);
           if (endActions.length === 0) return null;
           return new Date(
-            Math.max(...endActions.map((action) => new Date(action.dateEnd)))
+            Math.max(...endActions.map((action) => new Date(action.dateEnd))),
           );
         };
         const dateEndA = getDateEnd(a);
@@ -1119,7 +1151,7 @@ const UserProfile = () => {
           const endActions = actions.filter((action) => action.dateEnd);
           if (endActions.length === 0) return null;
           return new Date(
-            Math.max(...endActions.map((action) => new Date(action.dateEnd)))
+            Math.max(...endActions.map((action) => new Date(action.dateEnd))),
           );
         };
         const dateEndA = getDateEnd(a);
@@ -1149,7 +1181,7 @@ const UserProfile = () => {
           const endActions = actions.filter((action) => action.dateEnd);
           if (endActions.length === 0) return null;
           return new Date(
-            Math.max(...endActions.map((action) => new Date(action.dateEnd)))
+            Math.max(...endActions.map((action) => new Date(action.dateEnd))),
           );
         };
         const dateEndA = getDateEnd(a);
@@ -1179,7 +1211,7 @@ const UserProfile = () => {
           const endActions = actions.filter((action) => action.dateEnd);
           if (endActions.length === 0) return null;
           return new Date(
-            Math.max(...endActions.map((action) => new Date(action.dateEnd)))
+            Math.max(...endActions.map((action) => new Date(action.dateEnd))),
           );
         };
         const dateEndA = getDateEnd(a);
@@ -1209,7 +1241,7 @@ const UserProfile = () => {
           const endActions = actions.filter((action) => action.dateEnd);
           if (endActions.length === 0) return null;
           return new Date(
-            Math.max(...endActions.map((action) => new Date(action.dateEnd)))
+            Math.max(...endActions.map((action) => new Date(action.dateEnd))),
           );
         };
         const dateEndA = getDateEnd(a);
@@ -1239,7 +1271,7 @@ const UserProfile = () => {
           const endActions = actions.filter((action) => action.dateEnd);
           if (endActions.length === 0) return null;
           return new Date(
-            Math.max(...endActions.map((action) => new Date(action.dateEnd)))
+            Math.max(...endActions.map((action) => new Date(action.dateEnd))),
           );
         };
         const dateEndA = getDateEnd(a);
@@ -1269,7 +1301,7 @@ const UserProfile = () => {
           const endActions = actions.filter((action) => action.dateEnd);
           if (endActions.length === 0) return null;
           return new Date(
-            Math.max(...endActions.map((action) => new Date(action.dateEnd)))
+            Math.max(...endActions.map((action) => new Date(action.dateEnd))),
           );
         };
         const dateEndA = getDateEnd(a);
@@ -1296,17 +1328,17 @@ const UserProfile = () => {
           : departments[0].name === "CadCam"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.cadCam.actions.find((i) => i.dateEnd).dateEnd
+          item.cadCam.actions.find((i) => i.dateEnd).dateEnd,
         );
       }
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-          userData.lastName === "Jamous"
+            userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd
+          item.cadCam.actions.find((i) => i.dateEnd)?.dateEnd,
         );
       }
       if (
@@ -1315,7 +1347,7 @@ const UserProfile = () => {
           : departments[0].name === "Caramic"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.ceramic.actions.find((i) => i.dateEnd).dateEnd
+          item.ceramic.actions.find((i) => i.dateEnd).dateEnd,
         );
       }
       if (
@@ -1325,7 +1357,7 @@ const UserProfile = () => {
         item.fitting.actions?.length > 0
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.fitting.actions.find((i) => i.dateEnd)?.dateEnd
+          item.fitting.actions.find((i) => i.dateEnd)?.dateEnd,
         );
       }
       if (
@@ -1334,7 +1366,7 @@ const UserProfile = () => {
           : departments[0].name === "Plaster"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.plaster.actions.find((i) => i.dateEnd).dateEnd
+          item.plaster.actions.find((i) => i.dateEnd).dateEnd,
         );
       }
       if (
@@ -1343,7 +1375,7 @@ const UserProfile = () => {
           : departments[0].name === "Reception"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.receptionPacking.actions.find((i) => i.dateEnd)?.dateEnd
+          item.receptionPacking.actions.find((i) => i.dateEnd)?.dateEnd,
         );
       }
       if (
@@ -1352,7 +1384,7 @@ const UserProfile = () => {
           : departments[0].name === "Marketing"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.designing.actions.find((i) => i.dateEnd).dateEnd
+          item.designing.actions.find((i) => i.dateEnd).dateEnd,
         );
       }
       if (
@@ -1361,7 +1393,7 @@ const UserProfile = () => {
           : departments[0].name === "Drivers"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
-          item.delivering.actions.find((i) => i.dateEnd).dateEnd
+          item.delivering.actions.find((i) => i.dateEnd).dateEnd,
         );
       }
       return endDateStr;
@@ -1378,18 +1410,18 @@ const UserProfile = () => {
           : departments[0].name === "CadCam"
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+          item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart,
         );
       }
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-          userData.lastName === "Jamous"
+            userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         console.log("FITTING CAD CAM");
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+          item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart,
         );
       }
       if (
@@ -1398,7 +1430,7 @@ const UserProfile = () => {
           : departments[0].name === "Caramic"
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+          item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart,
         );
       }
       if (
@@ -1408,7 +1440,7 @@ const UserProfile = () => {
         item.fitting.actions?.length > 0
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+          item.fitting.actions[item.fitting.actions.length - 1]?.dateStart,
         );
       }
       if (
@@ -1417,7 +1449,7 @@ const UserProfile = () => {
           : departments[0].name === "Plaster"
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+          item.plaster.actions[item.plaster.actions.length - 1]?.dateStart,
         );
       }
       if (
@@ -1428,7 +1460,7 @@ const UserProfile = () => {
         startDateStr = _global.formatDateToYYYYMMDD(
           item.receptionPacking.actions[
             item.receptionPacking.actions.length - 1
-          ]?.dateStart
+          ]?.dateStart,
         );
       }
       if (
@@ -1437,7 +1469,7 @@ const UserProfile = () => {
           : departments[0].name === "Marketing"
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.designing.actions[item.designing.actions.length - 1]?.dateStart
+          item.designing.actions[item.designing.actions.length - 1]?.dateStart,
         );
       }
       if (
@@ -1446,7 +1478,8 @@ const UserProfile = () => {
           : departments[0].name === "Drivers"
       ) {
         startDateStr = _global.formatDateToYYYYMMDD(
-          item.delivering.actions[item.delivering.actions.length - 1]?.dateStart
+          item.delivering.actions[item.delivering.actions.length - 1]
+            ?.dateStart,
         );
       }
       return startDateStr;
@@ -1463,17 +1496,17 @@ const UserProfile = () => {
           : departments[0].name === "CadCam"
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
-          item?.historyHolding[item.historyHolding.length - 1]?.date
+          item?.historyHolding[item.historyHolding.length - 1]?.date,
         );
       }
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-          userData.lastName === "Jamous"
+            userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
-          item?.historyHolding[item.historyHolding.length - 1]?.date
+          item?.historyHolding[item.historyHolding.length - 1]?.date,
         );
       }
       if (
@@ -1482,7 +1515,7 @@ const UserProfile = () => {
           : departments[0].name === "Caramic"
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
-          item.ceramic.actions[item.ceramic.actions.length - 1]?.datePause
+          item.ceramic.actions[item.ceramic.actions.length - 1]?.datePause,
         );
       }
       if (
@@ -1492,7 +1525,7 @@ const UserProfile = () => {
         item.fitting.actions?.length > 0
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
-          item.fitting.actions[item.fitting.actions.length - 1]?.datePause
+          item.fitting.actions[item.fitting.actions.length - 1]?.datePause,
         );
       }
       if (
@@ -1501,7 +1534,7 @@ const UserProfile = () => {
           : departments[0].name === "Plaster"
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
-          item.plaster.actions[item.plaster.actions.length - 1]?.datePause
+          item.plaster.actions[item.plaster.actions.length - 1]?.datePause,
         );
       }
       if (
@@ -1512,7 +1545,7 @@ const UserProfile = () => {
         pauseDateStr = _global.formatDateToYYYYMMDD(
           item.receptionPacking.actions[
             item.receptionPacking.actions.length - 1
-          ]?.datePause
+          ]?.datePause,
         );
       }
       if (
@@ -1521,7 +1554,7 @@ const UserProfile = () => {
           : departments[0].name === "Marketing"
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
-          item.designing.actions[item.designing.actions.length - 1]?.datePause
+          item.designing.actions[item.designing.actions.length - 1]?.datePause,
         );
       }
       if (
@@ -1530,7 +1563,8 @@ const UserProfile = () => {
           : departments[0].name === "Drivers"
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
-          item.delivering.actions[item.delivering.actions.length - 1]?.datePause
+          item.delivering.actions[item.delivering.actions.length - 1]
+            ?.datePause,
         );
       }
       return pauseDateStr;
@@ -1551,7 +1585,7 @@ const UserProfile = () => {
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-          userData.lastName === "Jamous"
+            userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         reason = item?.historyHolding[item.historyHolding.length - 1]?.msg;
@@ -1622,7 +1656,10 @@ const UserProfile = () => {
   };
   // Helper function to get CadCam and Ceramic assignments
   const getCadCamAndCeramicAssignments = (caseItem) => {
-    if (!caseItem?.assignmentHistory || caseItem.assignmentHistory.length === 0) {
+    if (
+      !caseItem?.assignmentHistory ||
+      caseItem.assignmentHistory.length === 0
+    ) {
       return { cadCam: null, ceramic: null };
     }
 
@@ -1636,13 +1673,13 @@ const UserProfile = () => {
 
       // Look for CadCam assignment if we haven't found one yet
       if (!cadCamUser) {
-        const cadCam = assignments.find(a => a.department === "CadCam");
+        const cadCam = assignments.find((a) => a.department === "CadCam");
         if (cadCam) cadCamUser = cadCam.userName;
       }
 
       // Look for Ceramic assignment if we haven't found one yet
       if (!ceramicUser) {
-        const ceramic = assignments.find(a => a.department === "Caramic");
+        const ceramic = assignments.find((a) => a.department === "Caramic");
         if (ceramic) ceramicUser = ceramic.userName;
       }
 
@@ -1731,9 +1768,9 @@ const UserProfile = () => {
                   role="tab"
                   aria-controls="assignedCases-tab-pane"
                   aria-selected="false"
-                // onClick={() => {
-                //   handleTabChange(3, () => fetchAssignedCases())
-                // }}
+                  // onClick={() => {
+                  //   handleTabChange(3, () => fetchAssignedCases())
+                  // }}
                 >
                   Assigned Cases <small>({assignedCases?.length})</small>
                 </button>
@@ -1748,9 +1785,9 @@ const UserProfile = () => {
                   role="tab"
                   aria-controls="startCases-tab-pane"
                   onClick={() => {
-                    handleTabChange(1)
-                    setSearchCaseNumber("")
-                    setStartCases(buffCasesStartingUser)
+                    handleTabChange(1);
+                    setSearchCaseNumber("");
+                    setStartCases(buffCasesStartingUser);
                   }}
                   aria-selected={activeTab === 0}
                 >
@@ -1772,8 +1809,8 @@ const UserProfile = () => {
                   aria-controls="holdCases-tab-pane"
                   aria-selected="true"
                   onClick={() => {
-                    handleTabChange(2)
-                    searchByName("", "Pause")
+                    handleTabChange(2);
+                    searchByName("", "Pause");
                   }}
                 >
                   Hold <small>({pauseCases.length})</small>
@@ -1794,14 +1831,13 @@ const UserProfile = () => {
                   aria-controls="endCases-tab-pane"
                   aria-selected="true"
                   onClick={() => {
-                    handleTabChange(3)
-                    searchByName("", "End")
+                    handleTabChange(3);
+                    searchByName("", "End");
                   }}
                 >
                   End <small>({casesUser?.length})</small>
                 </button>
               </li>
-
             </ul>
           </div>
           <div
@@ -1816,7 +1852,6 @@ const UserProfile = () => {
               setStartCases(buffCasesStartingUser);
             }}
           >
-
             {/* Assigned Cases */}
             <div
               className={`tab-pane fade ${activeTab === 0 ? "show active" : ""}`}
@@ -1851,38 +1886,56 @@ const UserProfile = () => {
                         <thead>
                           <tr className="table-secondary">
                             <th scope="col">#Case</th>
-                            <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor Name {renderSortIcon("doctorName")}</th>
+                            <th
+                              scope="col"
+                              onClick={() => handleSort("doctorName")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              Doctor Name {renderSortIcon("doctorName")}
+                            </th>
                             <th scope="col">Patient Name</th>
                             <th scope="col">#Unites</th>
-                            <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>In {renderSortIcon("dateIn")}</th>
+                            <th
+                              scope="col"
+                              onClick={() => handleSort("dateIn")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              In {renderSortIcon("dateIn")}
+                            </th>
                             <th scope="col">Due</th>
                             <th scope="col">Ceramic</th>
                             <th scope="col">Deadline CadCam</th>
                             <th scope="col">Actions</th>
-
-
                           </tr>
                         </thead>
                         <tbody>
                           {assignedCases.map((item, index) => (
-                            <tr key={item._id}
-                              className={
-                                `${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${item.isTopPriority ? "urgent-case animate-me" :
-                                  (item.isStudy ? "bgc-study" : "") ||
-                                  (item.isUrgent ? "urgent-case animate-me" : "")}`
-                              }>
+                            <tr
+                              key={item._id}
+                              className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${
+                                item.isTopPriority
+                                  ? "urgent-case animate-me"
+                                  : (item.isStudy ? "bgc-study" : "") ||
+                                    (item.isUrgent
+                                      ? "urgent-case animate-me"
+                                      : "")
+                              }`}
+                            >
                               <td>{item.caseNumber}</td>
                               <td>{item.dentistObj?.name}</td>
                               <td>{item.patientName}</td>
                               <td
-                                className={`${item.teethNumbers.length <= 0
-                                  ? "bg-danger"
-                                  : "bg-white"
-                                  } td-phone`}
+                                className={`${
+                                  item.teethNumbers.length <= 0
+                                    ? "bg-danger"
+                                    : "bg-white"
+                                } td-phone`}
                               >
                                 {item.teethNumbers.length}
                               </td>
-                              <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                              <td>
+                                {_global.formatDateToYYYYMMDD(item.dateIn)}
+                              </td>
                               <td>
                                 {item.dateOut &&
                                   _global.formatDateToYYYYMMDD(item.dateOut)}
@@ -1890,18 +1943,28 @@ const UserProfile = () => {
                               <td>
                                 <div className="text-start small">
                                   {(() => {
-                                    const assignments = getCadCamAndCeramicAssignments(item);
+                                    const assignments =
+                                      getCadCamAndCeramicAssignments(item);
                                     return (
                                       <>
                                         {/* <strong>{assignments.ceramic}</strong> */}
                                         {/* {assignments.cadCam && (
                                             <div><strong>CadCam:</strong> {assignments.cadCam}</div>
                                         )} */}
-                                        {assignments.ceramic && item.isAssignedCeramic && (
-                                          <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
-                                        )}
+                                        {assignments.ceramic &&
+                                          item.isAssignedCeramic && (
+                                            <div className="text-center">
+                                              <strong>
+                                                {assignments.ceramic
+                                                  ? assignments.ceramic
+                                                  : "-"}
+                                              </strong>
+                                            </div>
+                                          )}
                                         {!assignments.ceramic && (
-                                          <div className="text-center"><strong>-</strong></div>
+                                          <div className="text-center">
+                                            <strong>-</strong>
+                                          </div>
                                         )}
                                       </>
                                     );
@@ -1909,13 +1972,31 @@ const UserProfile = () => {
                                 </div>
                               </td>
                               <td>
-                                {item.isUrgent ? <span className="fw-bold text-danger">Urgent</span> : (item.isTopPriority ? <span className="fw-bold text-danger">Top Priority</span> : (item.deadlineCadCam ? _global.formatDateToYYYYMMDD(item.deadlineCadCam) : "-"))}
+                                {item.isUrgent ? (
+                                  <span className="fw-bold text-danger">
+                                    Urgent
+                                  </span>
+                                ) : item.isTopPriority ? (
+                                  <span className="fw-bold text-danger">
+                                    Top Priority
+                                  </span>
+                                ) : item.deadlineCadCam ? (
+                                  _global.formatDateToYYYYMMDD(
+                                    item.deadlineCadCam,
+                                  )
+                                ) : (
+                                  "-"
+                                )}
                               </td>
                               <td>
                                 <div className="actions-btns">
                                   <span
                                     className={`schedule-action ${item.isTopPriority ? "schedule-toppriority" : ""}`}
-                                    style={item.isTopPriority ? { color: "rgb(255, 63, 63)" } : undefined}
+                                    style={
+                                      item.isTopPriority
+                                        ? { color: "rgb(255, 63, 63)" }
+                                        : undefined
+                                    }
                                     onClick={() => {
                                       setBuffCase(item);
                                     }}
@@ -1943,10 +2024,14 @@ const UserProfile = () => {
                                   >
                                     <i class="fa-brands fa-squarespace"></i>
                                   </span>
-                                  {(item.deadlineCadCam || item.deadlineCeramic || item.deadlineFitting) && (
+                                  {(item.deadlineCadCam ||
+                                    item.deadlineCeramic ||
+                                    item.deadlineFitting) && (
                                     <span
                                       className="c-warning reset-unschedule-action"
-                                      onClick={() => handleResetUnschedule(item)}
+                                      onClick={() =>
+                                        handleResetUnschedule(item)
+                                      }
                                       title="Reset Unschedule"
                                     >
                                       <i className="fa-solid fa-calendar-xmark"></i>
@@ -1961,7 +2046,8 @@ const UserProfile = () => {
                                     }}
                                     title="Notes"
                                   >
-                                    <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
+                                    <i className="fas fa-comment-dots"></i>{" "}
+                                    {item.notes?.length || 0}
                                   </span>
                                 </div>
                               </td>
@@ -1983,37 +2069,56 @@ const UserProfile = () => {
                         <thead>
                           <tr className="table-secondary">
                             <th scope="col">#Case</th>
-                            <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor Name {renderSortIcon("doctorName")}</th>
+                            <th
+                              scope="col"
+                              onClick={() => handleSort("doctorName")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              Doctor Name {renderSortIcon("doctorName")}
+                            </th>
                             <th scope="col">Patient Name</th>
                             <th scope="col">#Unites</th>
-                            <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>In {renderSortIcon("dateIn")}</th>
+                            <th
+                              scope="col"
+                              onClick={() => handleSort("dateIn")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              In {renderSortIcon("dateIn")}
+                            </th>
                             <th scope="col">Due</th>
                             <th scope="col">Ceramic</th>
                             <th scope="col">Deadline CadCam</th>
                             <th scope="col">Actions</th>
-
                           </tr>
                         </thead>
                         <tbody>
                           {allAssignedCasesUnfiltered.map((item, index) => (
-                            <tr key={item._id}
+                            <tr
+                              key={item._id}
                               className={
-                                item.isTopPriority ? "urgent-case animate-me" :
-                                  (item.isStudy ? "bgc-study" : "") ||
-                                  (item.isUrgent ? "urgent-case animate-me" : "")
-                              }>
+                                item.isTopPriority
+                                  ? "urgent-case animate-me"
+                                  : (item.isStudy ? "bgc-study" : "") ||
+                                    (item.isUrgent
+                                      ? "urgent-case animate-me"
+                                      : "")
+                              }
+                            >
                               <td>{item.caseNumber}</td>
                               <td>{item.dentistObj?.name}</td>
                               <td>{item.patientName}</td>
                               <td
-                                className={`${item.teethNumbers.length <= 0
-                                  ? "bg-danger"
-                                  : "bg-white"
-                                  } td-phone`}
+                                className={`${
+                                  item.teethNumbers.length <= 0
+                                    ? "bg-danger"
+                                    : "bg-white"
+                                } td-phone`}
                               >
                                 {item.teethNumbers.length}
                               </td>
-                              <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
+                              <td>
+                                {_global.formatDateToYYYYMMDD(item.dateIn)}
+                              </td>
                               <td>
                                 {item.dateOut &&
                                   _global.formatDateToYYYYMMDD(item.dateOut)}
@@ -2021,18 +2126,28 @@ const UserProfile = () => {
                               <td>
                                 <div className="text-start small">
                                   {(() => {
-                                    const assignments = getCadCamAndCeramicAssignments(item);
+                                    const assignments =
+                                      getCadCamAndCeramicAssignments(item);
                                     return (
                                       <>
                                         {/* <strong>{assignments.ceramic}</strong> */}
                                         {/* {assignments.cadCam && (
                                             <div><strong>CadCam:</strong> {assignments.cadCam}</div>
                                         )} */}
-                                        {assignments.ceramic && item.isAssignedCeramic && (
-                                          <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
-                                        )}
+                                        {assignments.ceramic &&
+                                          item.isAssignedCeramic && (
+                                            <div className="text-center">
+                                              <strong>
+                                                {assignments.ceramic
+                                                  ? assignments.ceramic
+                                                  : "-"}
+                                              </strong>
+                                            </div>
+                                          )}
                                         {!assignments.ceramic && (
-                                          <div className="text-center"><strong>-</strong></div>
+                                          <div className="text-center">
+                                            <strong>-</strong>
+                                          </div>
                                         )}
                                       </>
                                     );
@@ -2040,20 +2155,46 @@ const UserProfile = () => {
                                 </div>
                               </td>
                               <td>
-                                {item.isUrgent ? <span className="fw-bold text-danger">Urgent</span> : (item.isTopPriority ? <span className="fw-bold text-danger">Top Priority</span> : (item.deadlineCadCam ? _global.formatDateToYYYYMMDD(item.deadlineCadCam) : "-"))}
+                                {item.isUrgent ? (
+                                  <span className="fw-bold text-danger">
+                                    Urgent
+                                  </span>
+                                ) : item.isTopPriority ? (
+                                  <span className="fw-bold text-danger">
+                                    Top Priority
+                                  </span>
+                                ) : item.deadlineCadCam ? (
+                                  _global.formatDateToYYYYMMDD(
+                                    item.deadlineCadCam,
+                                  )
+                                ) : (
+                                  "-"
+                                )}
                               </td>
                               <td>
                                 <div className="actions-btns">
                                   <span
-                                    className={item.isTopPriority ? "c-danger" : "c-warning"}
+                                    className={
+                                      item.isTopPriority
+                                        ? "c-danger"
+                                        : "c-warning"
+                                    }
                                     onClick={() => togglePriority(item)}
                                     title="Top Priority"
                                   >
-                                    {item.isTopPriority ? <i className="fa-solid fa-star"></i> : <i className="fa-regular fa-star"></i>}
+                                    {item.isTopPriority ? (
+                                      <i className="fa-solid fa-star"></i>
+                                    ) : (
+                                      <i className="fa-regular fa-star"></i>
+                                    )}
                                   </span>
                                   <span
                                     className={`schedule-action ${item.isTopPriority ? "schedule-toppriority" : ""}`}
-                                    style={item.isTopPriority ? { color: "rgb(255, 63, 63)" } : undefined}
+                                    style={
+                                      item.isTopPriority
+                                        ? { color: "rgb(255, 63, 63)" }
+                                        : undefined
+                                    }
                                     onClick={() => {
                                       setBuffCase(item);
                                     }}
@@ -2063,10 +2204,14 @@ const UserProfile = () => {
                                   >
                                     <i className="fa-regular fa-calendar"></i>
                                   </span>
-                                  {(item.deadlineCadCam || item.deadlineCeramic || item.deadlineFitting) && (
+                                  {(item.deadlineCadCam ||
+                                    item.deadlineCeramic ||
+                                    item.deadlineFitting) && (
                                     <span
                                       className="c-warning reset-unschedule-action"
-                                      onClick={() => handleResetUnschedule(item)}
+                                      onClick={() =>
+                                        handleResetUnschedule(item)
+                                      }
                                       title="Reset Unschedule"
                                     >
                                       <i className="fa-solid fa-calendar-xmark"></i>
@@ -2099,7 +2244,8 @@ const UserProfile = () => {
                                     }}
                                     title="Notes"
                                   >
-                                    <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
+                                    <i className="fas fa-comment-dots"></i>{" "}
+                                    {item.notes?.length || 0}
                                   </span>
                                 </div>
                               </td>
@@ -2110,11 +2256,12 @@ const UserProfile = () => {
                     </>
                   )}
 
-                  {assignedCases?.length <= 0 && allAssignedCasesUnfiltered?.length <= 0 && (
-                    <div className="text-center">
-                      <h6>No Assigned Cases</h6>
-                    </div>
-                  )}
+                  {assignedCases?.length <= 0 &&
+                    allAssignedCasesUnfiltered?.length <= 0 && (
+                      <div className="text-center">
+                        <h6>No Assigned Cases</h6>
+                      </div>
+                    )}
                 </>
               ) : (
                 <>
@@ -2124,34 +2271,50 @@ const UserProfile = () => {
                       <thead>
                         <tr className="table-secondary">
                           <th scope="col">#Case</th>
-                          <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor Name {renderSortIcon("doctorName")}</th>
+                          <th
+                            scope="col"
+                            onClick={() => handleSort("doctorName")}
+                            style={{ cursor: "pointer" }}
+                          >
+                            Doctor Name {renderSortIcon("doctorName")}
+                          </th>
                           <th scope="col">Patient Name</th>
                           <th scope="col">#Unites</th>
-                          <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>In {renderSortIcon("dateIn")}</th>
+                          <th
+                            scope="col"
+                            onClick={() => handleSort("dateIn")}
+                            style={{ cursor: "pointer" }}
+                          >
+                            In {renderSortIcon("dateIn")}
+                          </th>
                           <th scope="col">Due</th>
                           <th scope="col">Ceramic</th>
                           <th scope="col">Deadline CadCam</th>
                           <th scope="col">Actions</th>
-
-
                         </tr>
                       </thead>
                       <tbody>
                         {assignedCases.map((item, index) => (
-                          <tr key={item._id}
-                            className={
-                              `${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${item.isTopPriority ? "urgent-case animate-me" :
-                                (item.isStudy ? "bgc-study" : "") ||
-                                (item.isUrgent ? "urgent-case animate-me" : "")}`
-                            }>
+                          <tr
+                            key={item._id}
+                            className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${
+                              item.isTopPriority
+                                ? "urgent-case animate-me"
+                                : (item.isStudy ? "bgc-study" : "") ||
+                                  (item.isUrgent
+                                    ? "urgent-case animate-me"
+                                    : "")
+                            }`}
+                          >
                             <td>{item.caseNumber}</td>
                             <td>{item.dentistObj?.name}</td>
                             <td>{item.patientName}</td>
                             <td
-                              className={`${item.teethNumbers.length <= 0
-                                ? "bg-danger"
-                                : "bg-white"
-                                } td-phone`}
+                              className={`${
+                                item.teethNumbers.length <= 0
+                                  ? "bg-danger"
+                                  : "bg-white"
+                              } td-phone`}
                             >
                               {item.teethNumbers.length}
                             </td>
@@ -2163,18 +2326,28 @@ const UserProfile = () => {
                             <td>
                               <div className="text-start small">
                                 {(() => {
-                                  const assignments = getCadCamAndCeramicAssignments(item);
+                                  const assignments =
+                                    getCadCamAndCeramicAssignments(item);
                                   return (
                                     <>
                                       {/* <strong>{assignments.ceramic}</strong> */}
                                       {/* {assignments.cadCam && (
                                             <div><strong>CadCam:</strong> {assignments.cadCam}</div>
                                         )} */}
-                                      {assignments.ceramic && item.isAssignedCeramic && (
-                                        <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
-                                      )}
+                                      {assignments.ceramic &&
+                                        item.isAssignedCeramic && (
+                                          <div className="text-center">
+                                            <strong>
+                                              {assignments.ceramic
+                                                ? assignments.ceramic
+                                                : "-"}
+                                            </strong>
+                                          </div>
+                                        )}
                                       {!assignments.ceramic && (
-                                        <div className="text-center"><strong>-</strong></div>
+                                        <div className="text-center">
+                                          <strong>-</strong>
+                                        </div>
                                       )}
                                     </>
                                   );
@@ -2182,7 +2355,21 @@ const UserProfile = () => {
                               </div>
                             </td>
                             <td>
-                              {item.isUrgent ? <span className="fw-bold text-danger">Urgent</span> : (item.isTopPriority ? <span className="fw-bold text-danger">Top Priority</span> : (item.deadlineCadCam ? _global.formatDateToYYYYMMDD(item.deadlineCadCam) : "-"))}
+                              {item.isUrgent ? (
+                                <span className="fw-bold text-danger">
+                                  Urgent
+                                </span>
+                              ) : item.isTopPriority ? (
+                                <span className="fw-bold text-danger">
+                                  Top Priority
+                                </span>
+                              ) : item.deadlineCadCam ? (
+                                _global.formatDateToYYYYMMDD(
+                                  item.deadlineCadCam,
+                                )
+                              ) : (
+                                "-"
+                              )}
                             </td>
                             <td>
                               <div className="actions-btns">
@@ -2204,7 +2391,9 @@ const UserProfile = () => {
                                 >
                                   <i class="fa-brands fa-squarespace"></i>
                                 </span>
-                                {(item.deadlineCadCam || item.deadlineCeramic || item.deadlineFitting) && (
+                                {(item.deadlineCadCam ||
+                                  item.deadlineCeramic ||
+                                  item.deadlineFitting) && (
                                   <span
                                     className="c-warning reset-unschedule-action"
                                     onClick={() => handleResetUnschedule(item)}
@@ -2222,7 +2411,8 @@ const UserProfile = () => {
                                   }}
                                   title="Notes"
                                 >
-                                  <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
+                                  <i className="fas fa-comment-dots"></i>{" "}
+                                  {item.notes?.length || 0}
                                 </span>
                               </div>
                             </td>
@@ -2274,7 +2464,9 @@ const UserProfile = () => {
                     value={filterBy}
                     onChange={(e) => setFilterBy(e.target.value)}
                   >
-                    <option value={SEARCH_FIELDS.CASE_NUMBER}>Case Number</option>
+                    <option value={SEARCH_FIELDS.CASE_NUMBER}>
+                      Case Number
+                    </option>
                     <option value={SEARCH_FIELDS.DOCTOR}>Doctor</option>
                     <option value={SEARCH_FIELDS.PATIENT}>Patient</option>
                   </select>
@@ -2310,21 +2502,30 @@ const UserProfile = () => {
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">StartedAt</th>
-                        <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
+                        <th
+                          scope="col"
+                          onClick={() => handleSort("doctorName")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          Doctor {renderSortIcon("doctorName")}
+                        </th>
                         <th scope="col">Patient</th>
                         <th scope="col">Ceramic</th>
                         <th scope="col">#teeth</th>
                         <th>Actions</th>
-
 
                         {/* <th scope="col">Actions</th> */}
                       </tr>
                     </thead>
                     <tbody>
                       {startCases.map((item) => (
-                        <tr key={item._id} className={` c-pointer ${(item.isStudy ? "bgc-study" : "") ||
-                          (item.isUrgent ? "urgent-case animate-me" : "")
-                          }`}>
+                        <tr
+                          key={item._id}
+                          className={` c-pointer ${
+                            (item.isStudy ? "bgc-study" : "") ||
+                            (item.isUrgent ? "urgent-case animate-me" : "")
+                          }`}
+                        >
                           <td>{item.caseNumber}</td>
                           <td>{getStartingDate(item)}</td>
                           <td>{item?.dentistObj?.name}</td>
@@ -2332,18 +2533,28 @@ const UserProfile = () => {
                           <td>
                             <div className="text-start small">
                               {(() => {
-                                const assignments = getCadCamAndCeramicAssignments(item);
+                                const assignments =
+                                  getCadCamAndCeramicAssignments(item);
                                 return (
                                   <>
                                     {/* <strong>{assignments.ceramic}</strong> */}
                                     {/* {assignments.cadCam && (
                                         <div><strong>CadCam:</strong> {assignments.cadCam}</div>
                                     )} */}
-                                    {assignments.ceramic && item.isAssignedCeramic && (
-                                      <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
-                                    )}
+                                    {assignments.ceramic &&
+                                      item.isAssignedCeramic && (
+                                        <div className="text-center">
+                                          <strong>
+                                            {assignments.ceramic
+                                              ? assignments.ceramic
+                                              : "-"}
+                                          </strong>
+                                        </div>
+                                      )}
                                     {!assignments.ceramic && (
-                                      <div className="text-center"><strong>-</strong></div>
+                                      <div className="text-center">
+                                        <strong>-</strong>
+                                      </div>
                                     )}
                                   </>
                                 );
@@ -2359,7 +2570,7 @@ const UserProfile = () => {
                                     {item.count}
                                   </b>
                                 </p>
-                              )
+                              ),
                             )}
                           </td>
                           {/* <td>
@@ -2386,12 +2597,11 @@ const UserProfile = () => {
                                 }}
                                 title="Notes"
                               >
-                                <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
+                                <i className="fas fa-comment-dots"></i>{" "}
+                                {item.notes?.length || 0}
                               </span>
                               <span
                                 className="c-success"
-
-
                                 // onClick={() => viewCase(item, "view")}
                                 onClick={() => {
                                   buffCaseHandle(item);
@@ -2412,7 +2622,6 @@ const UserProfile = () => {
                               <b>Total of Pieces</b>
                             </td>
 
-
                             <td
                               className="bg-success p-2 text-dark bg-opacity-50"
                               colSpan={2}
@@ -2424,29 +2633,26 @@ const UserProfile = () => {
                             userData.departments[0].name === "CadCam") ||
                             (userData.isAdmin &&
                               userData.departments[0].name === "Fitting")) && (
-                              <tr>
-                                <td className="f-bold c-success" colSpan={5}>
-                                  <b>Total Without Study</b>
-                                </td>
+                            <tr>
+                              <td className="f-bold c-success" colSpan={5}>
+                                <b>Total Without Study</b>
+                              </td>
 
-
-                                <td
-                                  className="bg-success p-2 text-dark bg-opacity-50"
-                                  colSpan={2}
-                                >
-                                  <b>
-                                    {sumOfTeethNumbersLength("Start") -
-                                      getStudyCases(
-                                        groupCasesTeethNumbersByName("Start")
-                                      )}
-                                  </b>
-                                </td>
-                              </tr>
-                            )}
+                              <td
+                                className="bg-success p-2 text-dark bg-opacity-50"
+                                colSpan={2}
+                              >
+                                <b>
+                                  {sumOfTeethNumbersLength("Start") -
+                                    getStudyCases(
+                                      groupCasesTeethNumbersByName("Start"),
+                                    )}
+                                </b>
+                              </td>
+                            </tr>
+                          )}
                           <tr>
                             <td colSpan={6}>
-
-
                               <div className="summary-teeth-cases">
                                 {groupCasesTeethNumbersByName("Start")?.map(
                                   (item) => (
@@ -2456,7 +2662,7 @@ const UserProfile = () => {
                                         {item.count}
                                       </b>
                                     </p>
-                                  )
+                                  ),
                                 )}
                               </div>
                             </td>
@@ -2522,14 +2728,18 @@ const UserProfile = () => {
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">HeldAt</th>
-                        <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
+                        <th
+                          scope="col"
+                          onClick={() => handleSort("doctorName")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          Doctor {renderSortIcon("doctorName")}
+                        </th>
                         <th scope="col">Patient</th>
                         <th scope="col">Ceramic</th>
                         <th scope="col">Reason</th>
                         <th scope="col">#teeth</th>
                         <th scope="col">Actions</th>
-
-
                       </tr>
                     </thead>
                     <tbody>
@@ -2537,7 +2747,7 @@ const UserProfile = () => {
                         <tr
                           key={item._id}
                           className="c-pointer"
-                        // onClick={() => viewCase(item, "view")}
+                          // onClick={() => viewCase(item, "view")}
                         >
                           <td>{item.caseNumber}</td>
                           <td>{getHoldingDate(item)}</td>
@@ -2546,18 +2756,28 @@ const UserProfile = () => {
                           <td>
                             <div className="text-start small">
                               {(() => {
-                                const assignments = getCadCamAndCeramicAssignments(item);
+                                const assignments =
+                                  getCadCamAndCeramicAssignments(item);
                                 return (
                                   <>
                                     {/* <strong>{assignments.ceramic}</strong> */}
                                     {/* {assignments.cadCam && (
                                         <div><strong>CadCam:</strong> {assignments.cadCam}</div>
                                     )} */}
-                                    {assignments.ceramic && item.isAssignedCeramic && (
-                                      <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
-                                    )}
+                                    {assignments.ceramic &&
+                                      item.isAssignedCeramic && (
+                                        <div className="text-center">
+                                          <strong>
+                                            {assignments.ceramic
+                                              ? assignments.ceramic
+                                              : "-"}
+                                          </strong>
+                                        </div>
+                                      )}
                                     {!assignments.ceramic && (
-                                      <div className="text-center"><strong>-</strong></div>
+                                      <div className="text-center">
+                                        <strong>-</strong>
+                                      </div>
                                     )}
                                   </>
                                 );
@@ -2574,7 +2794,7 @@ const UserProfile = () => {
                                     {item.count}
                                   </b>
                                 </p>
-                              )
+                              ),
                             )}
                           </td>
                           <td>
@@ -2594,12 +2814,12 @@ const UserProfile = () => {
                                 }}
                                 title="Notes"
                               >
-                                <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
+                                <i className="fas fa-comment-dots"></i>{" "}
+                                {item.notes?.length || 0}
                               </span>
 
                               <span
                                 className="c-success"
-
                                 // onClick={() => viewCase(item, "view")}
                                 onClick={() => {
                                   buffCaseHandle(item);
@@ -2620,8 +2840,10 @@ const UserProfile = () => {
                               <b>Total of Pieces</b>
                             </td>
 
-
-                            <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
+                            <td
+                              className="bg-success p-2 text-dark bg-opacity-50"
+                              colSpan={2}
+                            >
                               <b>{sumOfTeethNumbersLength("Pause")}</b>
                             </td>
                           </tr>
@@ -2629,26 +2851,26 @@ const UserProfile = () => {
                             userData.departments[0].name === "CadCam") ||
                             (userData.isAdmin &&
                               userData.departments[0].name === "Fitting")) && (
-                              <tr>
-                                <td className="f-bold c-success" colSpan={6}>
-                                  <b>Total Without Study</b>
-                                </td>
+                            <tr>
+                              <td className="f-bold c-success" colSpan={6}>
+                                <b>Total Without Study</b>
+                              </td>
 
-
-                                <td className="bg-success p-2 text-dark bg-opacity-50" colSpan={2}>
-                                  <b>
-                                    {sumOfTeethNumbersLength("Pause") -
-                                      getStudyCases(
-                                        groupCasesTeethNumbersByName("Pause")
-                                      )}
-                                  </b>
-                                </td>
-                              </tr>
-                            )}
+                              <td
+                                className="bg-success p-2 text-dark bg-opacity-50"
+                                colSpan={2}
+                              >
+                                <b>
+                                  {sumOfTeethNumbersLength("Pause") -
+                                    getStudyCases(
+                                      groupCasesTeethNumbersByName("Pause"),
+                                    )}
+                                </b>
+                              </td>
+                            </tr>
+                          )}
                           <tr>
                             <td colSpan={8}>
-
-
                               <div className="summary-teeth-cases">
                                 {groupCasesTeethNumbersByName("Pause")?.map(
                                   (item) => (
@@ -2658,7 +2880,7 @@ const UserProfile = () => {
                                         {item.count}
                                       </b>
                                     </p>
-                                  )
+                                  ),
                                 )}
                               </div>
                             </td>
@@ -2741,11 +2963,16 @@ const UserProfile = () => {
                       <tr className="table-secondary">
                         <th scope="col">#</th>
                         <th scope="col">FinishedAt</th>
-                        <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
+                        <th
+                          scope="col"
+                          onClick={() => handleSort("doctorName")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          Doctor {renderSortIcon("doctorName")}
+                        </th>
                         <th scope="col">Patient</th>
                         {userData.isAdmin && <th scope="col">#teeth</th>}
                         <th scope="col">Actions</th>
-
 
                         {/* <th scope="col">Actions</th> */}
                       </tr>
@@ -2776,7 +3003,7 @@ const UserProfile = () => {
                                       {item.count}
                                     </b>
                                   </p>
-                                )
+                                ),
                               )}
                             </td>
                           )}
@@ -2791,9 +3018,9 @@ const UserProfile = () => {
                                 }}
                                 title="Notes"
                               >
-                                <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
+                                <i className="fas fa-comment-dots"></i>{" "}
+                                {item.notes?.length || 0}
                               </span>
-
                             </div>
                           </td>
 
@@ -2806,13 +3033,14 @@ const UserProfile = () => {
                 </td> */}
                         </tr>
                       ))}
-                      {userData.isAdmin && (
+                      {(userData.isAdmin ||
+                        (userData.firstName === "Ali " &&
+                          userData.lastName === "Ajinah")) && (
                         <>
                           <tr>
                             <td className="f-bold c-success" colSpan={4}>
                               <b>Total of Pieces</b>
                             </td>
-
 
                             <td className="bg-success p-2 text-dark bg-opacity-50">
                               <b>{sumOfTeethNumbersLength("End")}</b>
@@ -2822,26 +3050,23 @@ const UserProfile = () => {
                             userData.departments[0].name === "CadCam") ||
                             (userData.isAdmin &&
                               userData.departments[0].name === "Fitting")) && (
-                              <tr>
-                                <td className="f-bold c-success" colSpan={4}>
-                                  <b>Total Without Study</b>
-                                </td>
+                            <tr>
+                              <td className="f-bold c-success" colSpan={4}>
+                                <b>Total Without Study</b>
+                              </td>
 
-
-                                <td className="bg-success p-2 text-dark bg-opacity-50">
-                                  <b>
-                                    {sumOfTeethNumbersLength("End") -
-                                      getStudyCases(
-                                        groupCasesTeethNumbersByName("End")
-                                      )}
-                                  </b>
-                                </td>
-                              </tr>
-                            )}
+                              <td className="bg-success p-2 text-dark bg-opacity-50">
+                                <b>
+                                  {sumOfTeethNumbersLength("End") -
+                                    getStudyCases(
+                                      groupCasesTeethNumbersByName("End"),
+                                    )}
+                                </b>
+                              </td>
+                            </tr>
+                          )}
                           <tr>
                             <td colSpan={5}>
-
-
                               <div className="summary-teeth-cases">
                                 {groupCasesTeethNumbersByName("End")?.map(
                                   (item) => (
@@ -2851,7 +3076,7 @@ const UserProfile = () => {
                                         {item.count}
                                       </b>
                                     </p>
-                                  )
+                                  ),
                                 )}
                               </div>
                             </td>
@@ -2868,7 +3093,6 @@ const UserProfile = () => {
                 </div>
               )}
             </div>
-
           </div>
         </div>
       </div>
@@ -2883,7 +3107,9 @@ const UserProfile = () => {
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="scheduleModalLabel">Schedule Cases</h5>
+              <h5 className="modal-title" id="scheduleModalLabel">
+                Schedule Cases
+              </h5>
               <button
                 type="button"
                 className="btn-close"
@@ -2902,14 +3128,29 @@ const UserProfile = () => {
                       type="checkbox"
                       id="checkCadCam"
                       checked={scheduleConfig.cadCam.selected}
-                      onChange={(e) => setScheduleConfig(prev => ({ ...prev, cadCam: { ...prev.cadCam, selected: e.target.checked } }))}
+                      onChange={(e) =>
+                        setScheduleConfig((prev) => ({
+                          ...prev,
+                          cadCam: {
+                            ...prev.cadCam,
+                            selected: e.target.checked,
+                          },
+                        }))
+                      }
                     />
-                    <label className="form-check-label" htmlFor="checkCadCam">Cad Cam</label>
+                    <label className="form-check-label" htmlFor="checkCadCam">
+                      Cad Cam
+                    </label>
                   </div>
                   {scheduleConfig.cadCam.selected && (
                     <DatePicker
                       value={scheduleConfig.cadCam.date}
-                      onChange={(date) => setScheduleConfig(prev => ({ ...prev, cadCam: { ...prev.cadCam, date } }))}
+                      onChange={(date) =>
+                        setScheduleConfig((prev) => ({
+                          ...prev,
+                          cadCam: { ...prev.cadCam, date },
+                        }))
+                      }
                       format="DD/MM/YYYY"
                       calendarPosition="bottom-center"
                       className="form-control"
@@ -2927,14 +3168,29 @@ const UserProfile = () => {
                       type="checkbox"
                       id="checkFitting"
                       checked={scheduleConfig.fitting.selected}
-                      onChange={(e) => setScheduleConfig(prev => ({ ...prev, fitting: { ...prev.fitting, selected: e.target.checked } }))}
+                      onChange={(e) =>
+                        setScheduleConfig((prev) => ({
+                          ...prev,
+                          fitting: {
+                            ...prev.fitting,
+                            selected: e.target.checked,
+                          },
+                        }))
+                      }
                     />
-                    <label className="form-check-label" htmlFor="checkFitting">Fitting</label>
+                    <label className="form-check-label" htmlFor="checkFitting">
+                      Fitting
+                    </label>
                   </div>
                   {scheduleConfig.fitting.selected && (
                     <DatePicker
                       value={scheduleConfig.fitting.date}
-                      onChange={(date) => setScheduleConfig(prev => ({ ...prev, fitting: { ...prev.fitting, date } }))}
+                      onChange={(date) =>
+                        setScheduleConfig((prev) => ({
+                          ...prev,
+                          fitting: { ...prev.fitting, date },
+                        }))
+                      }
                       format="DD/MM/YYYY"
                       calendarPosition="bottom-center"
                       className="form-control"
@@ -2952,14 +3208,29 @@ const UserProfile = () => {
                       type="checkbox"
                       id="checkCeramic"
                       checked={scheduleConfig.ceramic.selected}
-                      onChange={(e) => setScheduleConfig(prev => ({ ...prev, ceramic: { ...prev.ceramic, selected: e.target.checked } }))}
+                      onChange={(e) =>
+                        setScheduleConfig((prev) => ({
+                          ...prev,
+                          ceramic: {
+                            ...prev.ceramic,
+                            selected: e.target.checked,
+                          },
+                        }))
+                      }
                     />
-                    <label className="form-check-label" htmlFor="checkCeramic">Ceramic</label>
+                    <label className="form-check-label" htmlFor="checkCeramic">
+                      Ceramic
+                    </label>
                   </div>
                   {scheduleConfig.ceramic.selected && (
                     <DatePicker
                       value={scheduleConfig.ceramic.date}
-                      onChange={(date) => setScheduleConfig(prev => ({ ...prev, ceramic: { ...prev.ceramic, date } }))}
+                      onChange={(date) =>
+                        setScheduleConfig((prev) => ({
+                          ...prev,
+                          ceramic: { ...prev.ceramic, date },
+                        }))
+                      }
                       format="DD/MM/YYYY"
                       calendarPosition="bottom-center"
                       className="form-control"
@@ -2989,7 +3260,7 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
-      {casesUser?.length > 0 &&
+      {casesUser?.length > 0 && (
         <div
           class="modal fade"
           id="viewModal"
@@ -3013,13 +3284,13 @@ const UserProfile = () => {
                 ></button>
               </div>
               <div class="modal-body">
-                {console.log('buffCase', buffCase)}
+                {console.log("buffCase", buffCase)}
                 {buffCase && <ViewCase caseModel={buffCase} />}
               </div>
             </div>
           </div>
         </div>
-      }
+      )}
       {showNoteModal && (
         <div
           className="modal fade show d-block"
@@ -3030,7 +3301,9 @@ const UserProfile = () => {
           <div className="modal-dialog modal-dialog-centered" role="document">
             <div className="modal-content">
               <div className="modal-header bg-primary text-white">
-                <h5 className="modal-title">Notes for Case #{currentNoteCase?.caseNumber}</h5>
+                <h5 className="modal-title">
+                  Notes for Case #{currentNoteCase?.caseNumber}
+                </h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -3043,15 +3316,27 @@ const UserProfile = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <div style={{ maxHeight: "300px", overflowY: "auto", marginBottom: "15px" }}>
-                  {currentNoteCase?.notes && currentNoteCase.notes.length > 0 ? (
+                <div
+                  style={{
+                    maxHeight: "300px",
+                    overflowY: "auto",
+                    marginBottom: "15px",
+                  }}
+                >
+                  {currentNoteCase?.notes &&
+                  currentNoteCase.notes.length > 0 ? (
                     currentNoteCase.notes.map((note, index) => (
-                      <div key={index} className="mb-3 p-2 border rounded bg-light">
+                      <div
+                        key={index}
+                        className="mb-3 p-2 border rounded bg-light"
+                      >
                         <div className="d-flex justify-content-between text-muted small mb-1">
                           <strong>{note.author || note.name}</strong>
                           <span>{new Date(note.date).toLocaleString()}</span>
                         </div>
-                        <div className="text-start">{note.text || note.msg}</div>
+                        <div className="text-start">
+                          {note.text || note.msg}
+                        </div>
                       </div>
                     ))
                   ) : (
@@ -3091,34 +3376,43 @@ const UserProfile = () => {
                         name: user.firstName + " " + user.lastName,
                         date: new Date().toISOString(),
                         text: newNoteText,
-                        msg: newNoteText
+                        msg: newNoteText,
                       };
 
-                      const updatedNotes = [...(currentNoteCase.notes || []), newNote];
+                      const updatedNotes = [
+                        ...(currentNoteCase.notes || []),
+                        newNote,
+                      ];
 
-                      await axios.patch(`${_global.BASE_URL}cases/${currentNoteCase._id}`, {
-                        notes: updatedNotes
-                      });
+                      await axios.patch(
+                        `${_global.BASE_URL}cases/${currentNoteCase._id}`,
+                        {
+                          notes: updatedNotes,
+                        },
+                      );
 
                       // Update local state
                       setCurrentNoteCase({
                         ...currentNoteCase,
-                        notes: updatedNotes
+                        notes: updatedNotes,
                       });
 
                       // Also update all tracking lists to keep UI in sync
-                      const updateList = (list) => list.map((c) =>
-                        c._id === currentNoteCase._id ? { ...c, notes: updatedNotes } : c
-                      );
+                      const updateList = (list) =>
+                        list.map((c) =>
+                          c._id === currentNoteCase._id
+                            ? { ...c, notes: updatedNotes }
+                            : c,
+                        );
 
-                      setStartCases(prev => updateList(prev));
-                      setPauseCases(prev => updateList(prev));
-                      setCasesUser(prev => updateList(prev));
-                      setAssignedCases(prev => updateList(prev));
-                      setAllAssignedCasesUnfiltered(prev => updateList(prev));
-                      setBuffStartingCasesUser(prev => updateList(prev));
-                      setBuffCasesHoldingUser(prev => updateList(prev));
-                      setBuffCasesUser(prev => updateList(prev));
+                      setStartCases((prev) => updateList(prev));
+                      setPauseCases((prev) => updateList(prev));
+                      setCasesUser((prev) => updateList(prev));
+                      setAssignedCases((prev) => updateList(prev));
+                      setAllAssignedCasesUnfiltered((prev) => updateList(prev));
+                      setBuffStartingCasesUser((prev) => updateList(prev));
+                      setBuffCasesHoldingUser((prev) => updateList(prev));
+                      setBuffCasesUser((prev) => updateList(prev));
 
                       setNewNoteText("");
                     } catch (err) {
@@ -3136,7 +3430,6 @@ const UserProfile = () => {
         </div>
       )}
     </div>
-
   );
 };
 export default UserProfile;
