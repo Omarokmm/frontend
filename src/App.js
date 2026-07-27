@@ -24,6 +24,7 @@ import Clinics from "./components/Layout/Clinics/Clinics.js";
 import RedoCase from "./components/Layout/Cases/RedoCase.js";
 import AssignedDoctors from "./components/Layout/AssignedDoctors.js";
 import Reports from "./components/Layout/Reports/Reports.js";
+import DepartmentTVView from "./components/Layout/Departments/DepartmentTVView.js";
 function App() {
   return (
     <div className="App">
@@ -32,6 +33,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route index path="/" element={<Login />} />
+            <Route path="department-tv/:id" element={<DepartmentTVView />} />
             <Route element={<RequireAuth allowedRoles={[0]} />}>
               <Route path="layout" element={<Layout />}>
                 <Route path="users" element={<Users />} />

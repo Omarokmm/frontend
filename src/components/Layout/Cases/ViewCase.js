@@ -874,6 +874,8 @@ const ViewCase = ({ caseModel }) => {
                 style={{ maxHeight: '70vh', objectFit: 'contain' }}
                 controls
                 autoPlay
+                muted
+                playsInline
               />
             ) : (
               <img
