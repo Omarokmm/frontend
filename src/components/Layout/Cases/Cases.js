@@ -3288,9 +3288,7 @@ const Cases = () => {
                                 (user.roles[0] ===
                                   _global.allRoles.technician &&
                                   departments[0].name === "CadCam") ||
-                                (user.roles[0] ===
-                                  _global.allRoles.technician &&
-                                  user.lastName === "Jamous") ||
+                                (user.lastName === "Harrat") ||
                                 user.roles[0] ===
                                 _global.allRoles.super_admin) && (
                                 <span
@@ -4655,9 +4653,7 @@ const Cases = () => {
                                 (user.roles[0] ===
                                   _global.allRoles.technician &&
                                   departments[0].name === "CadCam") ||
-                                (user.roles[0] ===
-                                  _global.allRoles.technician &&
-                                  user.lastName === "Jamous")) && (
+                                (user.lastName === "Harrat")) && (
                                   <span
                                     data-bs-toggle="modal"
                                     data-bs-target="#caseHoldModal"

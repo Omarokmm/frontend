@@ -1560,7 +1560,7 @@ const Doctors = () => {
                 <span className="badge bg-light text-secondary border rounded-pill px-3">
                   {doctors.length} Total
                 </span>
-                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.super_admin || user.lastName === "Jamous") && (
+                {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.super_admin || user.lastName === "Harrat") && (
                   <div className="d-flex gap-2">
                     <button
                       className="btn btn-outline-secondary btn-sm rounded-pill shadow-sm"

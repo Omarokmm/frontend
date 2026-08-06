@@ -120,6 +120,9 @@ const CasesInDepartments = () => {
       } else if (key === "dateIn") {
         aValue = new Date(a.dateIn).getTime();
         bValue = new Date(b.dateIn).getTime();
+      } else if (key === "ceramic") {
+        aValue = getCeramicName(a);
+        bValue = getCeramicName(b);
       } else {
         return 0;
       }
@@ -296,6 +299,13 @@ const CasesInDepartments = () => {
       cadCam: cadCamUser,
       ceramic: ceramicUser
     };
+  };
+
+  const getCeramicName = (item) => {
+    const assignments = getCadCamAndCeramicAssignments(item);
+    return assignments?.ceramic && item?.isAssignedCeramic
+      ? assignments.ceramic.toLowerCase()
+      : "";
   };
   function groupTeethNumbersByName(teethNumbers) {
     const result = {};
@@ -1457,7 +1467,7 @@ const CasesInDepartments = () => {
                         </th>
                         <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
                         <th scope="col">Patient</th>
-                        <th scope="col">Ceramic</th>
+                        <th scope="col" onClick={() => handleSort("ceramic")} style={{ cursor: "pointer" }}>Ceramic {renderSortIcon("ceramic")}</th>
                         <th scope="col">Notes</th>
                         <th scope="col">#teeth</th>
                       </tr>
@@ -1873,7 +1883,7 @@ const CasesInDepartments = () => {
                         </th>
                         <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
                         <th scope="col">Patient</th>
-                        <th scope="col">Ceramic</th>
+                        <th scope="col" onClick={() => handleSort("ceramic")} style={{ cursor: "pointer" }}>Ceramic {renderSortIcon("ceramic")}</th>
                         {/* <th scope="col">Notes</th> */}
                         <th scope="col">#teeth</th>
                       </tr>
