@@ -1036,45 +1036,48 @@ const Reports = () => {
               printSelection[section.key] && (
                 <div key={section.key} style={{ marginBottom: "40px" }}>
                   <h3 style={{ color: "#0d6efd", borderBottom: "1px solid #ccc", paddingBottom: "5px", marginBottom: "15px" }}>{section.title}</h3>
-                  {section.items.length > 0 ? (
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
-                      <thead>
-                        <tr style={{ backgroundColor: "#f8f9fa" }}>
-                          {printColumns[section.key].caseNumber && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>#</th>}
-                          {printColumns[section.key].doctor && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Doctor</th>}
-                          {printColumns[section.key].patient && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Patient</th>}
-                          {printColumns[section.key].units && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Units & Mat.</th>}
-                          {printColumns[section.key].cadCamCol && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>CadCam</th>}
-                          {printColumns[section.key].ceramicCol && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Ceramic</th>}
-                          {printColumns[section.key].dateIn && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Date In</th>}
-                          {printColumns[section.key].notes && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Notes</th>}
-                          {printColumns[section.key].addedBy && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Added By</th>}
-                          {printColumns[section.key].dateTime && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Time</th>}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {section.items.map((item, idx) => {
-                          const asgn = getCadCamAndCeramicAssignments(item.caseData);
-                          return (
-                            <tr key={idx}>
-                              {printColumns[section.key].caseNumber && <td style={{ border: "1px solid #dee2e6", padding: "6px", fontWeight: "bold" }}>{item.caseNumber}</td>}
-                              {printColumns[section.key].doctor && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.doctorName}</td>}
-                              {printColumns[section.key].patient && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.patientName}</td>}
-                              {printColumns[section.key].units && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.unitsMaterials}</td>}
-                              {printColumns[section.key].cadCamCol && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{asgn.cadCam || '-'}</td>}
-                              {printColumns[section.key].ceramicCol && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{asgn.ceramic || '-'}</td>}
-                              {printColumns[section.key].dateIn && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.dateIn}</td>}
-                              {printColumns[section.key].notes && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.notes}</td>}
-                              {printColumns[section.key].addedBy && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.user}</td>}
-                              {printColumns[section.key].dateTime && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.dateTime}</td>}
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p style={{ fontStyle: "italic", color: "#777", fontSize: "14px" }}>No entries for this section.</p>
-                  )}
+                  {(() => {
+                    const sortedItems = getSortedItems(section.items, section.key);
+                    return sortedItems.length > 0 ? (
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+                        <thead>
+                          <tr style={{ backgroundColor: "#f8f9fa" }}>
+                            {printColumns[section.key].caseNumber && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>#</th>}
+                            {printColumns[section.key].doctor && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Doctor</th>}
+                            {printColumns[section.key].patient && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Patient</th>}
+                            {printColumns[section.key].units && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Units & Mat.</th>}
+                            {printColumns[section.key].cadCamCol && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>CadCam</th>}
+                            {printColumns[section.key].ceramicCol && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Ceramic</th>}
+                            {printColumns[section.key].dateIn && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Date In</th>}
+                            {printColumns[section.key].notes && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Notes</th>}
+                            {printColumns[section.key].addedBy && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Added By</th>}
+                            {printColumns[section.key].dateTime && <th style={{ border: "1px solid #dee2e6", padding: "6px", textAlign: "left" }}>Time</th>}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sortedItems.map((item, idx) => {
+                            const asgn = getCadCamAndCeramicAssignments(item.caseData);
+                            return (
+                              <tr key={idx}>
+                                {printColumns[section.key].caseNumber && <td style={{ border: "1px solid #dee2e6", padding: "6px", fontWeight: "bold" }}>{item.caseNumber}</td>}
+                                {printColumns[section.key].doctor && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.doctorName}</td>}
+                                {printColumns[section.key].patient && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.patientName}</td>}
+                                {printColumns[section.key].units && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.unitsMaterials}</td>}
+                                {printColumns[section.key].cadCamCol && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{asgn.cadCam || '-'}</td>}
+                                {printColumns[section.key].ceramicCol && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{asgn.ceramic || '-'}</td>}
+                                {printColumns[section.key].dateIn && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.dateIn}</td>}
+                                {printColumns[section.key].notes && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.notes}</td>}
+                                {printColumns[section.key].addedBy && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.user}</td>}
+                                {printColumns[section.key].dateTime && <td style={{ border: "1px solid #dee2e6", padding: "6px" }}>{item.dateTime}</td>}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p style={{ fontStyle: "italic", color: "#777", fontSize: "14px" }}>No entries for this section.</p>
+                    );
+                  })()}
                 </div>
               )
             ))
