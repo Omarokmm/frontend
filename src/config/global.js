@@ -6,8 +6,6 @@ export const BASE_URL_WiTHOUT_API = "https://backend-pr1m.onrender.com/";
 // export const BASE_URL_WiTHOUT_API = "http://localhost:3000/";
 
 
-
-
 export const Roles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 export const naturalOfWorks = [
   {
