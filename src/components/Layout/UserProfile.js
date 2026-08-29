@@ -94,7 +94,7 @@ const UserProfile = () => {
               !item.isHold && // Ensure isHold is false
               item.cadCam.actions.length > 0 && // Ensure actions array is not empty
               item.cadCam.actions[item.cadCam.actions.length - 1].prfeix ===
-                "start" && // Ensure last action's prfeix is "start"
+              "start" && // Ensure last action's prfeix is "start"
               !item.cadCam.status.isStart, // Ensure status isStart is false
           );
           setStartCases(startCasesData);
@@ -622,7 +622,7 @@ const UserProfile = () => {
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-            userData.lastName === "Jamous"
+          userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         const filteredCases = buffCasesUser.filter((item) => {
@@ -1334,7 +1334,7 @@ const UserProfile = () => {
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-            userData.lastName === "Jamous"
+          userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         endDateStr = _global.formatDateToYYYYMMDD(
@@ -1416,7 +1416,7 @@ const UserProfile = () => {
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-            userData.lastName === "Jamous"
+          userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         console.log("FITTING CAD CAM");
@@ -1502,7 +1502,7 @@ const UserProfile = () => {
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-            userData.lastName === "Jamous"
+          userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         pauseDateStr = _global.formatDateToYYYYMMDD(
@@ -1585,7 +1585,7 @@ const UserProfile = () => {
       if (
         userData.isAdmin
           ? userData.departments[0].name === "Fitting" &&
-            userData.lastName === "Jamous"
+          userData.lastName === "Jamous"
           : departments[0].name === "Fitting" && userData.lastName === "Jamous"
       ) {
         reason = item?.historyHolding[item.historyHolding.length - 1]?.msg;
@@ -1768,9 +1768,9 @@ const UserProfile = () => {
                   role="tab"
                   aria-controls="assignedCases-tab-pane"
                   aria-selected="false"
-                  // onClick={() => {
-                  //   handleTabChange(3, () => fetchAssignedCases())
-                  // }}
+                // onClick={() => {
+                //   handleTabChange(3, () => fetchAssignedCases())
+                // }}
                 >
                   Assigned Cases <small>({assignedCases?.length})</small>
                 </button>
@@ -1910,26 +1910,25 @@ const UserProfile = () => {
                         </thead>
                         <tbody>
                           {assignedCases.map((item, index) => (
+                            !item.cadCam.status.isEnd &&
                             <tr
                               key={item._id}
-                              className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${
-                                item.isTopPriority
+                              className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${item.isTopPriority
                                   ? "urgent-case animate-me"
                                   : (item.isStudy ? "bgc-study" : "") ||
-                                    (item.isUrgent
-                                      ? "urgent-case animate-me"
-                                      : "")
-                              }`}
+                                  (item.isUrgent
+                                    ? "urgent-case animate-me"
+                                    : "")
+                                }`}
                             >
                               <td>{item.caseNumber}</td>
                               <td>{item.dentistObj?.name}</td>
                               <td>{item.patientName}</td>
                               <td
-                                className={`${
-                                  item.teethNumbers.length <= 0
+                                className={`${item.teethNumbers.length <= 0
                                     ? "bg-danger"
                                     : "bg-white"
-                                } td-phone`}
+                                  } td-phone`}
                               >
                                 {item.teethNumbers.length}
                               </td>
@@ -2027,16 +2026,16 @@ const UserProfile = () => {
                                   {(item.deadlineCadCam ||
                                     item.deadlineCeramic ||
                                     item.deadlineFitting) && (
-                                    <span
-                                      className="c-warning reset-unschedule-action"
-                                      onClick={() =>
-                                        handleResetUnschedule(item)
-                                      }
-                                      title="Reset Unschedule"
-                                    >
-                                      <i className="fa-solid fa-calendar-xmark"></i>
-                                    </span>
-                                  )}
+                                      <span
+                                        className="c-warning reset-unschedule-action"
+                                        onClick={() =>
+                                          handleResetUnschedule(item)
+                                        }
+                                        title="Reset Unschedule"
+                                      >
+                                        <i className="fa-solid fa-calendar-xmark"></i>
+                                      </span>
+                                    )}
                                   <span
                                     className="c-primary ms-2"
                                     onClick={(e) => {
@@ -2099,20 +2098,19 @@ const UserProfile = () => {
                                 item.isTopPriority
                                   ? "urgent-case animate-me"
                                   : (item.isStudy ? "bgc-study" : "") ||
-                                    (item.isUrgent
-                                      ? "urgent-case animate-me"
-                                      : "")
+                                  (item.isUrgent
+                                    ? "urgent-case animate-me"
+                                    : "")
                               }
                             >
                               <td>{item.caseNumber}</td>
                               <td>{item.dentistObj?.name}</td>
                               <td>{item.patientName}</td>
                               <td
-                                className={`${
-                                  item.teethNumbers.length <= 0
+                                className={`${item.teethNumbers.length <= 0
                                     ? "bg-danger"
                                     : "bg-white"
-                                } td-phone`}
+                                  } td-phone`}
                               >
                                 {item.teethNumbers.length}
                               </td>
@@ -2207,16 +2205,16 @@ const UserProfile = () => {
                                   {(item.deadlineCadCam ||
                                     item.deadlineCeramic ||
                                     item.deadlineFitting) && (
-                                    <span
-                                      className="c-warning reset-unschedule-action"
-                                      onClick={() =>
-                                        handleResetUnschedule(item)
-                                      }
-                                      title="Reset Unschedule"
-                                    >
-                                      <i className="fa-solid fa-calendar-xmark"></i>
-                                    </span>
-                                  )}
+                                      <span
+                                        className="c-warning reset-unschedule-action"
+                                        onClick={() =>
+                                          handleResetUnschedule(item)
+                                        }
+                                        title="Reset Unschedule"
+                                      >
+                                        <i className="fa-solid fa-calendar-xmark"></i>
+                                      </span>
+                                    )}
                                   <span
                                     className="c-success"
                                     onClick={() => {
@@ -2297,24 +2295,22 @@ const UserProfile = () => {
                         {assignedCases.map((item, index) => (
                           <tr
                             key={item._id}
-                            className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${
-                              item.isTopPriority
+                            className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${item.isTopPriority
                                 ? "urgent-case animate-me"
                                 : (item.isStudy ? "bgc-study" : "") ||
-                                  (item.isUrgent
-                                    ? "urgent-case animate-me"
-                                    : "")
-                            }`}
+                                (item.isUrgent
+                                  ? "urgent-case animate-me"
+                                  : "")
+                              }`}
                           >
                             <td>{item.caseNumber}</td>
                             <td>{item.dentistObj?.name}</td>
                             <td>{item.patientName}</td>
                             <td
-                              className={`${
-                                item.teethNumbers.length <= 0
+                              className={`${item.teethNumbers.length <= 0
                                   ? "bg-danger"
                                   : "bg-white"
-                              } td-phone`}
+                                } td-phone`}
                             >
                               {item.teethNumbers.length}
                             </td>
@@ -2394,14 +2390,14 @@ const UserProfile = () => {
                                 {(item.deadlineCadCam ||
                                   item.deadlineCeramic ||
                                   item.deadlineFitting) && (
-                                  <span
-                                    className="c-warning reset-unschedule-action"
-                                    onClick={() => handleResetUnschedule(item)}
-                                    title="Reset Unschedule"
-                                  >
-                                    <i className="fa-solid fa-calendar-xmark"></i>
-                                  </span>
-                                )}
+                                    <span
+                                      className="c-warning reset-unschedule-action"
+                                      onClick={() => handleResetUnschedule(item)}
+                                      title="Reset Unschedule"
+                                    >
+                                      <i className="fa-solid fa-calendar-xmark"></i>
+                                    </span>
+                                  )}
                                 <span
                                   className="c-primary ms-2"
                                   onClick={(e) => {
@@ -2521,10 +2517,9 @@ const UserProfile = () => {
                       {startCases.map((item) => (
                         <tr
                           key={item._id}
-                          className={` c-pointer ${
-                            (item.isStudy ? "bgc-study" : "") ||
+                          className={` c-pointer ${(item.isStudy ? "bgc-study" : "") ||
                             (item.isUrgent ? "urgent-case animate-me" : "")
-                          }`}
+                            }`}
                         >
                           <td>{item.caseNumber}</td>
                           <td>{getStartingDate(item)}</td>
@@ -2633,24 +2628,24 @@ const UserProfile = () => {
                             userData.departments[0].name === "CadCam") ||
                             (userData.isAdmin &&
                               userData.departments[0].name === "Fitting")) && (
-                            <tr>
-                              <td className="f-bold c-success" colSpan={5}>
-                                <b>Total Without Study</b>
-                              </td>
+                              <tr>
+                                <td className="f-bold c-success" colSpan={5}>
+                                  <b>Total Without Study</b>
+                                </td>
 
-                              <td
-                                className="bg-success p-2 text-dark bg-opacity-50"
-                                colSpan={2}
-                              >
-                                <b>
-                                  {sumOfTeethNumbersLength("Start") -
-                                    getStudyCases(
-                                      groupCasesTeethNumbersByName("Start"),
-                                    )}
-                                </b>
-                              </td>
-                            </tr>
-                          )}
+                                <td
+                                  className="bg-success p-2 text-dark bg-opacity-50"
+                                  colSpan={2}
+                                >
+                                  <b>
+                                    {sumOfTeethNumbersLength("Start") -
+                                      getStudyCases(
+                                        groupCasesTeethNumbersByName("Start"),
+                                      )}
+                                  </b>
+                                </td>
+                              </tr>
+                            )}
                           <tr>
                             <td colSpan={6}>
                               <div className="summary-teeth-cases">
@@ -2747,7 +2742,7 @@ const UserProfile = () => {
                         <tr
                           key={item._id}
                           className="c-pointer"
-                          // onClick={() => viewCase(item, "view")}
+                        // onClick={() => viewCase(item, "view")}
                         >
                           <td>{item.caseNumber}</td>
                           <td>{getHoldingDate(item)}</td>
@@ -2851,24 +2846,24 @@ const UserProfile = () => {
                             userData.departments[0].name === "CadCam") ||
                             (userData.isAdmin &&
                               userData.departments[0].name === "Fitting")) && (
-                            <tr>
-                              <td className="f-bold c-success" colSpan={6}>
-                                <b>Total Without Study</b>
-                              </td>
+                              <tr>
+                                <td className="f-bold c-success" colSpan={6}>
+                                  <b>Total Without Study</b>
+                                </td>
 
-                              <td
-                                className="bg-success p-2 text-dark bg-opacity-50"
-                                colSpan={2}
-                              >
-                                <b>
-                                  {sumOfTeethNumbersLength("Pause") -
-                                    getStudyCases(
-                                      groupCasesTeethNumbersByName("Pause"),
-                                    )}
-                                </b>
-                              </td>
-                            </tr>
-                          )}
+                                <td
+                                  className="bg-success p-2 text-dark bg-opacity-50"
+                                  colSpan={2}
+                                >
+                                  <b>
+                                    {sumOfTeethNumbersLength("Pause") -
+                                      getStudyCases(
+                                        groupCasesTeethNumbersByName("Pause"),
+                                      )}
+                                  </b>
+                                </td>
+                              </tr>
+                            )}
                           <tr>
                             <td colSpan={8}>
                               <div className="summary-teeth-cases">
@@ -3036,53 +3031,53 @@ const UserProfile = () => {
                       {(userData.isAdmin ||
                         (userData.firstName === "Ali " &&
                           userData.lastName === "Ajinah")) && (
-                        <>
-                          <tr>
-                            <td className="f-bold c-success" colSpan={4}>
-                              <b>Total of Pieces</b>
-                            </td>
-
-                            <td className="bg-success p-2 text-dark bg-opacity-50">
-                              <b>{sumOfTeethNumbersLength("End")}</b>
-                            </td>
-                          </tr>
-                          {((userData.isAdmin &&
-                            userData.departments[0].name === "CadCam") ||
-                            (userData.isAdmin &&
-                              userData.departments[0].name === "Fitting")) && (
+                          <>
                             <tr>
                               <td className="f-bold c-success" colSpan={4}>
-                                <b>Total Without Study</b>
+                                <b>Total of Pieces</b>
                               </td>
 
                               <td className="bg-success p-2 text-dark bg-opacity-50">
-                                <b>
-                                  {sumOfTeethNumbersLength("End") -
-                                    getStudyCases(
-                                      groupCasesTeethNumbersByName("End"),
-                                    )}
-                                </b>
+                                <b>{sumOfTeethNumbersLength("End")}</b>
                               </td>
                             </tr>
-                          )}
-                          <tr>
-                            <td colSpan={5}>
-                              <div className="summary-teeth-cases">
-                                {groupCasesTeethNumbersByName("End")?.map(
-                                  (item) => (
-                                    <p className="mb-0">
-                                      <span>{item.name}:</span>
-                                      <b className="badge text-bg-success">
-                                        {item.count}
-                                      </b>
-                                    </p>
-                                  ),
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        </>
-                      )}
+                            {((userData.isAdmin &&
+                              userData.departments[0].name === "CadCam") ||
+                              (userData.isAdmin &&
+                                userData.departments[0].name === "Fitting")) && (
+                                <tr>
+                                  <td className="f-bold c-success" colSpan={4}>
+                                    <b>Total Without Study</b>
+                                  </td>
+
+                                  <td className="bg-success p-2 text-dark bg-opacity-50">
+                                    <b>
+                                      {sumOfTeethNumbersLength("End") -
+                                        getStudyCases(
+                                          groupCasesTeethNumbersByName("End"),
+                                        )}
+                                    </b>
+                                  </td>
+                                </tr>
+                              )}
+                            <tr>
+                              <td colSpan={5}>
+                                <div className="summary-teeth-cases">
+                                  {groupCasesTeethNumbersByName("End")?.map(
+                                    (item) => (
+                                      <p className="mb-0">
+                                        <span>{item.name}:</span>
+                                        <b className="badge text-bg-success">
+                                          {item.count}
+                                        </b>
+                                      </p>
+                                    ),
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          </>
+                        )}
                     </tbody>
                   </table>
                 )}
@@ -3324,7 +3319,7 @@ const UserProfile = () => {
                   }}
                 >
                   {currentNoteCase?.notes &&
-                  currentNoteCase.notes.length > 0 ? (
+                    currentNoteCase.notes.length > 0 ? (
                     currentNoteCase.notes.map((note, index) => (
                       <div
                         key={index}

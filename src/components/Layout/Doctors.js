@@ -11,9 +11,11 @@ import {
   CountryRegionData,
 } from "react-country-region-selector";
 import ViewCase from "./Cases/ViewCase";
+import DoctorCasesReport from "./Reports/DoctorCasesReport";
 
 const Doctors = () => {
   const doctorsRef = useRef();
+  const casesReportRef = useRef();
   const user = JSON.parse(localStorage.getItem("user"));
   const [doctors, setDoctors] = useState([]);
   const [buffDoctor, setBuffDoctor] = useState([]);
@@ -584,14 +586,92 @@ const Doctors = () => {
   // State for Case Tabs and Search
   const [activeCaseTab, setActiveCaseTab] = useState("all"); // all, notStart, inProcess, holding, finished
   const [caseSearchText, setCaseSearchText] = useState("");
-  const [caseFilterType, setCaseFilterType] = useState("all");
+
+  // Tab-specific date filter states
+  const [tabFilters, setTabFilters] = useState({
+    all: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+    notStart: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+    inProcess: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+    holding: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+    finished: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+  });
+
+  const activeTabFilter = tabFilters[activeCaseTab] || { caseFilterType: "all", customStartDate: "", customEndDate: "" };
+
+  const updateActiveTabFilter = (key, value) => {
+    setTabFilters(prev => ({
+      ...prev,
+      [activeCaseTab]: {
+        ...prev[activeCaseTab],
+        [key]: value
+      }
+    }));
+  };
+
+  const handleResetFilter = () => {
+    setCaseSearchText("");
+    setSortColumn(null);
+    setSortDirection('asc');
+    setTabFilters({
+      all: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+      notStart: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+      inProcess: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+      holding: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+      finished: { caseFilterType: "all", customStartDate: "", customEndDate: "" },
+    });
+  };
+
+  // State for Column Sorting
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc'); // 'asc' or 'desc'
+
+  const handleSort = (columnKey) => {
+    if (sortColumn === columnKey) {
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortColumn(columnKey);
+      setSortDirection('asc');
+    }
+  };
+
+  const renderSortIcon = (columnKey) => {
+    if (sortColumn !== columnKey) {
+      return <i className="fa-solid fa-sort ms-1 text-muted opacity-50" style={{ fontSize: '11px' }}></i>;
+    }
+    return sortDirection === 'asc' ? (
+      <i className="fa-solid fa-sort-up ms-1 text-primary" style={{ fontSize: '11px' }}></i>
+    ) : (
+      <i className="fa-solid fa-sort-down ms-1 text-primary" style={{ fontSize: '11px' }}></i>
+    );
+  };
 
   // State for Charts Filter
   const [statsFilter, setStatsFilter] = useState("all"); // all, currentMonth, last3Months, etc.
+  const [statsCustomStartDate, setStatsCustomStartDate] = useState("");
+  const [statsCustomEndDate, setStatsCustomEndDate] = useState("");
   const [selectedTrendMonth, setSelectedTrendMonth] = useState(null); // For interactive trend chart
   const [tooltip, setTooltip] = useState({ show: false, content: '', x: 0, y: 0 }); // For rich tooltips
 
-  const filterCasesByPeriod = (cases, period) => {
+  // Helper to get case date for filtering based on tab:
+  // - For 'finished' tab (endcases): uses delivering property's dateEnd
+  // - For 'all', 'notStart', 'inProcess', 'holding' tabs: filters on dateIn
+  const getCaseDateToFilter = (c, isFinishedTab = false) => {
+    if (!c) return null;
+    if (isFinishedTab) {
+      const delivDateEnd = c.delivering?.actions?.find(i => i.dateEnd)?.dateEnd ||
+                           c.delivering?.actions?.[c.delivering?.actions?.length - 1]?.dateEnd;
+      if (delivDateEnd) {
+        return new Date(delivDateEnd);
+      }
+      const fallbackEnd = c.dateOut || c.dateIn || c.createdAt;
+      return fallbackEnd ? new Date(fallbackEnd) : null;
+    }
+    // For allCases, notStart, inProcess, holding tabs: filter on dateIn
+    const dateInToUse = c.dateIn || c.createdAt;
+    return dateInToUse ? new Date(dateInToUse) : null;
+  };
+
+  const filterCasesByPeriod = (cases, period, isFinishedOnly = false) => {
     if (!cases || cases.length === 0) return [];
     if (period === 'all') return cases;
 
@@ -600,11 +680,9 @@ const Doctors = () => {
     const currentMonth = now.getMonth();
 
     return cases.filter(c => {
-      // Use createdAt instead of dateIn
-      const dateToUse = c.createdAt || c.dateIn;
-      if (!dateToUse) return false;
+      const caseDate = getCaseDateToFilter(c, isFinishedOnly);
+      if (!caseDate || isNaN(caseDate.getTime())) return false;
 
-      const caseDate = new Date(dateToUse);
       const caseYear = caseDate.getFullYear();
       const caseMonth = caseDate.getMonth();
 
@@ -612,7 +690,6 @@ const Doctors = () => {
         case 'currentMonth':
           return caseYear === currentYear && caseMonth === currentMonth;
         case 'previousMonth':
-          // Logic for previous month, handling January rollover
           const prevMonthDate = new Date();
           prevMonthDate.setMonth(currentMonth - 1);
           return caseYear === prevMonthDate.getFullYear() && caseMonth === prevMonthDate.getMonth();
@@ -624,6 +701,18 @@ const Doctors = () => {
           return caseYear === currentYear;
         case 'lastYear':
           return caseYear === currentYear - 1;
+        case 'customDate':
+          if (statsCustomStartDate) {
+            const startDateObj = new Date(statsCustomStartDate);
+            startDateObj.setHours(0, 0, 0, 0);
+            if (caseDate < startDateObj) return false;
+          }
+          if (statsCustomEndDate) {
+            const endDateObj = new Date(statsCustomEndDate);
+            endDateObj.setHours(23, 59, 59, 999);
+            if (caseDate > endDateObj) return false;
+          }
+          return true;
         default:
           return true;
       }
@@ -649,11 +738,96 @@ const Doctors = () => {
       );
     }
 
-    // Date Filter (Month)
-    if (caseFilterType === "currentMonth") {
-      filtered = _global.filterCasesByDate(filtered, "currentMonth");
-    } else if (caseFilterType === "previousMonth") {
-      filtered = _global.filterCasesByDate(filtered, "previousMonth");
+    // Date Filter (Month / Custom) - uses active tab's specific filter settings
+    const { caseFilterType, customStartDate, customEndDate } = activeTabFilter;
+    if (caseFilterType !== "all") {
+      const isFinishedTab = activeCaseTab === 'finished';
+      filtered = filtered.filter(item => {
+        const itemDate = getCaseDateToFilter(item, isFinishedTab);
+        if (!itemDate || isNaN(itemDate.getTime())) return false;
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+
+        if (caseFilterType === "currentMonth") {
+          return itemDate.getFullYear() === currentYear && itemDate.getMonth() === currentMonth;
+        }
+        if (caseFilterType === "previousMonth") {
+          const prevMonthDate = new Date(currentYear, currentMonth - 1, 1);
+          return itemDate.getFullYear() === prevMonthDate.getFullYear() && itemDate.getMonth() === prevMonthDate.getMonth();
+        }
+        if (caseFilterType === "customDate") {
+          if (customStartDate) {
+            const startDateObj = new Date(customStartDate);
+            startDateObj.setHours(0, 0, 0, 0);
+            if (itemDate < startDateObj) return false;
+          }
+          if (customEndDate) {
+            const endDateObj = new Date(customEndDate);
+            endDateObj.setHours(23, 59, 59, 999);
+            if (itemDate > endDateObj) return false;
+          }
+          return true;
+        }
+        return true;
+      });
+    }
+
+    // Column Sorting Logic
+    if (sortColumn) {
+      filtered = [...filtered].sort((a, b) => {
+        let valA, valB;
+
+        switch (sortColumn) {
+          case 'caseNumber':
+            valA = (a.caseNumber || '').toString();
+            valB = (b.caseNumber || '').toString();
+            return sortDirection === 'asc'
+              ? valA.localeCompare(valB, undefined, { numeric: true })
+              : valB.localeCompare(valA, undefined, { numeric: true });
+
+          case 'patientName':
+            valA = (a.patientName || '').toLowerCase();
+            valB = (b.patientName || '').toLowerCase();
+            return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+
+          case 'dateIn':
+            valA = a.dateIn ? new Date(a.dateIn).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+            valB = b.dateIn ? new Date(b.dateIn).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+            return sortDirection === 'asc' ? valA - valB : valB - valA;
+
+          case 'dateOut':
+            const getEndDate = (item) => {
+              const delivEnd = item.delivering?.actions?.find(i => i.dateEnd)?.dateEnd ||
+                               item.delivering?.actions?.[item.delivering?.actions?.length - 1]?.dateEnd;
+              if (delivEnd) return new Date(delivEnd).getTime();
+              return item.dateOut ? new Date(item.dateOut).getTime() : 0;
+            };
+            valA = getEndDate(a);
+            valB = getEndDate(b);
+            return sortDirection === 'asc' ? valA - valB : valB - valA;
+
+          case 'status':
+            const getStatusRank = (item) => {
+              if (item.isHold) return 1;
+              if (item.delivering?.status?.isEnd) return 4;
+              if (item.cadCam?.actions?.length <= 0) return 2;
+              return 3;
+            };
+            valA = getStatusRank(a);
+            valB = getStatusRank(b);
+            return sortDirection === 'asc' ? valA - valB : valB - valA;
+
+          case 'teethUnits':
+            valA = a.teethNumbers?.length || 0;
+            valB = b.teethNumbers?.length || 0;
+            return sortDirection === 'asc' ? valA - valB : valB - valA;
+
+          default:
+            return 0;
+        }
+      });
     }
 
     return filtered;
@@ -740,8 +914,8 @@ const Doctors = () => {
             </ul>
 
             {/* Filters */}
-            <div className="row g-2 mb-3">
-              <div className="col-lg-8">
+            <div className="row g-2 mb-3 align-items-center">
+              <div className={activeTabFilter.caseFilterType === "customDate" ? "col-lg-3" : "col-lg-5"}>
                 <input
                   type="text"
                   className="form-control"
@@ -750,16 +924,64 @@ const Doctors = () => {
                   onChange={(e) => setCaseSearchText(e.target.value)}
                 />
               </div>
-              <div className="col-lg-4">
+              <div className={activeTabFilter.caseFilterType === "customDate" ? "col-lg-3" : "col-lg-3"}>
                 <select
                   className="form-select"
-                  value={caseFilterType}
-                  onChange={(e) => setCaseFilterType(e.target.value)}
+                  value={activeTabFilter.caseFilterType}
+                  onChange={(e) => updateActiveTabFilter("caseFilterType", e.target.value)}
                 >
                   <option value="all">All Dates</option>
                   <option value="currentMonth">Current Month</option>
                   <option value="previousMonth">Previous Month</option>
+                  <option value="customDate">Customized Date Range</option>
                 </select>
+              </div>
+
+              {activeTabFilter.caseFilterType === "customDate" && (
+                <>
+                  <div className="col-lg-2">
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={activeTabFilter.customStartDate}
+                      onChange={(e) => updateActiveTabFilter("customStartDate", e.target.value)}
+                      placeholder="Start Date"
+                      title="Start Date"
+                    />
+                  </div>
+                  <div className="col-lg-2">
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={activeTabFilter.customEndDate}
+                      onChange={(e) => updateActiveTabFilter("customEndDate", e.target.value)}
+                      placeholder="End Date"
+                      title="End Date"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className={activeTabFilter.caseFilterType === "customDate" ? "col-lg-1" : "col-lg-2"}>
+                <button
+                  className="btn btn-outline-secondary w-100 shadow-sm d-flex align-items-center justify-content-center gap-1"
+                  onClick={handleResetFilter}
+                  title="Reset Filters"
+                >
+                  <i className="fa-solid fa-rotate-left"></i>
+                  <span>Reset</span>
+                </button>
+              </div>
+
+              <div className={activeTabFilter.caseFilterType === "customDate" ? "col-lg-1" : "col-lg-2"}>
+                <button
+                  className="btn btn-outline-primary w-100 shadow-sm d-flex align-items-center justify-content-center gap-1"
+                  onClick={handlePrintCases}
+                  title="Print Cases"
+                >
+                  <i className="fa-solid fa-print"></i>
+                  <span>Print</span>
+                </button>
               </div>
             </div>
 
@@ -769,12 +991,24 @@ const Doctors = () => {
                 <table className="table text-center table-bordered table-hover align-middle">
                   <thead className="table-secondary">
                     <tr>
-                      <th scope="col">Case #</th>
-                      <th scope="col">Patient</th>
-                      <th scope="col">In</th>
-                      <th scope="col">Due</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">#Tooth</th>
+                      <th scope="col" onClick={() => handleSort('caseNumber')} style={{ cursor: 'pointer', userSelect: 'none' }} title="Click to sort by Case Number">
+                        Case # {renderSortIcon('caseNumber')}
+                      </th>
+                      <th scope="col" onClick={() => handleSort('patientName')} style={{ cursor: 'pointer', userSelect: 'none' }} title="Click to sort by Patient Name">
+                        Patient {renderSortIcon('patientName')}
+                      </th>
+                      <th scope="col" onClick={() => handleSort('dateIn')} style={{ cursor: 'pointer', userSelect: 'none' }} title="Click to sort by In Date">
+                        In {renderSortIcon('dateIn')}
+                      </th>
+                      <th scope="col" onClick={() => handleSort('dateOut')} style={{ cursor: 'pointer', userSelect: 'none' }} title="Click to sort by Due Date">
+                        Due {renderSortIcon('dateOut')}
+                      </th>
+                      <th scope="col" onClick={() => handleSort('status')} style={{ cursor: 'pointer', userSelect: 'none' }} title="Click to sort by Status">
+                        Status {renderSortIcon('status')}
+                      </th>
+                      <th scope="col" onClick={() => handleSort('teethUnits')} style={{ cursor: 'pointer', userSelect: 'none' }} title="Click to sort by Tooth Units">
+                        #Tooth {renderSortIcon('teethUnits')}
+                      </th>
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
@@ -1534,6 +1768,12 @@ const Doctors = () => {
     content: () => doctorsRef.current,
     documentTitle: `List of Doctors`,
   });
+  const handlePrintCases = useReactToPrint({
+    content: () => casesReportRef.current,
+    documentTitle: selectedDoctor
+      ? `${selectedDoctor.firstName}_${selectedDoctor.lastName}_Cases`
+      : `Doctor_Cases`,
+  });
   const selectCountry = (val) => {
     setCountry(val);
   };
@@ -1863,6 +2103,7 @@ const Doctors = () => {
       </div>
 
       <div style={{ display: "none" }}>
+        <DoctorCasesReport ref={casesReportRef} doctor={selectedDoctor} cases={getFilteredCases()} />
         <div ref={doctorsRef} className="p-4">
           <h3 className="text-center mb-4 fw-bold">Doctors List</h3>
           <div className="mb-3">Total Doctors: {doctors.length}</div>
