@@ -33,9 +33,18 @@ const Doctors = () => {
   const [email, setEmail] = useState("");
   // New State for Detail View
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [doctorStatusTab, setDoctorStatusTab] = useState("active"); // "active" | "inactive"
   const [activeTab, setActiveTab] = useState(
     user?.roles?.[0] === _global.allRoles.admin || user?.roles?.[0] === _global.allRoles.superAdmin ? "stats" : "profile"
   ); // profile, cases, stats
+  const [printColumns, setPrintColumns] = useState({
+    location: true,
+    name: true,
+    clinic: true,
+    contact: true,
+    status: true,
+    assignedTo: true,
+  });
 
   // Cases State
   const [doctorCases, setDoctorCases] = useState([]);
@@ -1597,6 +1606,77 @@ const Doctors = () => {
     }
   };
 
+  const activeDoctorsCount = buffDoctors.filter((d) => d.active !== false).length;
+  const inactiveDoctorsCount = buffDoctors.filter((d) => d.active === false).length;
+
+  const handleToggleDoctorStatus = async (doctorToToggle) => {
+    if (!doctorToToggle || !doctorToToggle._id) return;
+    const currentActive = doctorToToggle.active !== false;
+    const newActive = !currentActive;
+
+    try {
+      const response = await fetch(`${_global.BASE_URL}doctors/${doctorToToggle._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ active: newActive }),
+      });
+      const json = await response.json();
+      if (response.ok) {
+        showToastMessage(
+          `Doctor ${newActive ? "activated" : "deactivated"} successfully`,
+          "success"
+        );
+        const updatedList = buffDoctors.map((d) =>
+          d._id === doctorToToggle._id ? { ...d, active: newActive } : d
+        );
+        setDoctors(updatedList);
+        setBuffDoctors(updatedList);
+        if (selectedDoctor && selectedDoctor._id === doctorToToggle._id) {
+          setSelectedDoctor({ ...selectedDoctor, active: newActive });
+        }
+      } else {
+        showToastMessage("Failed to update status", "error");
+      }
+    } catch (error) {
+      console.error("Error updating doctor status:", error);
+      showToastMessage("Error updating doctor status", "error");
+    }
+  };
+
+  const getFilteredDoctorsList = () => {
+    let list = buffDoctors;
+    if (doctorStatusTab === "active") {
+      list = list.filter((d) => d.active !== false);
+    } else if (doctorStatusTab === "inactive") {
+      list = list.filter((d) => d.active === false);
+    }
+    if (searchText && typeof searchText === "string") {
+      list = list.filter(
+        (item) =>
+          item.firstName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.lastName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          (item.clinicName && item.clinicName.toLowerCase().includes(searchText.toLowerCase()))
+      );
+    }
+    if (countryFilter) {
+      list = list.filter(
+        (item) =>
+          item.address?.country &&
+          item.address.country.toLowerCase().includes(countryFilter.toLowerCase())
+      );
+    }
+    if (regionFilter) {
+      list = list.filter(
+        (item) =>
+          item.address?.city &&
+          item.address.city.toLowerCase().includes(regionFilter.toLowerCase())
+      );
+    }
+    return list;
+  };
+
 
   const deleteDoctor = (id) => {
     axios
@@ -1795,16 +1875,17 @@ const Doctors = () => {
           {/* Master Panel */}
           <div className="master-panel">
             <div className="master-header">
-              <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="d-flex justify-content-between align-items-center mb-2">
                 <h5 className="fw-bold mb-0 text-dark">Doctors</h5>
                 <span className="badge bg-light text-secondary border rounded-pill px-3">
-                  {doctors.length} Total
+                  {getFilteredDoctorsList().length} / {buffDoctors.length} Total
                 </span>
                 {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.super_admin || user.lastName === "Harrat") && (
                   <div className="d-flex gap-2">
                     <button
                       className="btn btn-outline-secondary btn-sm rounded-pill shadow-sm"
-                      onClick={handlePrint}
+                      data-bs-toggle="modal"
+                      data-bs-target="#printDoctorsModal"
                       title="Print List"
                     >
                       <i className="fa-solid fa-print"></i>
@@ -1820,6 +1901,38 @@ const Doctors = () => {
                 )}
               </div>
 
+              {/* Active / Inactive Status Tabs */}
+              <div className="d-flex bg-light p-1 rounded-3 border mb-3">
+                <button
+                  className={`btn btn-sm flex-fill fw-bold rounded-2 d-flex align-items-center justify-content-center gap-1.5 transition-all ${
+                    doctorStatusTab === "active"
+                      ? "btn-success text-white shadow-sm"
+                      : "btn-light text-secondary border-0"
+                  }`}
+                  onClick={() => setDoctorStatusTab("active")}
+                >
+                  <i className="fa-solid fa-user-check"></i>
+                  <span>Active</span>
+                  <span className={`badge rounded-pill ms-1 ${doctorStatusTab === "active" ? "bg-white text-success" : "bg-secondary text-white"}`}>
+                    {activeDoctorsCount}
+                  </span>
+                </button>
+                <button
+                  className={`btn btn-sm flex-fill fw-bold rounded-2 d-flex align-items-center justify-content-center gap-1.5 transition-all ${
+                    doctorStatusTab === "inactive"
+                      ? "btn-danger text-white shadow-sm"
+                      : "btn-light text-secondary border-0"
+                  }`}
+                  onClick={() => setDoctorStatusTab("inactive")}
+                >
+                  <i className="fa-solid fa-user-xmark"></i>
+                  <span>Inactive</span>
+                  <span className={`badge rounded-pill ms-1 ${doctorStatusTab === "inactive" ? "bg-white text-danger" : "bg-secondary text-white"}`}>
+                    {inactiveDoctorsCount}
+                  </span>
+                </button>
+              </div>
+
               {/* Filters */}
               <div className="d-flex flex-column gap-2 mb-3">
                 <div className="position-relative">
@@ -1829,14 +1942,14 @@ const Doctors = () => {
                     className="form-control bg-light border-0 ps-5"
                     placeholder="Search doctors..."
                     value={searchText}
-                    onChange={(e) => searchByName(e.target.value)}
+                    onChange={(e) => setSearchText(e.target.value)}
                   />
                 </div>
                 <div className="d-flex gap-2">
                   <CountryDropdown
                     className="form-select form-select-sm bg-light border-0"
                     value={countryFilter}
-                    onChange={(val) => searchByCountry(val)}
+                    onChange={(val) => setCountryFilter(val)}
                     defaultOptionLabel="All Countries"
                   />
                   {countryFilter && (
@@ -1844,7 +1957,7 @@ const Doctors = () => {
                       className="form-select form-select-sm bg-light border-0"
                       country={countryFilter}
                       value={regionFilter}
-                      onChange={(val) => searchByCity(val)}
+                      onChange={(val) => setRegionFilter(val)}
                       defaultOptionLabel="All Cities"
                     />
                   )}
@@ -1873,23 +1986,14 @@ const Doctors = () => {
                 </div>
               )}
 
-              {/* Select All Checkbox (if needed visible) */}
-              {/* <div className="form-check mt-2 small">
-                <input 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    checked={doctors.length > 0 && selectedDoctors.length === doctors.length}
-                />
-                <label className="form-check-label text-muted">Select All Visible</label>
-             </div> */}
             </div>
 
             <div className="overflow-auto flex-grow-1">
-              {doctors.length > 0 ? (
-                doctors.map((doctor) => {
+              {getFilteredDoctorsList().length > 0 ? (
+                getFilteredDoctorsList().map((doctor) => {
                   const isSelected = selectedDoctors.includes(doctor._id);
                   const initials = `${doctor.firstName?.[0] || ""}${doctor.lastName?.[0] || ""}`;
+                  const isActive = doctor.active !== false;
                   return (
                     <div
                       key={doctor._id}
@@ -1909,13 +2013,18 @@ const Doctors = () => {
                         {initials.toUpperCase()}
                       </div>
                       <div className="flex-grow-1 min-w-0">
-                        <div className="d-flex justify-content-between">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
                           <h6 className="mb-0 fw-bold text-dark text-truncate">{doctor.firstName} {doctor.lastName}</h6>
-                          {doctor.assignmentDetails?.isAssigned && (
-                            <span className="badge bg-light text-primary border rounded-pill" style={{ fontSize: '10px' }}>
-                              Assigned to {doctor.assignmentDetails.assignedToUserName || "User"}
+                          <div className="d-flex align-items-center gap-1">
+                            <span className={`badge rounded-pill ${isActive ? "bg-success-soft text-success border border-success-subtle" : "bg-danger-soft text-danger border border-danger-subtle"}`} style={{ fontSize: '9px' }}>
+                              {isActive ? "Active" : "Inactive"}
                             </span>
-                          )}
+                            {doctor.assignmentDetails?.isAssigned && (
+                              <span className="badge bg-light text-primary border rounded-pill" style={{ fontSize: '10px' }}>
+                                Assigned to {doctor.assignmentDetails.assignedToUserName || "User"}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="small text-muted text-truncate">{doctor.clinicName}</div>
                         <div className="small text-muted text-truncate opacity-75">
@@ -1929,7 +2038,7 @@ const Doctors = () => {
               ) : (
                 <div className="text-center py-5 text-muted">
                   <i className="fa-regular fa-folder-open fa-2x mb-3 opacity-25"></i>
-                  <p className="mb-0 small">No doctors found</p>
+                  <p className="mb-0 small">No {doctorStatusTab} doctors found</p>
                 </div>
               )}
             </div>
@@ -1955,6 +2064,18 @@ const Doctors = () => {
                     {(user.roles[0] === _global.allRoles.admin || user.roles[0] === _global.allRoles.super_admin) && (
                       <>
                         <button
+                          className={`btn btn-sm rounded-pill px-3 d-flex align-items-center gap-1.5 shadow-sm ${
+                            selectedDoctor.active !== false
+                              ? "btn-outline-danger"
+                              : "btn-outline-success"
+                          }`}
+                          onClick={() => handleToggleDoctorStatus(selectedDoctor)}
+                          title={selectedDoctor.active !== false ? "Deactivate Doctor" : "Activate Doctor"}
+                        >
+                          <i className={`fa-solid ${selectedDoctor.active !== false ? "fa-user-xmark" : "fa-user-check"}`}></i>
+                          <span>{selectedDoctor.active !== false ? "Deactivate" : "Activate"}</span>
+                        </button>
+                        <button
                           className="btn btn-light btn-sm rounded-circle shadow-sm text-secondary"
                           data-bs-toggle="modal"
                           data-bs-target="#updateDoctorModal"
@@ -1972,6 +2093,16 @@ const Doctors = () => {
                           <i className="fa-solid fa-ellipsis-vertical"></i>
                         </button>
                         <ul className="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2">
+                          <li>
+                            <button
+                              className={`dropdown-item rounded-2 small mb-1 ${selectedDoctor.active !== false ? "text-danger" : "text-success"}`}
+                              onClick={() => handleToggleDoctorStatus(selectedDoctor)}
+                            >
+                              <i className={`fa-solid ${selectedDoctor.active !== false ? "fa-user-xmark" : "fa-user-check"} me-2`}></i>
+                              {selectedDoctor.active !== false ? "Set as Inactive" : "Set as Active"}
+                            </button>
+                          </li>
+                          <li><hr className="dropdown-divider" /></li>
                           {selectedDoctor.assignmentDetails?.isAssigned ? (
                             <>
                               <li><button className="dropdown-item rounded-2 small mb-1" onClick={() => handleReassign(selectedDoctor)} data-bs-toggle="modal" data-bs-target="#assignUserModal"><i className="fa-solid fa-user-pen me-2 text-primary"></i>Reassign</button></li>
@@ -2051,6 +2182,35 @@ const Doctors = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="col-12 border-top pt-2 mt-2">
+                              <div className="info-label">Account Status</div>
+                              <div className="info-value d-flex align-items-center justify-content-between">
+                                <div>
+                                  {selectedDoctor.active !== false ? (
+                                    <span className="badge bg-success text-white px-2.5 py-1">
+                                      <i className="fa-solid fa-circle-check me-1"></i> Active Doctor
+                                    </span>
+                                  ) : (
+                                    <span className="badge bg-danger text-white px-2.5 py-1">
+                                      <i className="fa-solid fa-circle-xmark me-1"></i> Inactive Doctor
+                                    </span>
+                                  )}
+                                </div>
+                                {isAdminOrSuperAdmin && (
+                                  <button
+                                    className={`btn btn-sm py-1 px-3 rounded-pill fw-medium ${
+                                      selectedDoctor.active !== false
+                                        ? "btn-outline-danger"
+                                        : "btn-outline-success"
+                                    }`}
+                                    onClick={() => handleToggleDoctorStatus(selectedDoctor)}
+                                  >
+                                    <i className={`fa-solid ${selectedDoctor.active !== false ? "fa-user-xmark" : "fa-user-check"} me-1`}></i>
+                                    {selectedDoctor.active !== false ? "Deactivate" : "Activate"}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2105,44 +2265,226 @@ const Doctors = () => {
       <div style={{ display: "none" }}>
         <DoctorCasesReport ref={casesReportRef} doctor={selectedDoctor} cases={getFilteredCases()} />
         <div ref={doctorsRef} className="p-4">
-          <h3 className="text-center mb-4 fw-bold">Doctors List</h3>
-          <div className="mb-3">Total Doctors: {doctors.length}</div>
+          <h3 className="text-center mb-2 fw-bold">Doctors List</h3>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="fw-bold">Category: {doctorStatusTab === "active" ? "Active Doctors" : "Inactive Doctors"}</div>
+            <div className="text-muted">Total Doctors: {getFilteredDoctorsList().length}</div>
+          </div>
           <table className="table table-bordered table-striped">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Clinic</th>
-                <th>Contact</th>
-                <th>Location</th>
-                <th>Assigned To</th>
+                {printColumns.location && <th>Country / Location</th>}
+                {printColumns.name && <th>Name</th>}
+                {printColumns.clinic && <th>Clinic</th>}
+                {printColumns.contact && <th>Contact</th>}
+                {printColumns.status && <th>Status</th>}
+                {printColumns.assignedTo && <th>Assigned To</th>}
               </tr>
             </thead>
             <tbody>
-              {doctors.map(d => (
-                <tr key={d._id}>
-                  <td>{d.firstName} {d.lastName}</td>
-                  <td>{d.clinicName}</td>
-                  <td>
-                    <div>{d.phone}</div>
-                    <div className="small text-muted">{d.email}</div>
-                  </td>
-                  <td>
-                    {d.address?.country}
-                    {d.address?.city && `, ${d.address.city}`}
-                  </td>
-                  <td>
-                    {d.assignmentDetails?.isAssigned ? (
-                      <span className="badge bg-success-soft text-success border border-success">
-                        {d.assignmentDetails.assignedToUserName}
-                      </span>
-                    ) : (
-                      <span className="text-muted">-</span>
+              {[...getFilteredDoctorsList()]
+                .sort((a, b) => {
+                  const countryA = (a.address?.country || "").toLowerCase();
+                  const countryB = (b.address?.country || "").toLowerCase();
+                  if (countryA !== countryB) return countryA.localeCompare(countryB);
+
+                  const cityA = (a.address?.city || "").toLowerCase();
+                  const cityB = (b.address?.city || "").toLowerCase();
+                  if (cityA !== cityB) return cityA.localeCompare(cityB);
+
+                  return (a.firstName || "").localeCompare(b.firstName || "");
+                })
+                .map(d => (
+                  <tr key={d._id}>
+                    {printColumns.location && (
+                      <td className="fw-bold">
+                        {d.address?.country || "N/A"}
+                        {d.address?.city ? `, ${d.address.city}` : ""}
+                      </td>
                     )}
-                  </td>
-                </tr>
-              ))}
+                    {printColumns.name && <td>{d.firstName} {d.lastName}</td>}
+                    {printColumns.clinic && <td>{d.clinicName}</td>}
+                    {printColumns.contact && (
+                      <td>
+                        <div>{d.phone || "-"}</div>
+                        <div className="small text-muted">{d.email || "-"}</div>
+                      </td>
+                    )}
+                    {printColumns.status && (
+                      <td>
+                        <span className={`badge ${d.active !== false ? "bg-success" : "bg-danger"} text-white`}>
+                          {d.active !== false ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                    )}
+                    {printColumns.assignedTo && (
+                      <td>
+                        {d.assignmentDetails?.isAssigned ? (
+                          <span className="badge bg-light text-primary border border-primary">
+                            {d.assignmentDetails.assignedToUserName}
+                          </span>
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Print Columns Selection Modal */}
+      <div
+        className="modal fade"
+        id="printDoctorsModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div className="modal-header bg-light border-0 py-3 px-4">
+              <h5 className="modal-title fw-bold text-dark">
+                <i className="fa-solid fa-print me-2 text-primary"></i>
+                Print Options - Select Columns
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body p-4">
+              <p className="text-muted small mb-3">
+                Select which columns to include in the printed report:
+              </p>
+
+              <div className="row g-3">
+                <div className="col-6">
+                  <div className="form-check form-switch p-2 bg-light rounded border d-flex align-items-center">
+                    <input
+                      className="form-check-input ms-0 me-2"
+                      type="checkbox"
+                      id="colLocation"
+                      checked={printColumns.location}
+                      onChange={(e) => setPrintColumns({ ...printColumns, location: e.target.checked })}
+                    />
+                    <label className="form-check-label fw-medium text-dark cursor-pointer small mb-0" htmlFor="colLocation">
+                      Country / Location
+                    </label>
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="form-check form-switch p-2 bg-light rounded border d-flex align-items-center">
+                    <input
+                      className="form-check-input ms-0 me-2"
+                      type="checkbox"
+                      id="colName"
+                      checked={printColumns.name}
+                      onChange={(e) => setPrintColumns({ ...printColumns, name: e.target.checked })}
+                    />
+                    <label className="form-check-label fw-medium text-dark cursor-pointer small mb-0" htmlFor="colName">
+                      Doctor Name
+                    </label>
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="form-check form-switch p-2 bg-light rounded border d-flex align-items-center">
+                    <input
+                      className="form-check-input ms-0 me-2"
+                      type="checkbox"
+                      id="colClinic"
+                      checked={printColumns.clinic}
+                      onChange={(e) => setPrintColumns({ ...printColumns, clinic: e.target.checked })}
+                    />
+                    <label className="form-check-label fw-medium text-dark cursor-pointer small mb-0" htmlFor="colClinic">
+                      Clinic Name
+                    </label>
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="form-check form-switch p-2 bg-light rounded border d-flex align-items-center">
+                    <input
+                      className="form-check-input ms-0 me-2"
+                      type="checkbox"
+                      id="colContact"
+                      checked={printColumns.contact}
+                      onChange={(e) => setPrintColumns({ ...printColumns, contact: e.target.checked })}
+                    />
+                    <label className="form-check-label fw-medium text-dark cursor-pointer small mb-0" htmlFor="colContact">
+                      Contact Info
+                    </label>
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="form-check form-switch p-2 bg-light rounded border d-flex align-items-center">
+                    <input
+                      className="form-check-input ms-0 me-2"
+                      type="checkbox"
+                      id="colStatus"
+                      checked={printColumns.status}
+                      onChange={(e) => setPrintColumns({ ...printColumns, status: e.target.checked })}
+                    />
+                    <label className="form-check-label fw-medium text-dark cursor-pointer small mb-0" htmlFor="colStatus">
+                      Account Status
+                    </label>
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="form-check form-switch p-2 bg-light rounded border d-flex align-items-center">
+                    <input
+                      className="form-check-input ms-0 me-2"
+                      type="checkbox"
+                      id="colAssignedTo"
+                      checked={printColumns.assignedTo}
+                      onChange={(e) => setPrintColumns({ ...printColumns, assignedTo: e.target.checked })}
+                    />
+                    <label className="form-check-label fw-medium text-dark cursor-pointer small mb-0" htmlFor="colAssignedTo">
+                      Assigned User
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="d-flex justify-content-between align-items-center mt-4 pt-2 border-top">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link text-decoration-none text-primary p-0 fw-bold"
+                  onClick={() => setPrintColumns({ location: true, name: true, clinic: true, contact: true, status: true, assignedTo: true })}
+                >
+                  Select All
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link text-decoration-none text-secondary p-0"
+                  onClick={() => setPrintColumns({ location: false, name: false, clinic: false, contact: false, status: false, assignedTo: false })}
+                >
+                  Clear All
+                </button>
+              </div>
+            </div>
+            <div className="modal-footer border-0 p-4 pt-0 bg-transparent">
+              <button
+                type="button"
+                className="btn btn-light rounded-pill px-4"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary rounded-pill px-4 shadow-sm fw-bold"
+                onClick={() => {
+                  handlePrint();
+                }}
+                data-bs-dismiss="modal"
+              >
+                <i className="fa-solid fa-print me-1"></i> Print Report
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

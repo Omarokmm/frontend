@@ -1914,11 +1914,11 @@ const UserProfile = () => {
                             <tr
                               key={item._id}
                               className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${item.isTopPriority
+                                ? "urgent-case animate-me"
+                                : (item.isStudy ? "bgc-study" : "") ||
+                                (item.isUrgent
                                   ? "urgent-case animate-me"
-                                  : (item.isStudy ? "bgc-study" : "") ||
-                                  (item.isUrgent
-                                    ? "urgent-case animate-me"
-                                    : "")
+                                  : "")
                                 }`}
                             >
                               <td>{item.caseNumber}</td>
@@ -1926,8 +1926,8 @@ const UserProfile = () => {
                               <td>{item.patientName}</td>
                               <td
                                 className={`${item.teethNumbers.length <= 0
-                                    ? "bg-danger"
-                                    : "bg-white"
+                                  ? "bg-danger"
+                                  : "bg-white"
                                   } td-phone`}
                               >
                                 {item.teethNumbers.length}
@@ -2092,6 +2092,7 @@ const UserProfile = () => {
                         </thead>
                         <tbody>
                           {allAssignedCasesUnfiltered.map((item, index) => (
+                            !item.cadCam.status.isEnd &&
                             <tr
                               key={item._id}
                               className={
@@ -2103,13 +2104,13 @@ const UserProfile = () => {
                                     : "")
                               }
                             >
-                              <td>{item.caseNumber}</td>
+                              <td>{item.caseNumber}11111111</td>
                               <td>{item.dentistObj?.name}</td>
                               <td>{item.patientName}</td>
                               <td
                                 className={`${item.teethNumbers.length <= 0
-                                    ? "bg-danger"
-                                    : "bg-white"
+                                  ? "bg-danger"
+                                  : "bg-white"
                                   } td-phone`}
                               >
                                 {item.teethNumbers.length}
@@ -2293,14 +2294,15 @@ const UserProfile = () => {
                       </thead>
                       <tbody>
                         {assignedCases.map((item, index) => (
+                          !item.cadCam.status.isEnd &&
                           <tr
                             key={item._id}
                             className={`${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight " : ""}${item.isTopPriority
+                              ? "urgent-case animate-me"
+                              : (item.isStudy ? "bgc-study" : "") ||
+                              (item.isUrgent
                                 ? "urgent-case animate-me"
-                                : (item.isStudy ? "bgc-study" : "") ||
-                                (item.isUrgent
-                                  ? "urgent-case animate-me"
-                                  : "")
+                                : "")
                               }`}
                           >
                             <td>{item.caseNumber}</td>
@@ -2308,8 +2310,8 @@ const UserProfile = () => {
                             <td>{item.patientName}</td>
                             <td
                               className={`${item.teethNumbers.length <= 0
-                                  ? "bg-danger"
-                                  : "bg-white"
+                                ? "bg-danger"
+                                : "bg-white"
                                 } td-phone`}
                             >
                               {item.teethNumbers.length}
