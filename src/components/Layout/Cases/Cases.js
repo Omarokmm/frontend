@@ -859,7 +859,7 @@ const Cases = () => {
       .then((res) => {
         const result = res.data.cases;
         const holdingCases = res.data.holdingCases;
-        const urgentCases = res.data.urgentCases;
+        const urgentCases = res.data.urgentCases.filter((u) => !u.delivering.status.isEnd);
         const redoCases = res.data.redoCases;
         const studyCases = res.data.studyCases
           .filter(
