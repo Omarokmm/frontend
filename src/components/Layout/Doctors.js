@@ -33,7 +33,7 @@ const Doctors = () => {
   const [email, setEmail] = useState("");
   // New State for Detail View
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [doctorStatusTab, setDoctorStatusTab] = useState("active"); // "active" | "inactive"
+  const [doctorStatusTab, setDoctorStatusTab] = useState("all"); // "all" | "active" | "inactive"
   const [activeTab, setActiveTab] = useState(
     user?.roles?.[0] === _global.allRoles.admin || user?.roles?.[0] === _global.allRoles.superAdmin ? "stats" : "profile"
   ); // profile, cases, stats
@@ -89,6 +89,78 @@ const Doctors = () => {
         padding: 20px;
         background: #fff;
         border-bottom: 1px solid #dee2e6;
+    }
+
+    .doctor-status-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+        background: #f4f6f8;
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        margin-bottom: 14px;
+    }
+
+    .doctor-status-tab {
+        border: none;
+        background: transparent;
+        padding: 8px 4px;
+        border-radius: 9px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        color: #6c757d;
+        transition: all 0.2s ease;
+        min-width: 0;
+    }
+
+    .doctor-status-tab:hover {
+        background: #fff;
+        color: #343a40;
+    }
+
+    .doctor-status-tab .tab-label {
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .doctor-status-tab .tab-count {
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .doctor-status-tab.active-all {
+        background: #0d6efd;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25);
+    }
+
+    .doctor-status-tab.active-active {
+        background: #198754;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(25, 135, 84, 0.25);
+    }
+
+    .doctor-status-tab.active-inactive {
+        background: #dc3545;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.25);
+    }
+
+    .assigned-under-name {
+        font-size: 11px;
+        color: #0d6efd;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .doctor-list-item {
@@ -1606,7 +1678,10 @@ const Doctors = () => {
     }
   };
 
-  const activeDoctorsCount = buffDoctors.filter((d) => d.active !== false).length;
+  const allDoctorsCount = buffDoctors.length;
+  const activeDoctorsCount = buffDoctors.filter(
+    (d) => d.active !== false || d.assignmentDetails?.isAssigned
+  ).length;
   const inactiveDoctorsCount = buffDoctors.filter((d) => d.active === false).length;
 
   const handleToggleDoctorStatus = async (doctorToToggle) => {
@@ -1645,10 +1720,28 @@ const Doctors = () => {
     }
   };
 
+  const getAssignedToDisplayName = (doctor) => {
+    if (!doctor?.assignmentDetails?.isAssigned) return "";
+    if (doctor.assignmentDetails.assignedToUserName) {
+      return doctor.assignmentDetails.assignedToUserName;
+    }
+    const assignedToUser = doctor.assignmentDetails.assignedToUser;
+    const assignedUserId =
+      typeof assignedToUser === "object"
+        ? assignedToUser?._id || assignedToUser?.id
+        : assignedToUser;
+    if (!assignedUserId) return "";
+    const assignedUser = assignUsers.find((u) => u._id === assignedUserId);
+    if (!assignedUser) return "";
+    return `${assignedUser.firstName || ""} ${assignedUser.lastName || ""}`.trim();
+  };
+
   const getFilteredDoctorsList = () => {
     let list = buffDoctors;
     if (doctorStatusTab === "active") {
-      list = list.filter((d) => d.active !== false);
+      list = list.filter(
+        (d) => d.active !== false || d.assignmentDetails?.isAssigned
+      );
     } else if (doctorStatusTab === "inactive") {
       list = list.filter((d) => d.active === false);
     }
@@ -1901,35 +1994,31 @@ const Doctors = () => {
                 )}
               </div>
 
-              {/* Active / Inactive Status Tabs */}
-              <div className="d-flex bg-light p-1 rounded-3 border mb-3">
+              {/* All / Active / Inactive Status Tabs */}
+              <div className="doctor-status-tabs">
                 <button
-                  className={`btn btn-sm flex-fill fw-bold rounded-2 d-flex align-items-center justify-content-center gap-1.5 transition-all ${
-                    doctorStatusTab === "active"
-                      ? "btn-success text-white shadow-sm"
-                      : "btn-light text-secondary border-0"
-                  }`}
-                  onClick={() => setDoctorStatusTab("active")}
+                  type="button"
+                  className={`doctor-status-tab ${doctorStatusTab === "all" ? "active-all" : ""}`}
+                  onClick={() => setDoctorStatusTab("all")}
                 >
-                  <i className="fa-solid fa-user-check"></i>
-                  <span>Active</span>
-                  <span className={`badge rounded-pill ms-1 ${doctorStatusTab === "active" ? "bg-white text-success" : "bg-secondary text-white"}`}>
-                    {activeDoctorsCount}
-                  </span>
+                  <span className="tab-label">All</span>
+                  <span className="tab-count">{allDoctorsCount}</span>
                 </button>
                 <button
-                  className={`btn btn-sm flex-fill fw-bold rounded-2 d-flex align-items-center justify-content-center gap-1.5 transition-all ${
-                    doctorStatusTab === "inactive"
-                      ? "btn-danger text-white shadow-sm"
-                      : "btn-light text-secondary border-0"
-                  }`}
+                  type="button"
+                  className={`doctor-status-tab ${doctorStatusTab === "active" ? "active-active" : ""}`}
+                  onClick={() => setDoctorStatusTab("active")}
+                >
+                  <span className="tab-label">Active</span>
+                  <span className="tab-count">{activeDoctorsCount}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`doctor-status-tab ${doctorStatusTab === "inactive" ? "active-inactive" : ""}`}
                   onClick={() => setDoctorStatusTab("inactive")}
                 >
-                  <i className="fa-solid fa-user-xmark"></i>
-                  <span>Inactive</span>
-                  <span className={`badge rounded-pill ms-1 ${doctorStatusTab === "inactive" ? "bg-white text-danger" : "bg-secondary text-white"}`}>
-                    {inactiveDoctorsCount}
-                  </span>
+                  <span className="tab-label">Inactive</span>
+                  <span className="tab-count">{inactiveDoctorsCount}</span>
                 </button>
               </div>
 
@@ -1994,6 +2083,7 @@ const Doctors = () => {
                   const isSelected = selectedDoctors.includes(doctor._id);
                   const initials = `${doctor.firstName?.[0] || ""}${doctor.lastName?.[0] || ""}`;
                   const isActive = doctor.active !== false;
+                  const assignedToName = getAssignedToDisplayName(doctor);
                   return (
                     <div
                       key={doctor._id}
@@ -2013,18 +2103,18 @@ const Doctors = () => {
                         {initials.toUpperCase()}
                       </div>
                       <div className="flex-grow-1 min-w-0">
-                        <div className="d-flex justify-content-between align-items-center mb-1">
-                          <h6 className="mb-0 fw-bold text-dark text-truncate">{doctor.firstName} {doctor.lastName}</h6>
-                          <div className="d-flex align-items-center gap-1">
-                            <span className={`badge rounded-pill ${isActive ? "bg-success-soft text-success border border-success-subtle" : "bg-danger-soft text-danger border border-danger-subtle"}`} style={{ fontSize: '9px' }}>
-                              {isActive ? "Active" : "Inactive"}
-                            </span>
-                            {doctor.assignmentDetails?.isAssigned && (
-                              <span className="badge bg-light text-primary border rounded-pill" style={{ fontSize: '10px' }}>
-                                Assigned to {doctor.assignmentDetails.assignedToUserName || "User"}
-                              </span>
+                        <div className="d-flex justify-content-between align-items-start mb-1">
+                          <div className="min-w-0 me-2">
+                            <h6 className="mb-0 fw-bold text-dark text-truncate">{doctor.firstName} {doctor.lastName}</h6>
+                            {assignedToName && (
+                              <div className="assigned-under-name" title={assignedToName}>
+                                Assigned to {assignedToName}
+                              </div>
                             )}
                           </div>
+                          <span className={`badge rounded-pill flex-shrink-0 ${isActive ? "bg-success-soft text-success border border-success-subtle" : "bg-danger-soft text-danger border border-danger-subtle"}`} style={{ fontSize: '9px' }}>
+                            {isActive ? "Active" : "Inactive"}
+                          </span>
                         </div>
                         <div className="small text-muted text-truncate">{doctor.clinicName}</div>
                         <div className="small text-muted text-truncate opacity-75">
@@ -2038,7 +2128,11 @@ const Doctors = () => {
               ) : (
                 <div className="text-center py-5 text-muted">
                   <i className="fa-regular fa-folder-open fa-2x mb-3 opacity-25"></i>
-                  <p className="mb-0 small">No {doctorStatusTab} doctors found</p>
+                  <p className="mb-0 small">
+                    {doctorStatusTab === "all"
+                      ? "No doctors found"
+                      : `No ${doctorStatusTab} doctors found`}
+                  </p>
                 </div>
               )}
             </div>
@@ -2267,7 +2361,14 @@ const Doctors = () => {
         <div ref={doctorsRef} className="p-4">
           <h3 className="text-center mb-2 fw-bold">Doctors List</h3>
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <div className="fw-bold">Category: {doctorStatusTab === "active" ? "Active Doctors" : "Inactive Doctors"}</div>
+            <div className="fw-bold">
+              Category:{" "}
+              {doctorStatusTab === "all"
+                ? "All Doctors"
+                : doctorStatusTab === "active"
+                  ? "Active Doctors"
+                  : "Inactive Doctors"}
+            </div>
             <div className="text-muted">Total Doctors: {getFilteredDoctorsList().length}</div>
           </div>
           <table className="table table-bordered table-striped">

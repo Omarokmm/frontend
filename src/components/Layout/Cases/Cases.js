@@ -100,6 +100,7 @@ const Cases = () => {
   const [isHoldCase, setIsHoldCase] = useState(false);
   const [isUrgentCase, setIsUrgentCase] = useState(false);
   const [docotrs, seDoctors] = useState([]);
+  const [usersList, setUsersList] = useState([]);
   const [allCases, setAllCases] = useState([]);
   const [clinics, setClinics] = useState([]);
   const [forShipments, setForShipments] = useState([]);
@@ -166,6 +167,24 @@ const Cases = () => {
     direction: "asc",
   });
 
+  const getDoctorAssignedToName = (dentistId) => {
+    if (!dentistId) return "";
+    const doctor = docotrs.find((d) => d._id === dentistId);
+    if (!doctor?.assignmentDetails?.isAssigned) return "";
+    const assignedToUser = doctor.assignmentDetails.assignedToUser;
+    const assignedUserId =
+      typeof assignedToUser === "object"
+        ? assignedToUser?._id || assignedToUser?.id
+        : assignedToUser;
+    if (assignedUserId) {
+      const assignedUser = usersList.find((u) => u._id === assignedUserId);
+      if (assignedUser) {
+        return `${assignedUser.firstName || ""} ${assignedUser.lastName || ""}`.trim();
+      }
+    }
+    return doctor.assignmentDetails.assignedToUserName || "";
+  };
+
   const sortData = (data, key, direction) => {
     if (!data || !Array.isArray(data)) return [];
 
@@ -175,6 +194,9 @@ const Cases = () => {
       if (key === "doctorName") {
         aValue = a.dentistObj?.name?.toLowerCase() || "";
         bValue = b.dentistObj?.name?.toLowerCase() || "";
+      } else if (key === "assignedTo") {
+        aValue = (getDoctorAssignedToName(a.dentistObj?.id) || "").toLowerCase();
+        bValue = (getDoctorAssignedToName(b.dentistObj?.id) || "").toLowerCase();
       } else if (key === "technicianName") {
         const getTechName = (item) => {
           if (!item.assignmentHistory || item.assignmentHistory.length === 0) return "";
@@ -279,6 +301,7 @@ const Cases = () => {
     setSortConfig({ key, direction });
 
     // Apply sorting to all relevant lists
+    setAllCases((prev) => sortData(prev, key, direction));
     setNotStartCases((prev) => sortData(prev, key, direction));
     setForAssignCases((prev) => sortData(prev, key, direction));
     setInProcessCases((prev) => sortData(prev, key, direction));
@@ -292,6 +315,9 @@ const Cases = () => {
     setRedoCasesInClinics((prev) => sortNestedData(prev, key, direction));
     setStudyCases((prev) => sortData(prev, key, direction));
     setAllCasesImplants((prev) => sortData(prev, key, direction));
+    setHaveAppointmentCases((prev) => sortData(prev, key, direction));
+    setHavePrepCases((prev) => sortData(prev, key, direction));
+    setNoShadeCases((prev) => sortData(prev, key, direction));
     // For Shipments is complex and not requested explicitly or structurally compatible
   };
 
@@ -1041,6 +1067,12 @@ const Cases = () => {
         const result = res.data;
         seDoctors(result);
         console.log("seDoctors", docotrs);
+      })
+      .catch((error) => { });
+    axios
+      .get(`${_global.BASE_URL}users`)
+      .then((res) => {
+        setUsersList(res.data || []);
       })
       .catch((error) => { });
   }, []);
@@ -3245,6 +3277,9 @@ const Cases = () => {
                       <th className="td-phone" scope="col">
                         #Unites
                       </th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">In</th>
                       <th scope="col">Due</th>
                       <th scope="col">Actions</th>
@@ -3320,6 +3355,8 @@ const Cases = () => {
                         >
                           {item.teethNumbers.length}
                         </td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>
@@ -3725,10 +3762,15 @@ const Cases = () => {
                       <th scope="col" onClick={() => handleSort("ceramic")} style={{ cursor: "pointer" }}>
                         Ceramic {renderSortIcon("ceramic")}
                       </th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
+
                       {/* <th scope="col">Type</th> */}
                       <th className="td-phone" scope="col">
                         #Unites
                       </th>
+
                       <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
                         In {renderSortIcon("dateIn")}
                       </th>
@@ -3815,6 +3857,8 @@ const Cases = () => {
                           </div>
                         </td>
                         {/* <td>{item.caseType}</td> */}
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -3974,7 +4018,7 @@ const Cases = () => {
                     {user.roles[0] === _global.allRoles.admin && (
                       <>
                         <tr>
-                          <td className="f-bold c-success" colSpan={5}>
+                          <td className="f-bold c-success" colSpan={6}>
                             <b>Total of Pieces</b>
                           </td>
                           <td
@@ -4003,7 +4047,7 @@ const Cases = () => {
                           </tr>
                         )} */}
                         <tr>
-                          <td colSpan={7}>
+                          <td colSpan={8}>
                             <div className="summary-teeth-cases">
                               {groupCasesTeethNumbersByName("Start")?.map(
                                 (item) => (
@@ -4193,6 +4237,9 @@ const Cases = () => {
                         <th scope="col">#Case</th>
                         <th scope="col">Doctor Name</th>
                         <th scope="col">Patient Name</th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                         <th className="td-phone" scope="col">
                           #Unites
                         </th>
@@ -4233,6 +4280,7 @@ const Cases = () => {
                             )}
                           </td>
                           <td>{item.patientName}</td>
+                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                           <td
                             className={`${item.teethNumbers.length <= 0
                               ? "bg-danger"
@@ -4439,6 +4487,9 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
                         In {renderSortIcon("dateIn")}
@@ -4465,6 +4516,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>
@@ -4661,6 +4713,9 @@ const Cases = () => {
                           Doctor Name {renderSortIcon("doctorName")}
                         </th>
                         <th scope="col">Patient Name</th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                         {/* <th scope="col">Type</th> */}
                         <th className="td-phone" scope="col">
                           #Unites
@@ -4690,6 +4745,7 @@ const Cases = () => {
                             {renderCaseFlags(item)}
                           </td>
                           <td>{item.patientName}</td>
+                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                           {/* <td>{item.caseType}</td> */}
                           <td
                             className={`${item.teethNumbers.length <= 0
@@ -4886,6 +4942,9 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor Name</th>
                       <th scope="col">Patient Name</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">In</th>
                       <th scope="col">Due</th>
                       <th scope="col">Actions</th>
@@ -4904,6 +4963,7 @@ const Cases = () => {
                           )}
                         </td>
                         <td>{item.patientName}</td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>
                           {item.dateOut &&
@@ -4986,6 +5046,9 @@ const Cases = () => {
                               Doctor Name {renderSortIcon("doctorName")}
                             </th>
                             <th scope="col">Patient Name</th>
+                            <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                             <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
                               In {renderSortIcon("dateIn")}
                             </th>
@@ -5014,6 +5077,7 @@ const Cases = () => {
                                 {renderCaseFlags(item)}
                               </td>
                               <td>{item.patientName}</td>
+                              <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                               {/* <td>{item.caseType}</td> */}
                               <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                               <td>
@@ -5136,6 +5200,9 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">#Unites</th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
@@ -5161,6 +5228,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -5408,10 +5476,12 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col" onClick={() => handleSort("technicianName")} style={{ cursor: "pointer" }}>
                         Technician {renderSortIcon("technicianName")}
                       </th>
-                      {/* <th scope="col">Assigned To</th> */}
                       <th scope="col">#Unites</th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
@@ -5456,6 +5526,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                         <td>
                           {item.assignmentHistory &&
                             item.assignmentHistory.length > 0 &&
@@ -5723,6 +5794,9 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">#Unites</th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
@@ -5747,6 +5821,7 @@ const Cases = () => {
                           )}
                         </td>
                         <td>{item.patientName}</td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -6396,6 +6471,9 @@ const Cases = () => {
                           Doctor Name {renderSortIcon("doctorName")}
                         </th>
                         <th scope="col">Patient Name</th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                         {/* <th scope="col">Type</th> */}
                         <th className="td-phone" scope="col">
                           #Unites
@@ -6421,6 +6499,7 @@ const Cases = () => {
                             {renderCaseFlags(item)}
                           </td>
                           <td>{item.patientName}</td>
+                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                           {/* <td>{item.caseType}</td> */}
                           <td
                             className={`${item.teethNumbers.length <= 0
@@ -7075,6 +7154,9 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">#Unites</th>
                       {/* <th scope="col">Type</th> */}
                       <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
@@ -7100,6 +7182,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -7195,6 +7278,9 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor</th>
                       <th scope="col">Patient</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">Shade</th>
                       <th scope="col">#Unites</th>
                       <th scope="col">In</th>
@@ -7216,6 +7302,7 @@ const Cases = () => {
                             )}
                           </td>
                           <td>{item.patientName}</td>
+                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                           <td>
                             {noShade ? (
                               <span className="badge bg-warning text-dark">No Shade</span>
@@ -7270,6 +7357,9 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor</th>
                       <th scope="col">Patient</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">Shade</th>
                       <th scope="col">#Unites</th>
                       <th scope="col">In</th>
@@ -7291,6 +7381,7 @@ const Cases = () => {
                             )}
                           </td>
                           <td>{item.patientName}</td>
+                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                           <td>
                             {noShade ? (
                               <span className="badge bg-warning text-dark">No Shade</span>
@@ -7345,6 +7436,9 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor</th>
                       <th scope="col">Patient</th>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                        Assigned {renderSortIcon("assignedTo")}
+                      </th>
                       <th scope="col">Shade</th>
                       <th scope="col">#Unites</th>
                       <th scope="col">In</th>
@@ -7363,6 +7457,7 @@ const Cases = () => {
                           )}
                         </td>
                         <td>{item.patientName}</td>
+                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
                         <td>
                           <span className="badge bg-warning text-dark fw-bold">
                             <i className="fa-solid fa-droplet-slash me-1"></i>No Shade

@@ -2193,11 +2193,26 @@ const CasesInDepartments = () => {
                     <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>shade:</strong> </p>
                     <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Dr. Name:</strong> {item.dentistObj?.name || "-"}</p>
                     <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Pt. Name:</strong> {item.patientName || "-"}</p>
-                    <p className="mb-0"><strong style={{ color: "#2a0580ff" }}>Items:</strong> </p>
-                    <br />
-                    <br />
-                    <br />
-                    <br />
+                    <div className="mb-1">
+                      <strong style={{ color: "#2a0580ff" }}>Items:</strong>
+                      {item.cadCam?.obj?.selectedItems?.length > 0 ? (
+                        <ul className="mb-0 mt-1" style={{ paddingLeft: "18px" }}>
+                          {item.cadCam.obj.selectedItems.map((si, idx) => (
+                            <li key={idx} style={{ fontSize: "13px" }}>
+                              <strong>{si.name}</strong> &times; {si.qty}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div style={{ minHeight: "60px" }}></div>
+                      )}
+                    </div>
+                    {item.cadCam?.obj?.notes && (
+                      <p className="mb-1">
+                        <strong style={{ color: "#2a0580ff" }}>Notes:</strong>{" "}
+                        <span style={{ fontStyle: "italic" }}>{item.cadCam.obj.notes}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
