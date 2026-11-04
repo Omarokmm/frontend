@@ -8023,9 +8023,9 @@ const Cases = () => {
       >
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
-            <div className="modal-header">
+            <div className="modal-header bg-primary text-light">
               <h5 className="modal-title" id="assignDoctorReceptionModalLabel">
-                Doctor to Receptionist
+                Assign Doctor
               </h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -8036,13 +8036,13 @@ const Cases = () => {
                   ? `${doctorToAssign.firstName || ""} ${doctorToAssign.lastName || ""}`.trim()
                   : "-"}
               </p>
-              <label className="form-label">Receptionist</label>
+              <label className="form-label">Users</label>
               <select
                 className="form-select"
                 value={selectedReceptionUser}
                 onChange={(e) => setSelectedReceptionUser(e.target.value)}
               >
-                <option value="">Choose receptionist...</option>
+                <option value="">Choose user...</option>
                 {receptionUsers.map((u) => (
                   <option key={u._id} value={u._id}>
                     {u.firstName} {u.lastName}
