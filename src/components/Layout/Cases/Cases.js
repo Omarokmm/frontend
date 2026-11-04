@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import * as _global from "../../../config/global";
 import "./Cases.css";
@@ -101,6 +101,8 @@ const Cases = () => {
   const [isUrgentCase, setIsUrgentCase] = useState(false);
   const [docotrs, seDoctors] = useState([]);
   const [usersList, setUsersList] = useState([]);
+  const [doctorToAssign, setDoctorToAssign] = useState(null);
+  const [selectedReceptionUser, setSelectedReceptionUser] = useState("");
   const [allCases, setAllCases] = useState([]);
   const [clinics, setClinics] = useState([]);
   const [forShipments, setForShipments] = useState([]);
@@ -167,6 +169,9 @@ const Cases = () => {
     direction: "asc",
   });
 
+  // Receptionist filter toggle
+  const [filterByMe, setFilterByMe] = useState(false);
+
   const getDoctorAssignedToName = (dentistId) => {
     if (!dentistId) return "";
     const doctor = docotrs.find((d) => d._id === dentistId);
@@ -183,6 +188,183 @@ const Cases = () => {
       }
     }
     return doctor.assignmentDetails.assignedToUserName || "";
+  };
+
+  // Returns true if the doctor of this case is assigned to the currently logged-in user (by ID)
+  // Mirrors the exact logic of getDoctorAssignedToName which is known to work
+  const isDoctorAssignedToCurrentUser = (dentistId) => {
+    if (!dentistId) return false;
+    const myId = user?._id || user?.id; // cover both formats
+    if (!myId) return false;
+
+    const doctor = docotrs.find((d) => d._id === dentistId);
+    if (!doctor) return false;
+
+    // Path 1: via assignmentDetails (same as getDoctorAssignedToName)
+    if (doctor.assignmentDetails?.isAssigned) {
+      const assignedToUser = doctor.assignmentDetails.assignedToUser;
+      const assignedUserId =
+        typeof assignedToUser === "object" && assignedToUser !== null
+          ? assignedToUser?._id || assignedToUser?.id
+          : assignedToUser;
+
+      // Try direct match
+      if (assignedUserId && String(assignedUserId) === String(myId)) return true;
+
+      // Try resolving through usersList (same as getDoctorAssignedToName does)
+      if (assignedUserId) {
+        const resolvedUser = usersList.find((u) => String(u._id) === String(assignedUserId));
+        if (resolvedUser && String(resolvedUser._id) === String(myId)) return true;
+      }
+    }
+
+    // Path 2: via doctor.assignments array (Reception department)
+    if (Array.isArray(doctor.assignments)) {
+      const receptionAssignment = doctor.assignments.find(
+        (a) => a.department === "Reception"
+      );
+      if (receptionAssignment) {
+        const uid = receptionAssignment.userId || receptionAssignment.user;
+        if (uid && String(uid) === String(myId)) return true;
+      }
+    }
+
+    return false;
+  };
+
+  // Apply "Filter by Me" – returns the list filtered by current user's assigned doctors
+  const applyMyFilter = (list) => {
+    if (!filterByMe) return list;
+    const myId = user?._id || user?.id;
+    // Debug: log to help diagnose if filter still shows 0 results
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[MyFilter] user id:", myId, "| docotrs loaded:", docotrs.length, "| list size:", list.length);
+      if (docotrs.length > 0) {
+        const sample = docotrs[0];
+        console.log("[MyFilter] sample doctor:", sample?.firstName, "| assignmentDetails:", sample?.assignmentDetails, "| assignments:", sample?.assignments);
+      }
+    }
+    return list.filter((item) => isDoctorAssignedToCurrentUser(item.dentistObj?.id));
+  };
+
+  const getDoctorAssignmentInfo = (dentistId) => {
+    const name = getDoctorAssignedToName(dentistId);
+    if (!dentistId || !name) {
+      return { name: "", assignedAt: "" };
+    }
+    const doctor = docotrs.find((d) => d._id === dentistId);
+    const receptionAssignment = Array.isArray(doctor?.assignments)
+      ? doctor.assignments.find((a) => a.department === "Reception")
+      : null;
+    const assignedAt =
+      doctor?.assignmentDetails?.assignedAt ||
+      receptionAssignment?.assignedAt ||
+      "";
+    return { name, assignedAt };
+  };
+
+  const canAssignDoctorToReception =
+    user?.roles?.[0] === _global.allRoles.admin ||
+    user?.roles?.[0] === _global.allRoles.super_admin;
+
+  const receptionUsers = usersList.filter(
+    (u) => Array.isArray(u.roles) && u.roles.includes(_global.allRoles.Reception) && u.active
+  );
+
+  const openAssignDoctorModal = (item) => {
+    const doctor = docotrs.find((d) => d._id === item?.dentistObj?.id);
+    setDoctorToAssign(
+      doctor || {
+        _id: item?.dentistObj?.id,
+        firstName: item?.dentistObj?.name || "",
+        lastName: "",
+      }
+    );
+    setSelectedReceptionUser("");
+  };
+
+  const handleAssignDoctorToReception = async () => {
+    if (!doctorToAssign?._id || !selectedReceptionUser) {
+      showToastMessage("Select a receptionist", "error");
+      return;
+    }
+    const receptionist = usersList.find((u) => u._id === selectedReceptionUser);
+    if (!receptionist) {
+      showToastMessage("Receptionist not found", "error");
+      return;
+    }
+    const assignment = {
+      department: "Reception",
+      userId: selectedReceptionUser,
+      userName: `${receptionist.firstName} ${receptionist.lastName}`,
+      assignedBy: `${user.firstName} ${user.lastName}`,
+      assignedById: user._id,
+      assignedAt: new Date(),
+      doctorIds: [doctorToAssign._id],
+      action: "assign",
+    };
+    try {
+      await fetch(`${_global.BASE_URL}doctors/assign-doctors`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(assignment),
+      });
+      seDoctors((prev) =>
+        prev.map((d) =>
+          d._id === doctorToAssign._id
+            ? {
+              ...d,
+              assignmentDetails: {
+                ...d.assignmentDetails,
+                isAssigned: true,
+                assignedToUser: selectedReceptionUser,
+                assignedToUserName: assignment.userName,
+                assignedBy: assignment.assignedBy,
+                assignedById: user._id,
+                assignedAt: assignment.assignedAt,
+              },
+            }
+            : d
+        )
+      );
+      showToastMessage("Assigned successfully", "success");
+      setDoctorToAssign(null);
+      setSelectedReceptionUser("");
+    } catch (error) {
+      console.error("Assignment error", error);
+      showToastMessage("Error assigning doctor", "error");
+    }
+  };
+
+  const renderAssignedCell = (item) => {
+    const dentistId = item?.dentistObj?.id;
+    const doctor = docotrs.find((d) => d._id === dentistId);
+    const isAssigned = !!doctor?.assignmentDetails?.isAssigned;
+    const { name } = getDoctorAssignmentInfo(dentistId);
+    if (!isAssigned) {
+      if (!canAssignDoctorToReception || !dentistId) {
+        return <td className="text-start">-</td>;
+      }
+      return (
+        <td className="text-center">
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#assignDoctorReceptionModal"
+            onClick={() => openAssignDoctorModal(item)}
+          >
+            <i className="fa-solid fa-user-plus me-1"></i>
+
+          </button>
+        </td>
+      );
+    }
+    return (
+      <td className="small text-center align-top">
+        <div>{name}</div>
+      </td>
+    );
   };
 
   const sortData = (data, key, direction) => {
@@ -926,7 +1108,7 @@ const Cases = () => {
         // Populate Have Appointment and Have Prep tabs
         setHaveAppointmentCases(result.filter((r) => r.isHaveAppoinment === true && r.delivering?.status?.isEnd !== true));
         setHavePrepCases(result.filter((r) => r.isHavePrep === false && r.delivering?.status?.isEnd !== true));
-        // Populate No Shade tab — active cases with no/empty/"none" shade, excluding study cases
+        // Populate No Shade tab â€” active cases with no/empty/"none" shade, excluding study cases
         setNoShadeCases(result.filter((r) => {
           if (r.cadCam?.status?.isEnd === true) return false;
           if (r.isStudy === true) return false;
@@ -1972,7 +2154,7 @@ const Cases = () => {
 
     return response;
   };
-  // ── Inline case flag pills shown in doctor cell ───────────────────────────
+  // â”€â”€ Inline case flag pills shown in doctor cell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const renderCaseFlags = (item) => {
     const shade = item.shadeCase?.shade;
     const noShade = !shade || shade.trim() === "" || shade.trim().toLowerCase() === "none";
@@ -1980,11 +2162,11 @@ const Cases = () => {
     if (noShade && !item.isStudy)
       flags.push({ label: "No Shade", color: "#92400e", bg: "#fff7ed", border: "#fdba74" });
     if (item.isHaveAppoinment)
-      flags.push({ label: "📅 Appt", color: "#7c3aed", bg: "#f5f3ff", border: "#c4b5fd" });
+      flags.push({ label: "Appt", icon: "fa-regular fa-calendar", color: "#7c3aed", bg: "#f5f3ff", border: "#c4b5fd" });
     if (!item.isHavePrep)
-      flags.push({ label: "🦷 Prep", color: "#065f46", bg: "#ecfdf5", border: "#6ee7b7" });
+      flags.push({ label: "Prep", icon: "fa-solid fa-tooth", color: "#065f46", bg: "#ecfdf5", border: "#6ee7b7" });
     if (!item.isHaveDetails)
-      flags.push({ label: "📋 Details", color: "#1e40af", bg: "#eff6ff", border: "#93c5fd" });
+      flags.push({ label: "Details", icon: "fa-solid fa-clipboard-list", color: "#1e40af", bg: "#eff6ff", border: "#93c5fd" });
     if (flags.length === 0) return null;
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", marginTop: "4px", justifyContent: "flex-start" }}>
@@ -2000,7 +2182,10 @@ const Cases = () => {
             letterSpacing: "0.02em",
             whiteSpace: "nowrap",
             lineHeight: "1.7",
-          }}>{f.label}</span>
+          }}>
+            {f.icon && <i className={`${f.icon} me-1`}></i>}
+            {f.label}
+          </span>
         ))}
       </div>
     );
@@ -2817,6 +3002,22 @@ const Cases = () => {
                   <i class="fa-solid fa-circle-plus "></i>
                 </span>
               )}
+            {/* Global Receptionist Filter Toggle */}
+            {/* {(user.roles[0] === _global.allRoles.Reception ||
+              user.roles[0] === _global.allRoles.admin ||
+              user.roles[0] === _global.allRoles.super_admin) && (
+              <button
+                type="button"
+                className={`btn btn-sm ms-3 ${
+                  filterByMe ? "btn-primary" : "btn-outline-primary"
+                }`}
+                onClick={() => setFilterByMe((prev) => !prev)}
+                title="Show only cases with doctors assigned to me"
+              >
+                <i className="fa-solid fa-user-check me-1"></i>
+                {filterByMe ? "My Cases (On)" : "My Cases"}
+              </button>
+            )} */}
           </span>
         </h5>
         <div className="card-body">
@@ -3204,7 +3405,7 @@ const Cases = () => {
               aria-labelledby="allCases-tab"
               tabIndex="0"
             >
-              <div className="row ">
+              <div className="row align-items-end">
                 <div className="col-md-6">
                   <div className=""></div>
                   <div class="input-group mb-3">
@@ -3227,12 +3428,6 @@ const Cases = () => {
                   </div>
                 </div>
                 <div className="col-md-3 mb-3">
-                  {/* <DatePicker
-                    multiple
-                    value={value}
-                    onChange={setValue}
-                    plugins={[<DatePanel />]}
-                  /> */}
                   <DatePicker
                     className="form-control"
                     range
@@ -3257,6 +3452,7 @@ const Cases = () => {
                   </select>
                 </div>
               </div>
+              {/* Receptionist filter toggle - removed from here, now in card header */}
               {allCases.length > 0 && (
                 <table className="table table-responsive text-center table-bordered">
                   <thead>
@@ -3277,7 +3473,7 @@ const Cases = () => {
                       <th className="td-phone" scope="col">
                         #Unites
                       </th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">In</th>
@@ -3286,7 +3482,7 @@ const Cases = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {allCases.map((item, index) => (
+                    {applyMyFilter(allCases).map((item, index) => (
                       <tr
                         role="alert"
                         className={
@@ -3355,7 +3551,7 @@ const Cases = () => {
                         >
                           {item.teethNumbers.length}
                         </td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
 
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
@@ -3649,7 +3845,7 @@ const Cases = () => {
                       data-bs-target="#assignUserModal"
                     >
                       <i class="fa-solid fa-user-plus me-1"></i>
-                      Assign
+
                     </button>
                     {/* <button
                           className="btn btn-warning btn-sm"
@@ -3762,7 +3958,7 @@ const Cases = () => {
                       <th scope="col" onClick={() => handleSort("ceramic")} style={{ cursor: "pointer" }}>
                         Ceramic {renderSortIcon("ceramic")}
                       </th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
 
@@ -3780,7 +3976,7 @@ const Cases = () => {
                   </thead>
                   <tbody>
                     {console.log("notStartCases", notStartCases)}
-                    {notStartCases.map((item, index) => (
+                    {applyMyFilter(notStartCases).map((item, index) => (
                       <tr
                         key={item._id}
                         className={`${checkNotStartDelay(item)} ${item.isTopPriority ? "urgent-case animate-me" : ""} ${item.deadlineCadCam && !item.isTopPriority ? "deadline-cadcam-highlight" : ""}`}
@@ -3805,7 +4001,27 @@ const Cases = () => {
                           />
                         </td>
                         <td>{item.caseNumber}</td>
-                        <td>
+                        <td style={{ position: "relative", paddingTop: item.historyTopPriority?.length > 0 ? "22px" : undefined }}>
+                          {item.historyTopPriority && item.historyTopPriority.length > 0 && item.isTopPriority && (
+                            <b
+                              className="badge"
+                              style={{
+                                position: "absolute",
+                                top: "2px",
+                                left: "4px",
+                                background: "#f0fdf4",
+                                color: "#166534",
+                                fontSize: "0.7rem",
+                                fontWeight: "500",
+                                borderRadius: "6px",
+                                padding: "2px 7px",
+                                border: "1px solid #bbf7d0",
+                              }}
+                            >
+                              <i className="fas fa-calendar-check me-1"></i>
+                              Assigned from: {_global.formatDateToYYYYMMDD(item.historyTopPriority[item.historyTopPriority.length - 1].date)}
+                            </b>
+                          )}
                           {item.dentistObj.name}
                           {item.isUrgent && (
                             <span className="badge badge-pill badge-warning mx-1">
@@ -3813,6 +4029,7 @@ const Cases = () => {
                             </span>
                           )}
                           {renderCaseFlags(item)}
+
                         </td>
                         <td>{item.patientName}</td>
                         <td>
@@ -3857,7 +4074,7 @@ const Cases = () => {
                           </div>
                         </td>
                         {/* <td>{item.caseType}</td> */}
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
 
                         <td
                           className={`${item.teethNumbers.length <= 0
@@ -4150,7 +4367,7 @@ const Cases = () => {
                           data-bs-target="#assignUserModal"
                         >
                           <i class="fa-solid fa-user-plus me-1"></i>
-                          Assign
+
                         </button>
                         {/* <button
                           className="btn btn-warning btn-sm"
@@ -4237,9 +4454,9 @@ const Cases = () => {
                         <th scope="col">#Case</th>
                         <th scope="col">Doctor Name</th>
                         <th scope="col">Patient Name</th>
-                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
-                        Assigned {renderSortIcon("assignedTo")}
-                      </th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
+                          Assigned {renderSortIcon("assignedTo")}
+                        </th>
                         <th className="td-phone" scope="col">
                           #Unites
                         </th>
@@ -4249,7 +4466,7 @@ const Cases = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {forAssignCases.map((item, index) => (
+                      {applyMyFilter(forAssignCases).map((item, index) => (
                         <tr key={item._id} className={`${checkNotStartDelay(item)} ${item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                           <td>
                             <input
@@ -4280,7 +4497,7 @@ const Cases = () => {
                             )}
                           </td>
                           <td>{item.patientName}</td>
-                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                          {renderAssignedCell(item)}
                           <td
                             className={`${item.teethNumbers.length <= 0
                               ? "bg-danger"
@@ -4487,7 +4704,7 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       {/* <th scope="col">Type</th> */}
@@ -4499,7 +4716,7 @@ const Cases = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {inProcessCases.map((item, index) => (
+                    {applyMyFilter(inProcessCases).map((item, index) => (
                       <tr
                         key={item._id}
                         className={`${item.isTopPriority ? "urgent-case animate-me" : ""}`}
@@ -4516,7 +4733,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
                         {/* <td>{item.caseType}</td> */}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>
@@ -4713,9 +4930,9 @@ const Cases = () => {
                           Doctor Name {renderSortIcon("doctorName")}
                         </th>
                         <th scope="col">Patient Name</th>
-                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
-                        Assigned {renderSortIcon("assignedTo")}
-                      </th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
+                          Assigned {renderSortIcon("assignedTo")}
+                        </th>
                         {/* <th scope="col">Type</th> */}
                         <th className="td-phone" scope="col">
                           #Unites
@@ -4732,7 +4949,7 @@ const Cases = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {holdingCases.map((item, index) => (
+                      {applyMyFilter(holdingCases).map((item, index) => (
                         <tr key={item._id} className={`${item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                           <td>{item.caseNumber}</td>
                           <td>
@@ -4745,7 +4962,7 @@ const Cases = () => {
                             {renderCaseFlags(item)}
                           </td>
                           <td>{item.patientName}</td>
-                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                          {renderAssignedCell(item)}
                           {/* <td>{item.caseType}</td> */}
                           <td
                             className={`${item.teethNumbers.length <= 0
@@ -4942,7 +5159,7 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor Name</th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">In</th>
@@ -4963,7 +5180,7 @@ const Cases = () => {
                           )}
                         </td>
                         <td>{item.patientName}</td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
                         <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                         <td>
                           {item.dateOut &&
@@ -5046,9 +5263,9 @@ const Cases = () => {
                               Doctor Name {renderSortIcon("doctorName")}
                             </th>
                             <th scope="col">Patient Name</th>
-                            <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
-                        Assigned {renderSortIcon("assignedTo")}
-                      </th>
+                            <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
+                              Assigned {renderSortIcon("assignedTo")}
+                            </th>
                             <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>
                               In {renderSortIcon("dateIn")}
                             </th>
@@ -5058,7 +5275,7 @@ const Cases = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {delayCases.map((item, index) => (
+                          {applyMyFilter(delayCases).map((item, index) => (
                             <tr key={item._id} className={checkCaseDate(item)}>
                               <td
                                 data-bs-toggle="tooltip"
@@ -5077,7 +5294,7 @@ const Cases = () => {
                                 {renderCaseFlags(item)}
                               </td>
                               <td>{item.patientName}</td>
-                              <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                              {renderAssignedCell(item)}
                               {/* <td>{item.caseType}</td> */}
                               <td>{_global.formatDateToYYYYMMDD(item.dateIn)}</td>
                               <td>
@@ -5200,7 +5417,7 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">#Unites</th>
@@ -5215,7 +5432,7 @@ const Cases = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {urgentCases.map((item, index) => (
+                    {applyMyFilter(urgentCases).map((item, index) => (
                       <tr key={item._id}>
                         <td>{item.caseNumber}</td>
                         <td>
@@ -5228,7 +5445,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -5376,7 +5593,7 @@ const Cases = () => {
                         data-bs-target="#assignUserModal"
                       >
                         <i class="fa-solid fa-user-plus me-1"></i>
-                        Assign
+
                       </button>
                       {/* <button
                           className="btn btn-warning btn-sm"
@@ -5476,7 +5693,7 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col" onClick={() => handleSort("technicianName")} style={{ cursor: "pointer" }}>
@@ -5494,7 +5711,7 @@ const Cases = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {studyCases.map((item, index) => (
+                    {applyMyFilter(studyCases).map((item, index) => (
                       <tr key={item._id} className={`${item.isTopPriority ? "urgent-case animate-me" : ""}`}>
                         {user.roles[0] === _global.allRoles.admin && <td>
                           <input
@@ -5516,7 +5733,27 @@ const Cases = () => {
                           />
                         </td>}
                         <td>{item.caseNumber}</td>
-                        <td>
+                        <td style={{ position: "relative", paddingTop: item.historyTopPriority?.length > 0 && item.isTopPriority ? "22px" : undefined }}>
+                          {item.historyTopPriority && item.historyTopPriority.length > 0 && item.isTopPriority && (
+                            <b
+                              className="badge"
+                              style={{
+                                position: "absolute",
+                                top: "2px",
+                                left: "4px",
+                                background: "#f0fdf4",
+                                color: "#166534",
+                                fontSize: "0.7rem",
+                                fontWeight: "500",
+                                borderRadius: "6px",
+                                padding: "2px 7px",
+                                border: "1px solid #bbf7d0",
+                              }}
+                            >
+                              <i className="fas fa-calendar-check me-1"></i>
+                              Assigned from: {_global.formatDateToYYYYMMDD(item.historyTopPriority[item.historyTopPriority.length - 1].date)}
+                            </b>
+                          )}
                           {item.dentistObj.name}
                           {item.isUrgent && (
                             <span className="badge badge-pill badge-warning mx-1">
@@ -5526,7 +5763,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
                         <td>
                           {item.assignmentHistory &&
                             item.assignmentHistory.length > 0 &&
@@ -5794,7 +6031,7 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">#Unites</th>
@@ -5821,7 +6058,7 @@ const Cases = () => {
                           )}
                         </td>
                         <td>{item.patientName}</td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -6471,9 +6708,9 @@ const Cases = () => {
                           Doctor Name {renderSortIcon("doctorName")}
                         </th>
                         <th scope="col">Patient Name</th>
-                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
-                        Assigned {renderSortIcon("assignedTo")}
-                      </th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
+                          Assigned {renderSortIcon("assignedTo")}
+                        </th>
                         {/* <th scope="col">Type</th> */}
                         <th className="td-phone" scope="col">
                           #Unites
@@ -6499,7 +6736,7 @@ const Cases = () => {
                             {renderCaseFlags(item)}
                           </td>
                           <td>{item.patientName}</td>
-                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                          {renderAssignedCell(item)}
                           {/* <td>{item.caseType}</td> */}
                           <td
                             className={`${item.teethNumbers.length <= 0
@@ -7154,7 +7391,7 @@ const Cases = () => {
                         Doctor Name {renderSortIcon("doctorName")}
                       </th>
                       <th scope="col">Patient Name</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">#Unites</th>
@@ -7182,7 +7419,7 @@ const Cases = () => {
                           {renderCaseFlags(item)}
                         </td>
                         <td>{item.patientName}</td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
                         <td
                           className={`${item.teethNumbers.length <= 0
                             ? "bg-danger"
@@ -7278,7 +7515,7 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor</th>
                       <th scope="col">Patient</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">Shade</th>
@@ -7302,7 +7539,7 @@ const Cases = () => {
                             )}
                           </td>
                           <td>{item.patientName}</td>
-                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                          {renderAssignedCell(item)}
                           <td>
                             {noShade ? (
                               <span className="badge bg-warning text-dark">No Shade</span>
@@ -7357,7 +7594,7 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor</th>
                       <th scope="col">Patient</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">Shade</th>
@@ -7381,7 +7618,7 @@ const Cases = () => {
                             )}
                           </td>
                           <td>{item.patientName}</td>
-                          <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                          {renderAssignedCell(item)}
                           <td>
                             {noShade ? (
                               <span className="badge bg-warning text-dark">No Shade</span>
@@ -7436,7 +7673,7 @@ const Cases = () => {
                       <th scope="col">#Case</th>
                       <th scope="col">Doctor</th>
                       <th scope="col">Patient</th>
-                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }}>
+                      <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">
                         Assigned {renderSortIcon("assignedTo")}
                       </th>
                       <th scope="col">Shade</th>
@@ -7457,7 +7694,7 @@ const Cases = () => {
                           )}
                         </td>
                         <td>{item.patientName}</td>
-                        <td>{getDoctorAssignedToName(item.dentistObj?.id) || "-"}</td>
+                        {renderAssignedCell(item)}
                         <td>
                           <span className="badge bg-warning text-dark fw-bold">
                             <i className="fa-solid fa-droplet-slash me-1"></i>No Shade
@@ -7501,7 +7738,7 @@ const Cases = () => {
                   </tbody>
                 </table>
               ) : (
-                <div className="no-content">No active cases without shade! ✅</div>
+                <div className="no-content">No active cases without shade! âœ…</div>
               )}
             </div>
           </div>
@@ -7777,6 +8014,59 @@ const Cases = () => {
           </div>
         </div>
       )}
+      <div
+        className="modal fade"
+        id="assignDoctorReceptionModal"
+        tabIndex="-1"
+        aria-labelledby="assignDoctorReceptionModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="assignDoctorReceptionModalLabel">
+                Doctor to Receptionist
+              </h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <p className="mb-3">
+                <strong>Doctor:</strong>{" "}
+                {doctorToAssign
+                  ? `${doctorToAssign.firstName || ""} ${doctorToAssign.lastName || ""}`.trim()
+                  : "-"}
+              </p>
+              <label className="form-label">Receptionist</label>
+              <select
+                className="form-select"
+                value={selectedReceptionUser}
+                onChange={(e) => setSelectedReceptionUser(e.target.value)}
+              >
+                <option value="">Choose receptionist...</option>
+                {receptionUsers.map((u) => (
+                  <option key={u._id} value={u._id}>
+                    {u.firstName} {u.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-light" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                data-bs-dismiss="modal"
+                disabled={!selectedReceptionUser}
+                onClick={handleAssignDoctorToReception}
+              >
+                Assign
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Assign User Modal */}
       <div
         class="modal fade"
