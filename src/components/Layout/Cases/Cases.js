@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import * as _global from "../../../config/global";
 import "./Cases.css";
@@ -169,8 +169,10 @@ const Cases = () => {
     direction: "asc",
   });
 
-  // Receptionist filter toggle
-  const [filterByMe, setFilterByMe] = useState(false);
+  // Receptionist filter toggle – persisted in localStorage
+  const [filterByMe, setFilterByMe] = useState(
+    () => localStorage.getItem("cases_filterByMe") === "true"
+  );
 
   const getDoctorAssignedToName = (dentistId) => {
     if (!dentistId) return "";
@@ -3003,21 +3005,19 @@ const Cases = () => {
                 </span>
               )}
             {/* Global Receptionist Filter Toggle */}
-            {/* {(user.roles[0] === _global.allRoles.Reception ||
-              user.roles[0] === _global.allRoles.admin ||
-              user.roles[0] === _global.allRoles.super_admin) && (
+            {user.roles[0] === _global.allRoles.Reception && (
               <button
                 type="button"
                 className={`btn btn-sm ms-3 ${
                   filterByMe ? "btn-primary" : "btn-outline-primary"
                 }`}
-                onClick={() => setFilterByMe((prev) => !prev)}
+                onClick={() => setFilterByMe((prev) => { const next = !prev; localStorage.setItem("cases_filterByMe", next); return next; })}
                 title="Show only cases with doctors assigned to me"
               >
                 <i className="fa-solid fa-user-check me-1"></i>
                 {filterByMe ? "My Cases (On)" : "My Cases"}
               </button>
-            )} */}
+            )}
           </span>
         </h5>
         <div className="card-body">
