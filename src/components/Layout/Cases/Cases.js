@@ -4977,7 +4977,25 @@ const Cases = () => {
                             {item.dateOut &&
                               _global.formatDateToYYYYMMDD(item.dateOut)}
                           </td>
-                          <td>
+                          <td style={{ position: "relative" }}>
+                            <b
+                              className="badge"
+                              style={{
+                                position: "absolute",
+                                bottom: "2px",
+                                right: "4px",
+                                background: "#f0fdf4",
+                                color: "#166534",
+                                fontSize: "0.7rem",
+                                fontWeight: "500",
+                                borderRadius: "6px",
+                                padding: "2px 7px",
+                                border: "1px solid #bbf7d0",
+                              }}
+                            >
+                              <i className="fas fa-calendar-check me-1"></i>
+                              Last update: {_global.formatDateToYYYYMMDD(item.historyHolding[item.historyHolding.length - 1].date)}
+                            </b>
                             <div className="text-start">
                               {item.historyHolding && item.historyHolding.length > 0 && (() => {
                                 const lastHold = item.historyHolding[item.historyHolding.length - 1];
