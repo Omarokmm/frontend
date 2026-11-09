@@ -49,6 +49,7 @@ const Sidebar = () => {
               )}
             {(user.roles[0] === _global.allRoles.admin ||
               user.roles[0] === _global.allRoles.manager ||
+              user.roles[0] === _global.allRoles.Reception ||
               user.roles[0] === _global.allRoles.super_admin || (user.roles[0] === _global.allRoles.technician &&
                 user.firstName === "Mustafa")) && (
                 <SubmenuItem
