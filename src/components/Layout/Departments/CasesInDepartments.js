@@ -942,696 +942,696 @@ const CasesInDepartments = () => {
 
     if (type === "Start") {
       setSearchTextStart(searchText);
-        if (searchText !== "") {
-          setStartCases(buffCasesStartingUser.filter(matchesItem));
-        } else {
-          setStartCases(buffCasesStartingUser);
-        }
-      }
-      if (type === "Pause") {
-        setSearchTextHold(searchText);
-        if (searchText !== "") {
-          setPauseCases(buffCasesHoldingUser.filter(matchesItem));
-        } else {
-          setPauseCases(buffCasesHoldingUser);
-        }
-      }
-      if (type === "End") {
-        setSearchText(searchText);
-        if (searchText !== "") {
-          setFinishedCases(buffCasesUser.filter(matchesItem));
-        } else {
-          setFinishedCases(buffCasesUser);
-        }
-      }
-    };
-    const searchStartByDate = (e) => {
-      const date = e.target.value;
-      setStartDate(date);
-      if (date != "") {
-        console.log("date");
-        if (department.name === "CadCam") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
-              ) === date
-            );
-          });
-          setStartCases(filteredCases);
-        }
-        if (department.name === "Caramic") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
-              ) === date
-            );
-          });
-          setStartCases(filteredCases);
-        }
-        if (department.name === "Fitting") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            if (item.fitting.actions.length > 0)
-              return (
-                _global.formatDateToYYYYMMDD(
-                  item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
-                ) === date
-              );
-          });
-
-          setStartCases(filteredCases);
-        }
-        if (department.name === "Plaster") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
-              ) === date
-            );
-          });
-
-          setStartCases(filteredCases);
-        }
-        if (department.name === "Reception") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.receptionPacking.actions[
-                  item.receptionPacking.actions.length - 1
-                ]?.dateStart
-              ) === date
-            );
-          });
-
-          setStartCases(filteredCases);
-        }
-        if (department.name === "Marketing") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.designing.actions[item.designing.actions.length - 1]
-                  ?.dateStart
-              ) === date
-            );
-          });
-
-          setStartCases(filteredCases);
-        }
-        if (department.name === "QC") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.qualityControl.actions[
-                  item.qualityControl.actions.length - 1
-                ]?.dateStart
-              ) === date
-            );
-          });
-
-          setStartCases(filteredCases);
-        }
-        if (department.name === "Drivers") {
-          const filteredCases = buffCasesStartingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.delivering.actions[item.delivering.actions.length - 1]
-                  ?.dateStart
-              ) === date
-            );
-          });
-
-          setStartCases(filteredCases);
-        }
+      if (searchText !== "") {
+        setStartCases(buffCasesStartingUser.filter(matchesItem));
       } else {
         setStartCases(buffCasesStartingUser);
       }
-    };
-    const searchPauseByDate = (e) => {
-      const date = e.target.value;
-      setPauseDate(date);
-      if (date != "") {
-        console.log("date");
-        if (department.name === "CadCam") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
-              ) === date
-            );
-          });
-          setPauseCases(filteredCases);
-        }
-        if (department.name === "Caramic") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
-              ) === date
-            );
-          });
-          setPauseCases(filteredCases);
-        }
-        if (department.name === "Fitting") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            if (item.fitting.actions.length > 0)
-              return (
-                _global.formatDateToYYYYMMDD(
-                  item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
-                ) === date
-              );
-          });
-
-          setPauseCases(filteredCases);
-        }
-        if (department.name === "Plaster") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
-              ) === date
-            );
-          });
-
-          setPauseCases(filteredCases);
-        }
-        if (department.name === "Reception") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.receptionPacking.actions[
-                  item.receptionPacking.actions.length - 1
-                ]?.dateStart
-              ) === date
-            );
-          });
-
-          setPauseCases(filteredCases);
-        }
-        if (department.name === "Marketing") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.designing.actions[item.designing.actions.length - 1]
-                  ?.dateStart
-              ) === date
-            );
-          });
-
-          setPauseCases(filteredCases);
-        }
-        if (department.name === "QC") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.qualityControl.actions[
-                  item.qualityControl.actions.length - 1
-                ]?.dateStart
-              ) === date
-            );
-          });
-
-          setPauseCases(filteredCases);
-        }
-        if (department.name === "Drivers") {
-          const filteredCases = buffCasesHoldingUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.delivering.actions[item.delivering.actions.length - 1]
-                  ?.dateStart
-              ) === date
-            );
-          });
-
-          setPauseCases(filteredCases);
-        }
+    }
+    if (type === "Pause") {
+      setSearchTextHold(searchText);
+      if (searchText !== "") {
+        setPauseCases(buffCasesHoldingUser.filter(matchesItem));
       } else {
-        setPauseCases(buffCasesStartingUser);
-      }
-    };
-    const searchByEndDate = (e) => {
-      const date = e.target.value;
-      const start = _global.formatDateToYYYYMMDD(startFinishDate);
-      const end = _global.formatDateToYYYYMMDD(date);
-      setEndDate(date);
-      if (date != "") {
-        const filteredCases = buffCasesUser.filter((item) => {
-          let endDateStr = "";
-          if (department.name === "CadCam") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.cadCam.actions.find((i) => i.dateEnd).dateEnd
-            );
-          }
-          if (department.name === "Caramic") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.ceramic.actions.find((i) => i.dateEnd).dateEnd
-            );
-          }
-          if (department.name === "Fitting") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.fitting.actions.find((i) => i.dateEnd)?.dateEnd
-            );
-          }
-          if (department.name === "Plaster") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.plaster.actions.find((i) => i.dateEnd).dateEnd
-            );
-          }
-          if (department.name === "Reception") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
-            );
-          }
-          if (department.name === "Marketing") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.designing.actions.find((i) => i.dateEnd).dateEnd
-            );
-          }
-          if (department.name === "QC") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
-            );
-          }
-          if (department.name === "Drivers") {
-            endDateStr = _global.formatDateToYYYYMMDD(
-              item.delivering.actions.find((i) => i.dateEnd).dateEnd
-            );
-          }
-          return endDateStr >= start && endDateStr <= end;
-        });
-        setFinishedCases(filteredCases);
-      } else {
-        setFinishedCases(buffCasesUser);
-      }
-    };
-    const searchByDate = (e) => {
-      const date = e.target.value;
-      setStartFinishDate(date);
-      if (date != "") {
-        console.log("date");
-        if (department.name === "CadCam") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.cadCam.actions.find((i) => i.dateEnd).dateEnd
-              ) === date
-            );
-          });
-          setFinishedCases(filteredCases);
-        }
-        if (department.name === "Caramic") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.ceramic.actions.find((i) => i.dateEnd).dateEnd
-              ) === date
-            );
-          });
-          setFinishedCases(filteredCases);
-        }
-        if (department.name === "Fitting") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            if (item.fitting.actions.length > 0)
-              return (
-                _global.formatDateToYYYYMMDD(
-                  item.fitting.actions.find((i) => i.dateEnd).dateEnd
-                ) === date
-              );
-          });
-
-          setFinishedCases(filteredCases);
-        }
-        if (department.name === "Plaster") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.plaster.actions.find((i) => i.dateEnd).dateEnd
-              ) === date
-            );
-          });
-
-          setFinishedCases(filteredCases);
-        }
-        if (department.name === "Reception") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
-              ) === date
-            );
-          });
-
-          setFinishedCases(filteredCases);
-        }
-        if (department.name === "Marketing") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.designing.actions.find((i) => i.dateEnd).dateEnd
-              ) === date
-            );
-          });
-
-          setFinishedCases(filteredCases);
-        }
-        if (department.name === "QC") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
-              ) === date
-            );
-          });
-
-          setFinishedCases(filteredCases);
-        }
-        if (department.name === "Drivers") {
-          const filteredCases = buffCasesUser.filter((item) => {
-            return (
-              _global.formatDateToYYYYMMDD(
-                item.delivering.actions.find((i) => i.dateEnd).dateEnd
-              ) === date
-            );
-          });
-
-          setFinishedCases(filteredCases);
-        }
-      } else {
-        setFinishedCases(buffCasesUser);
-      }
-    };
-    const handlePrint = useReactToPrint({
-      content: () => userRef.current,
-      documentTitle: ` ${department.name} (Finished Cases)`,
-    });
-    const handlePrint1 = useReactToPrint({
-      content: () => userRef1.current,
-      documentTitle: ` ${department.name} (Starting Cases)`,
-    });
-    const handlePrint2 = useReactToPrint({
-      content: () => userRef2.current,
-      documentTitle: `${department.name} (Holding Cases)`,
-    });
-    const handlePrintSelected = useReactToPrint({
-      content: () => userRef3.current,
-      documentTitle: `${department.name} (Selected Starting Cases)`,
-    });
-    function sortCasesByTechnacianName(cases, type) {
-      const sortingCases = [...cases].sort((a, b) => {
-        const nameA = getTechnicainName(a).toLowerCase(); // Convert names to lower case for case-insensitive comparison
-        const nameB = getTechnicainName(b).toLowerCase(); // Convert names to lower case for case-insensitive comparison
-
-        if (nameA < nameB) {
-          return -1; // a should come before b
-        }
-        if (nameA > nameB) {
-          return 1; // b should come before a
-        }
-        return 0; // names are equal
-      });
-      const deepClonedCases = JSON.parse(JSON.stringify(sortingCases));
-      if (type === "Start") {
-        setStartCases(deepClonedCases);
-      }
-      if (type === "Hold") {
-        setPauseCases(deepClonedCases);
-      }
-      if (type === "End") {
-        setFinishedCases(deepClonedCases);
+        setPauseCases(buffCasesHoldingUser);
       }
     }
-    const buffCaseHandle = (item) => {
-      const newItem = JSON.parse(JSON.stringify(item)); // Deep clone = new object ref
-      setBuffCase(newItem);
-    };
-    return (
-      <div className="content user-profile">
-        <div className="card">
-          <h5 class="card-title">
-            <span>{department.name} Cases </span>
-          </h5>
-          <div className="card-body">
-            {/* Tabs  */}
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active bgc-primary"
-                  id="startCases-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#startCases-tab-pane"
-                  type="button"
-                  role="tab"
-                  aria-controls="startCases-tab-pane"
-                  aria-selected="false"
-                  onClick={() => {
-                    searchByName("", "Start");
-                    setStartDate("");
-                  }}
-                >
-                  Start <small>({startCases.length})</small>
-                </button>
-              </li>
-              <li
-                class="nav-item"
-                role="presentation"
-              // onClick={() => searchByName("", "Pause")}
+    if (type === "End") {
+      setSearchText(searchText);
+      if (searchText !== "") {
+        setFinishedCases(buffCasesUser.filter(matchesItem));
+      } else {
+        setFinishedCases(buffCasesUser);
+      }
+    }
+  };
+  const searchStartByDate = (e) => {
+    const date = e.target.value;
+    setStartDate(date);
+    if (date != "") {
+      console.log("date");
+      if (department.name === "CadCam") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+        setStartCases(filteredCases);
+      }
+      if (department.name === "Caramic") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+        setStartCases(filteredCases);
+      }
+      if (department.name === "Fitting") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          if (item.fitting.actions.length > 0)
+            return (
+              _global.formatDateToYYYYMMDD(
+                item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+              ) === date
+            );
+        });
+
+        setStartCases(filteredCases);
+      }
+      if (department.name === "Plaster") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+
+        setStartCases(filteredCases);
+      }
+      if (department.name === "Reception") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.receptionPacking.actions[
+                item.receptionPacking.actions.length - 1
+              ]?.dateStart
+            ) === date
+          );
+        });
+
+        setStartCases(filteredCases);
+      }
+      if (department.name === "Marketing") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.designing.actions[item.designing.actions.length - 1]
+                ?.dateStart
+            ) === date
+          );
+        });
+
+        setStartCases(filteredCases);
+      }
+      if (department.name === "QC") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.qualityControl.actions[
+                item.qualityControl.actions.length - 1
+              ]?.dateStart
+            ) === date
+          );
+        });
+
+        setStartCases(filteredCases);
+      }
+      if (department.name === "Drivers") {
+        const filteredCases = buffCasesStartingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.delivering.actions[item.delivering.actions.length - 1]
+                ?.dateStart
+            ) === date
+          );
+        });
+
+        setStartCases(filteredCases);
+      }
+    } else {
+      setStartCases(buffCasesStartingUser);
+    }
+  };
+  const searchPauseByDate = (e) => {
+    const date = e.target.value;
+    setPauseDate(date);
+    if (date != "") {
+      console.log("date");
+      if (department.name === "CadCam") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.cadCam.actions[item.cadCam.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Caramic") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.ceramic.actions[item.ceramic.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Fitting") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          if (item.fitting.actions.length > 0)
+            return (
+              _global.formatDateToYYYYMMDD(
+                item.fitting.actions[item.fitting.actions.length - 1]?.dateStart
+              ) === date
+            );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Plaster") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.plaster.actions[item.plaster.actions.length - 1]?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Reception") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.receptionPacking.actions[
+                item.receptionPacking.actions.length - 1
+              ]?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Marketing") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.designing.actions[item.designing.actions.length - 1]
+                ?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "QC") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.qualityControl.actions[
+                item.qualityControl.actions.length - 1
+              ]?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+      if (department.name === "Drivers") {
+        const filteredCases = buffCasesHoldingUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.delivering.actions[item.delivering.actions.length - 1]
+                ?.dateStart
+            ) === date
+          );
+        });
+
+        setPauseCases(filteredCases);
+      }
+    } else {
+      setPauseCases(buffCasesStartingUser);
+    }
+  };
+  const searchByEndDate = (e) => {
+    const date = e.target.value;
+    const start = _global.formatDateToYYYYMMDD(startFinishDate);
+    const end = _global.formatDateToYYYYMMDD(date);
+    setEndDate(date);
+    if (date != "") {
+      const filteredCases = buffCasesUser.filter((item) => {
+        let endDateStr = "";
+        if (department.name === "CadCam") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.cadCam.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name === "Caramic") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.ceramic.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name === "Fitting") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.fitting.actions.find((i) => i.dateEnd)?.dateEnd
+          );
+        }
+        if (department.name === "Plaster") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.plaster.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name === "Reception") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name === "Marketing") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.designing.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name === "QC") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        if (department.name === "Drivers") {
+          endDateStr = _global.formatDateToYYYYMMDD(
+            item.delivering.actions.find((i) => i.dateEnd).dateEnd
+          );
+        }
+        return endDateStr >= start && endDateStr <= end;
+      });
+      setFinishedCases(filteredCases);
+    } else {
+      setFinishedCases(buffCasesUser);
+    }
+  };
+  const searchByDate = (e) => {
+    const date = e.target.value;
+    setStartFinishDate(date);
+    if (date != "") {
+      console.log("date");
+      if (department.name === "CadCam") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.cadCam.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Caramic") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.ceramic.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Fitting") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          if (item.fitting.actions.length > 0)
+            return (
+              _global.formatDateToYYYYMMDD(
+                item.fitting.actions.find((i) => i.dateEnd).dateEnd
+              ) === date
+            );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Plaster") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.plaster.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Reception") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.receptionPacking.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Marketing") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.designing.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "QC") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.qualityControl.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+      if (department.name === "Drivers") {
+        const filteredCases = buffCasesUser.filter((item) => {
+          return (
+            _global.formatDateToYYYYMMDD(
+              item.delivering.actions.find((i) => i.dateEnd).dateEnd
+            ) === date
+          );
+        });
+
+        setFinishedCases(filteredCases);
+      }
+    } else {
+      setFinishedCases(buffCasesUser);
+    }
+  };
+  const handlePrint = useReactToPrint({
+    content: () => userRef.current,
+    documentTitle: ` ${department.name} (Finished Cases)`,
+  });
+  const handlePrint1 = useReactToPrint({
+    content: () => userRef1.current,
+    documentTitle: ` ${department.name} (Starting Cases)`,
+  });
+  const handlePrint2 = useReactToPrint({
+    content: () => userRef2.current,
+    documentTitle: `${department.name} (Holding Cases)`,
+  });
+  const handlePrintSelected = useReactToPrint({
+    content: () => userRef3.current,
+    documentTitle: `${department.name} (Selected Starting Cases)`,
+  });
+  function sortCasesByTechnacianName(cases, type) {
+    const sortingCases = [...cases].sort((a, b) => {
+      const nameA = getTechnicainName(a).toLowerCase(); // Convert names to lower case for case-insensitive comparison
+      const nameB = getTechnicainName(b).toLowerCase(); // Convert names to lower case for case-insensitive comparison
+
+      if (nameA < nameB) {
+        return -1; // a should come before b
+      }
+      if (nameA > nameB) {
+        return 1; // b should come before a
+      }
+      return 0; // names are equal
+    });
+    const deepClonedCases = JSON.parse(JSON.stringify(sortingCases));
+    if (type === "Start") {
+      setStartCases(deepClonedCases);
+    }
+    if (type === "Hold") {
+      setPauseCases(deepClonedCases);
+    }
+    if (type === "End") {
+      setFinishedCases(deepClonedCases);
+    }
+  }
+  const buffCaseHandle = (item) => {
+    const newItem = JSON.parse(JSON.stringify(item)); // Deep clone = new object ref
+    setBuffCase(newItem);
+  };
+  return (
+    <div className="content user-profile">
+      <div className="card">
+        <h5 class="card-title">
+          <span>{department.name} Cases </span>
+        </h5>
+        <div className="card-body">
+          {/* Tabs  */}
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active bgc-primary"
+                id="startCases-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#startCases-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="startCases-tab-pane"
+                aria-selected="false"
+                onClick={() => {
+                  searchByName("", "Start");
+                  setStartDate("");
+                }}
               >
-                <button
-                  class="nav-link  bgc-danger"
-                  id="holdCases-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#holdCases-tab-pane"
-                  type="button"
-                  role="tab"
-                  aria-controls="holdCases-tab-pane"
-                  onClick={() => {
-                    searchByName("", "Pause");
-                    setPauseDate("");
-                  }}
-                  aria-selected="true"
-                >
-                  Hold <small>({pauseCases.length})</small>
-                </button>
-              </li>
-              <li
-                class="nav-item"
-                role="presentation"
-              // onClick={() => searchByName("", "End")}
-              >
-                <button
-                  class="nav-link  bgc-success"
-                  id="endCases-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#endCases-tab-pane"
-                  type="button"
-                  role="tab"
-                  aria-controls="endCases-tab-pane"
-                  onClick={() => {
-                    searchByName("", "End");
-                    setStartFinishDate("");
-                    setEndDate("");
-                  }}
-                  aria-selected="true"
-                >
-                  End <small>({FinishedCases?.length})</small>
-                </button>
-              </li>
-            </ul>
-            {/* Tabs Contents */}
-            {/* Starting Cases */}
-            <div
-              class="tab-content"
-              id="myTabContent"
-            // onClick={() => {
-            //   setSearchText("");
-            //   setSearchTextHold("");
-            //   setSearchTextStart("");
-            // }}
+                Start <small>({startCases.length})</small>
+              </button>
+            </li>
+            <li
+              class="nav-item"
+              role="presentation"
+            // onClick={() => searchByName("", "Pause")}
             >
-              <div
-                class="tab-pane fade show active"
-                id="startCases-tab-pane"
-                role="tabpanel"
-                aria-labelledby="startCases-tab"
-                tabIndex="0"
+              <button
+                class="nav-link  bgc-danger"
+                id="holdCases-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#holdCases-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="holdCases-tab-pane"
+                onClick={() => {
+                  searchByName("", "Pause");
+                  setPauseDate("");
+                }}
+                aria-selected="true"
               >
-                {/* Starting  */}
-                <div>
-                  <div className="row">
-                    <div className="col-lg-7 mb-3 ">
+                Hold <small>({pauseCases.length})</small>
+              </button>
+            </li>
+            <li
+              class="nav-item"
+              role="presentation"
+            // onClick={() => searchByName("", "End")}
+            >
+              <button
+                class="nav-link  bgc-success"
+                id="endCases-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#endCases-tab-pane"
+                type="button"
+                role="tab"
+                aria-controls="endCases-tab-pane"
+                onClick={() => {
+                  searchByName("", "End");
+                  setStartFinishDate("");
+                  setEndDate("");
+                }}
+                aria-selected="true"
+              >
+                End <small>({FinishedCases?.length})</small>
+              </button>
+            </li>
+          </ul>
+          {/* Tabs Contents */}
+          {/* Starting Cases */}
+          <div
+            class="tab-content"
+            id="myTabContent"
+          // onClick={() => {
+          //   setSearchText("");
+          //   setSearchTextHold("");
+          //   setSearchTextStart("");
+          // }}
+          >
+            <div
+              class="tab-pane fade show active"
+              id="startCases-tab-pane"
+              role="tabpanel"
+              aria-labelledby="startCases-tab"
+              tabIndex="0"
+            >
+              {/* Starting  */}
+              <div>
+                <div className="row">
+                  <div className="col-lg-7 mb-3 ">
+                    <input
+                      type="text"
+                      name="searchTextStart"
+                      className="form-control"
+                      placeholder="Search by name | case number | case type "
+                      value={searchTextStart}
+                      onChange={(e) => searchByName(e.target.value, "Start")}
+                    />
+                  </div>
+                  {/* Start Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
                       <input
-                        type="text"
-                        name="searchTextStart"
+                        type="date"
                         className="form-control"
-                        placeholder="Search by name | case number | case type "
-                        value={searchTextStart}
-                        onChange={(e) => searchByName(e.target.value, "Start")}
+                        placeholder="Select Date"
+                        value={startDate}
+                        onChange={(e) => searchStartByDate(e)}
                       />
                     </div>
-                    {/* Start Date */}
-                    <div className="col-lg-3 ">
-                      <div className="form-group">
-                        <input
-                          type="date"
-                          className="form-control"
-                          placeholder="Select Date"
-                          value={startDate}
-                          onChange={(e) => searchStartByDate(e)}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-lg-2 mb-3 print-btn">
-                      <button
-                        className="btn btn-sm btn-primary "
-                        onClick={() => {
-                          handlePrint1();
-                        }}
-                      >
-                        {" "}
-                        <i class="fas fa-print"></i> print
-                      </button>
-                      {/* {department.shortDescription === "receptionPacking" && ( */}
-                      <button
-                        className="btn btn-sm btn-success ms-2"
-                        onClick={() => {
-                          handlePrintSelected();
-                        }}
-                        disabled={selectedStartCases.length === 0}
-                      >
-                        <i className="fas fa-print"></i> Print Selected
-                      </button>
-                      {/* )} */}
-                    </div>
                   </div>
-                  {startCases?.length > 0 && (
-                    <table
-                      ref={userRef1}
-                      style={{ width: "100%" }}
-                      className="table text-center table-bordered"
+                  <div className="col-lg-2 mb-3 print-btn">
+                    <button
+                      className="btn btn-sm btn-primary "
+                      onClick={() => {
+                        handlePrint1();
+                      }}
                     >
-                      <thead>
-                        <tr className="table-secondary">
-                          {/* {department.shortDescription === "receptionPacking" && ( */}
-                          <th scope="col">Print</th>
-                          {/* )} */}
-                          <th scope="col">#</th>
-                          <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>StartedAt {renderSortIcon("dateIn")}</th>
-                          <th
-                            scope="col"
-                            onClick={() =>
-                              sortCasesByTechnacianName(startCases, "Start")
-                            }
-                          >
-                            Technacian
-                          </th>
-                          <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
-                          <th scope="col">Patient</th>
-                          <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">Assigned {renderSortIcon("assignedTo")}</th>
-                          <th scope="col">Ceramic</th>
-                          <th scope="col">Notes</th>
-                          <th scope="col">#teeth</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {startCases.map((item) => (
-                          <tr
-                            key={item._id}
-                            className={` c-pointer ${(item.isStudy ? "bgc-study" : "") ||
-                              (item.isUrgent ? "urgent-case animate-me" : "")
-                              }`}
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                    {/* {department.shortDescription === "receptionPacking" && ( */}
+                    <button
+                      className="btn btn-sm btn-success ms-2"
+                      onClick={() => {
+                        handlePrintSelected();
+                      }}
+                      disabled={selectedStartCases.length === 0}
+                    >
+                      <i className="fas fa-print"></i> Print Selected
+                    </button>
+                    {/* )} */}
+                  </div>
+                </div>
+                {startCases?.length > 0 && (
+                  <table
+                    ref={userRef1}
+                    style={{ width: "100%" }}
+                    className="table text-center table-bordered"
+                  >
+                    <thead>
+                      <tr className="table-secondary">
+                        {/* {department.shortDescription === "receptionPacking" && ( */}
+                        <th scope="col">Print</th>
+                        {/* )} */}
+                        <th scope="col">#</th>
+                        <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>StartedAt {renderSortIcon("dateIn")}</th>
+                        <th
+                          scope="col"
+                          onClick={() =>
+                            sortCasesByTechnacianName(startCases, "Start")
+                          }
+                        >
+                          Technacian
+                        </th>
+                        <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
+                        <th scope="col">Patient</th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">Assigned {renderSortIcon("assignedTo")}</th>
+                        <th scope="col">Ceramic</th>
+                        <th scope="col">Notes</th>
+                        <th scope="col">#teeth</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {startCases.map((item) => (
+                        <tr
+                          key={item._id}
+                          className={` c-pointer ${(item.isStudy ? "bgc-study" : "") ||
+                            (item.isUrgent ? "urgent-case animate-me" : "")
+                            }`}
 
-                          >
-                            {/* {department.shortDescription === "receptionPacking" && department.shortDescription === "Admin" && ( */}
-                            <td onClick={(e) => e.stopPropagation()}>
-                              <div className="form-check d-flex justify-content-center">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  checked={selectedStartCases.includes(item._id)}
-                                  onChange={(e) => {
-                                    e.stopPropagation();
-                                    handleSelectStartCase(item._id);
-                                  }}
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                              </div>
-                            </td>
+                        >
+                          {/* {department.shortDescription === "receptionPacking" && department.shortDescription === "Admin" && ( */}
+                          <td onClick={(e) => e.stopPropagation()}>
+                            <div className="form-check d-flex justify-content-center">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                checked={selectedStartCases.includes(item._id)}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectStartCase(item._id);
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </td>
 
-                            <td onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                              data-bs-toggle="modal"
-                              data-bs-target="#viewModal">{item.caseNumber}</td>
-                            <td onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                              data-bs-toggle="modal"
-                              data-bs-target="#viewModal">{getStartingDate1(item)}</td>
-                            <td onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                              data-bs-toggle="modal"
-                              data-bs-target="#viewModal">{getTechnicainName(item)}</td>
-                            <td onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                              data-bs-toggle="modal"
-                              data-bs-target="#viewModal">{item?.dentistObj?.name}</td>
-                            <td onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                              data-bs-toggle="modal"
-                              data-bs-target="#viewModal">{item.patientName}</td>
-                            {renderAssignedCell(item)}
-                            <td onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                              data-bs-toggle="modal"
-                              data-bs-target="#viewModal">
-                              <div className="text-start small">
-                                {(() => {
-                                  const assignments = getCadCamAndCeramicAssignments(item);
-                                  return (
-                                    <>
-                                      {/* <strong>{assignments.ceramic}</strong> */}
-                                      {/* {assignments.cadCam && (
+                          <td onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewModal">{item.caseNumber}</td>
+                          <td onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewModal">{getStartingDate1(item)}</td>
+                          <td onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewModal">{getTechnicainName(item)}</td>
+                          <td onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewModal">{item?.dentistObj?.name}</td>
+                          <td onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewModal">{item.patientName}</td>
+                          {renderAssignedCell(item)}
+                          <td onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#viewModal">
+                            <div className="text-start small">
+                              {(() => {
+                                const assignments = getCadCamAndCeramicAssignments(item);
+                                return (
+                                  <>
+                                    {/* <strong>{assignments.ceramic}</strong> */}
+                                    {/* {assignments.cadCam && (
                                               <div><strong>CadCam:</strong> {assignments.cadCam}</div>
                                           )} */}
-                                      {assignments.ceramic && item.isAssignedCeramic && (
-                                        <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
-                                      )}
-                                      {!assignments.ceramic && (
-                                        <div className="text-center"><strong>-</strong></div>
-                                      )}
-                                    </>
-                                  );
-                                })()}
-                              </div>
+                                    {assignments.ceramic && item.isAssignedCeramic && (
+                                      <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                    )}
+                                    {!assignments.ceramic && (
+                                      <div className="text-center"><strong>-</strong></div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </td>
+                          <td onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentNoteCase(item);
+                            setShowNoteModal(true);
+                          }}>
+                            <button className="btn btn-sm btn-info text-white">
+                              <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
+                            </button>
+                          </td>
+                          {userData.isAdmin && (
+                            <td className="teeth-pieces">
+                              {groupTeethNumbersByName(item.teethNumbers)?.map(
+                                (item) => (
+                                  <p className="teeth-piece">
+                                    <span>{item.name}:</span>
+                                    <b className="badge text-bg-light">
+                                      {item.count}
+                                    </b>
+                                  </p>
+                                )
+                              )}
                             </td>
-                            <td onClick={(e) => {
-                              e.stopPropagation();
-                              setCurrentNoteCase(item);
-                              setShowNoteModal(true);
-                            }}>
-                              <button className="btn btn-sm btn-info text-white">
-                                <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
-                              </button>
-                            </td>
-                            {userData.isAdmin && (
-                              <td className="teeth-pieces">
-                                {groupTeethNumbersByName(item.teethNumbers)?.map(
-                                  (item) => (
-                                    <p className="teeth-piece">
-                                      <span>{item.name}:</span>
-                                      <b className="badge text-bg-light">
-                                        {item.count}
-                                      </b>
-                                    </p>
-                                  )
-                                )}
-                              </td>
-                            )}
-                            {/* <td>
+                          )}
+                          {/* <td>
                             <div className="actions-btns">
                               <span
                                 className="c-success"
@@ -1647,358 +1647,358 @@ const CasesInDepartments = () => {
                               </span>
                             </div>
                           </td> */}
+                        </tr>
+                      ))}
+                      {userData.isAdmin && (
+                        <>
+                          <tr>
+                            <td className="f-bold c-success" colSpan={9}>
+                              <b>Total of Pieces</b>
+                            </td>
+                            <td className="bg-success p-2 text-dark bg-opacity-50">
+                              <b>{sumOfTeethNumbersLength("Start")}</b>
+                            </td>
                           </tr>
-                        ))}
-                        {userData.isAdmin && (
-                          <>
+                          {userData.isAdmin && (
                             <tr>
                               <td className="f-bold c-success" colSpan={9}>
-                                <b>Total of Pieces</b>
+                                <b>Total Without Study</b>
                               </td>
                               <td className="bg-success p-2 text-dark bg-opacity-50">
-                                <b>{sumOfTeethNumbersLength("Start")}</b>
+                                <b>
+                                  {sumOfTeethNumbersLength("Start") -
+                                    getStudyCases(
+                                      groupCasesTeethNumbersByName("Start")
+                                    )}
+                                </b>
                               </td>
                             </tr>
-                            {userData.isAdmin && (
-                              <tr>
-                                <td className="f-bold c-success" colSpan={9}>
-                                  <b>Total Without Study</b>
-                                </td>
-                                <td className="bg-success p-2 text-dark bg-opacity-50">
-                                  <b>
-                                    {sumOfTeethNumbersLength("Start") -
-                                      getStudyCases(
-                                        groupCasesTeethNumbersByName("Start")
-                                      )}
-                                  </b>
-                                </td>
-                              </tr>
-                            )}
-                            <tr>
-                              <td colSpan={9}>
-                                <div className="summary-teeth-cases">
-                                  {groupCasesTeethNumbersByName("Start")?.map(
-                                    (item) => (
-                                      <p className="mb-0">
-                                        <span>{item.name}:</span>
-                                        <b className="badge text-bg-success">
-                                          {item.count}
-                                        </b>
-                                      </p>
-                                    )
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          </>
-                        )}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-                {startCases?.length <= 0 && (
-                  <div className="text-center">
-                    <h6>No Starting Cases Yet! </h6>
-                  </div>
-                )}
-              </div>
-              {/* Pauseing Cases */}
-              <div
-                class="tab-pane fade "
-                id="holdCases-tab-pane"
-                role="tabpanel"
-                aria-labelledby="holdCases-tab"
-                tabIndex="0"
-              >
-                <div>
-                  <div className="row">
-                    <div className="col-lg-7 mb-3 ">
-                      <input
-                        type="text"
-                        name="searchTextStart"
-                        className="form-control"
-                        placeholder="Search by name | case number | case type "
-                        value={searchTextHold}
-                        onChange={(e) => searchByName(e.target.value, "Pause")}
-                      />
-                    </div>
-                    {/* Paus Date */}
-                    <div className="col-lg-3 ">
-                      <div className="form-group">
-                        <input
-                          type="date"
-                          className="form-control"
-                          placeholder="Select Date"
-                          value={pauseDate}
-                          onChange={(e) => searchPauseByDate(e)}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-lg-2 mb-3 print-btn">
-                      <button
-                        className="btn btn-sm btn-primary "
-                        onClick={() => {
-                          handlePrint2();
-                        }}
-                      >
-                        {" "}
-                        <i class="fas fa-print"></i> print
-                      </button>
-                    </div>
-                  </div>
-                  {pauseCases?.length > 0 && (
-                    <table
-                      ref={userRef2}
-                      style={{ width: "100%" }}
-                      className="table text-center table-bordered"
-                    >
-                      <thead>
-                        <tr className="table-secondary">
-                          <th scope="col">#</th>
-                          <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>HeldAt {renderSortIcon("dateIn")}</th>
-                          <th
-                            scope="col"
-                            onClick={() =>
-                              sortCasesByTechnacianName(pauseCases, "Hold")
-                            }
-                          >
-                            Technacian
-                          </th>
-                          <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
-                          <th scope="col">Patient</th>
-                          <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">Assigned {renderSortIcon("assignedTo")}</th>
-                          <th scope="col">Reason holding</th>
-                          <th scope="col">Notes</th>
-                          <th scope="col">#teeth</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pauseCases.map((item) => (
-                          <tr
-                            key={item._id}
-                            className="c-pointer"
-                            // onClick={() => viewCase(item, "view")}
-                            onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                            data-bs-toggle="modal"
-                            data-bs-target="#viewModal"
-                          >
-                            <td>{item.caseNumber}</td>
-                            <td>{getHoldingDate(item)}</td>
-                            <td>{getTechnicainName(item)}</td>
-                            <td>{item?.dentistObj?.name}</td>
-                            <td>{item.patientName}</td>
-                            {renderAssignedCell(item)}
-                            <td>{getHoldingreason(item)}</td>
-                            {userData.isAdmin && (
-                              <td className="teeth-pieces">
-                                {groupTeethNumbersByName(item.teethNumbers)?.map(
+                          )}
+                          <tr>
+                            <td colSpan={9}>
+                              <div className="summary-teeth-cases">
+                                {groupCasesTeethNumbersByName("Start")?.map(
                                   (item) => (
-                                    <p className="teeth-piece">
+                                    <p className="mb-0">
                                       <span>{item.name}:</span>
-                                      <b className="badge text-bg-light">
+                                      <b className="badge text-bg-success">
                                         {item.count}
                                       </b>
                                     </p>
                                   )
                                 )}
-                              </td>
-                            )}
-                            {/* <td>
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              {startCases?.length <= 0 && (
+                <div className="text-center">
+                  <h6>No Starting Cases Yet! </h6>
+                </div>
+              )}
+            </div>
+            {/* Pauseing Cases */}
+            <div
+              class="tab-pane fade "
+              id="holdCases-tab-pane"
+              role="tabpanel"
+              aria-labelledby="holdCases-tab"
+              tabIndex="0"
+            >
+              <div>
+                <div className="row">
+                  <div className="col-lg-7 mb-3 ">
+                    <input
+                      type="text"
+                      name="searchTextStart"
+                      className="form-control"
+                      placeholder="Search by name | case number | case type "
+                      value={searchTextHold}
+                      onChange={(e) => searchByName(e.target.value, "Pause")}
+                    />
+                  </div>
+                  {/* Paus Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder="Select Date"
+                        value={pauseDate}
+                        onChange={(e) => searchPauseByDate(e)}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-lg-2 mb-3 print-btn">
+                    <button
+                      className="btn btn-sm btn-primary "
+                      onClick={() => {
+                        handlePrint2();
+                      }}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                  </div>
+                </div>
+                {pauseCases?.length > 0 && (
+                  <table
+                    ref={userRef2}
+                    style={{ width: "100%" }}
+                    className="table text-center table-bordered"
+                  >
+                    <thead>
+                      <tr className="table-secondary">
+                        <th scope="col">#</th>
+                        <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>HeldAt {renderSortIcon("dateIn")}</th>
+                        <th
+                          scope="col"
+                          onClick={() =>
+                            sortCasesByTechnacianName(pauseCases, "Hold")
+                          }
+                        >
+                          Technacian
+                        </th>
+                        <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
+                        <th scope="col">Patient</th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">Assigned {renderSortIcon("assignedTo")}</th>
+                        <th scope="col">Reason holding</th>
+                        <th scope="col">Notes</th>
+                        <th scope="col">#teeth</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pauseCases.map((item) => (
+                        <tr
+                          key={item._id}
+                          className="c-pointer"
+                          // onClick={() => viewCase(item, "view")}
+                          onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewModal"
+                        >
+                          <td>{item.caseNumber}</td>
+                          <td>{getHoldingDate(item)}</td>
+                          <td>{getTechnicainName(item)}</td>
+                          <td>{item?.dentistObj?.name}</td>
+                          <td>{item.patientName}</td>
+                          {renderAssignedCell(item)}
+                          <td>{getHoldingreason(item)}</td>
+                          {userData.isAdmin && (
+                            <td className="teeth-pieces">
+                              {groupTeethNumbersByName(item.teethNumbers)?.map(
+                                (item) => (
+                                  <p className="teeth-piece">
+                                    <span>{item.name}:</span>
+                                    <b className="badge text-bg-light">
+                                      {item.count}
+                                    </b>
+                                  </p>
+                                )
+                              )}
+                            </td>
+                          )}
+                          {/* <td>
                 { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
                     <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
                     <i class="fas fa-edit"></i>
                     </span>
                 }
                 </td> */}
-                          </tr>
-                        ))}
-                        {userData.isAdmin && (
-                          <>
-                            <tr>
-                              <td className="f-bold c-success" colSpan={7}>
-                                <b>Total of Pieces</b>
-                              </td>
-                              <td className="bg-success p-2 text-dark bg-opacity-50">
-                                <b>{sumOfTeethNumbersLength("Pause")}</b>
-                              </td>
-                            </tr>
-                            {(departments[0].name === "cadCam" ||
-                              departments[0].name === "fitting") && (
-                                <tr>
-                                  <td className="f-bold c-success" colSpan={7}>
-                                    <b>Total Without Study</b>
-                                  </td>
-                                  <td className="bg-success p-2 text-dark bg-opacity-50">
-                                    <b>
-                                      {sumOfTeethNumbersLength("Pause") -
-                                        getStudyCases(
-                                          groupCasesTeethNumbersByName("Pause")
-                                        )}
-                                    </b>
-                                  </td>
-                                </tr>
-                              )}
-                            <tr>
-                              <td colSpan={8}>
-                                <div className="summary-teeth-cases">
-                                  {groupCasesTeethNumbersByName("Pause")?.map(
-                                    (item) => (
-                                      <p className="mb-0">
-                                        <span>{item.name}:</span>
-                                        <b className="badge text-bg-success">
-                                          {item.count}
-                                        </b>
-                                      </p>
-                                    )
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          </>
-                        )}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-                {pauseCases?.length <= 0 && (
-                  <div className="text-center">
-                    <h6>No pauseing Cases Yet! </h6>
-                  </div>
-                )}
-              </div>
-              {/* Finished Cases */}
-              <div
-                class="tab-pane fade "
-                id="endCases-tab-pane"
-                role="tabpanel"
-                aria-labelledby="endCases-tab"
-                tabIndex="0"
-              >
-                <div>
-                  <div className="row">
-                    <div className="col-lg-6 mb-3 ">
-                      <input
-                        type="text"
-                        name="searchTextStart"
-                        className="form-control"
-                        placeholder="Search by name | case number | case type "
-                        value={searchText}
-                        onChange={(e) => searchByName(e.target.value, "End")}
-                      />
-                    </div>
-                    {/* Start Date */}
-                    <div className="col-lg-3 ">
-                      <div className="form-group">
-                        <input
-                          type="date"
-                          className="form-control"
-                          placeholder="Start Date"
-                          value={startFinishDate}
-                          onChange={(e) => searchByDate(e)}
-                        />
-                      </div>
-                    </div>
-                    {/* End Date */}
-                    <div className="col-lg-3 ">
-                      <div className="form-group">
-                        <input
-                          type="date"
-                          className="form-control"
-                          placeholder=" End Date"
-                          value={endDate}
-                          onChange={(e) => searchByEndDate(e)}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-lg-12 mb-3 print-btn">
-                      <button
-                        className="btn btn-sm btn-primary "
-                        onClick={() => {
-                          handlePrint();
-                        }}
-                      >
-                        {" "}
-                        <i class="fas fa-print"></i> print
-                      </button>
-                    </div>
-                  </div>
-                  {FinishedCases?.length > 0 && (
-                    <table
-                      ref={userRef}
-                      style={{ width: "100%" }}
-                      className="table text-center table-bordered"
-                    >
-                      <thead>
-                        <tr className="table-secondary">
-                          <th scope="col">#</th>
-                          <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>StartedAtAt {renderSortIcon("dateIn")}</th>
-                          <th scope="col">FinishedAt</th>
-                          <th scope="col">day(s)</th>
-                          <th
-                            scope="col"
-                            onClick={() =>
-                              sortCasesByTechnacianName(FinishedCases, "End")
-                            }
-                          >
-                            Technacian
-                          </th>
-                          <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
-                          <th scope="col">Patient</th>
-                          <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">Assigned {renderSortIcon("assignedTo")}</th>
-                          <th scope="col">Ceramic</th>
-                          {/* <th scope="col">Notes</th> */}
-                          <th scope="col">#teeth</th>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {FinishedCases.map((item) => (
-                          <tr
-                            className="c-pointer"
-                            key={item._id}
-                            // onClick={() => viewCase(item, "view")}
-                            onClick={() => {
-                              buffCaseHandle(item);
-                            }}
-                            data-bs-toggle="modal"
-                            data-bs-target="#viewModal"
-                          >
-                            <td>{item.caseNumber}</td>
-                            <td>{getStartingDate(item)}</td>
-                            <td>{getFinisheingDate(item)}</td>
-                            <td>
-                              {handleCalculate(
-                                getFullStartingDate(item),
-                                getFullFinisheingDate(item)
-                              )}
+                      ))}
+                      {userData.isAdmin && (
+                        <>
+                          <tr>
+                            <td className="f-bold c-success" colSpan={7}>
+                              <b>Total of Pieces</b>
                             </td>
-                            <td>{getTechnicainName(item)}</td>
-                            <td>{item?.dentistObj?.name}</td>
-                            <td>{item.patientName}</td>
-                            {renderAssignedCell(item)}
-                            <td>
-                              <div className="text-start small">
-                                {(() => {
-                                  const assignments = getCadCamAndCeramicAssignments(item);
-                                  return (
-                                    <>
-                                      {/* <strong>{assignments.ceramic}</strong> */}
-                                      {/* {assignments.cadCam && (
-                                      <div><strong>CadCam:</strong> {assignments.cadCam}</div>
-                                    )} */}
-                                      {assignments.ceramic && item.isAssignedCeramic && (
-                                        <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                            <td className="bg-success p-2 text-dark bg-opacity-50">
+                              <b>{sumOfTeethNumbersLength("Pause")}</b>
+                            </td>
+                          </tr>
+                          {(departments[0].name === "cadCam" ||
+                            departments[0].name === "fitting") && (
+                              <tr>
+                                <td className="f-bold c-success" colSpan={7}>
+                                  <b>Total Without Study</b>
+                                </td>
+                                <td className="bg-success p-2 text-dark bg-opacity-50">
+                                  <b>
+                                    {sumOfTeethNumbersLength("Pause") -
+                                      getStudyCases(
+                                        groupCasesTeethNumbersByName("Pause")
                                       )}
-                                      {!assignments.ceramic && (
-                                        <div className="text-center"><strong>-</strong></div>
-                                      )}
-                                    </>
-                                  );
-                                })()}
+                                  </b>
+                                </td>
+                              </tr>
+                            )}
+                          <tr>
+                            <td colSpan={8}>
+                              <div className="summary-teeth-cases">
+                                {groupCasesTeethNumbersByName("Pause")?.map(
+                                  (item) => (
+                                    <p className="mb-0">
+                                      <span>{item.name}:</span>
+                                      <b className="badge text-bg-success">
+                                        {item.count}
+                                      </b>
+                                    </p>
+                                  )
+                                )}
                               </div>
                             </td>
-                            {/* <td onClick={(e) => {
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              {pauseCases?.length <= 0 && (
+                <div className="text-center">
+                  <h6>No pauseing Cases Yet! </h6>
+                </div>
+              )}
+            </div>
+            {/* Finished Cases */}
+            <div
+              class="tab-pane fade "
+              id="endCases-tab-pane"
+              role="tabpanel"
+              aria-labelledby="endCases-tab"
+              tabIndex="0"
+            >
+              <div>
+                <div className="row">
+                  <div className="col-lg-6 mb-3 ">
+                    <input
+                      type="text"
+                      name="searchTextStart"
+                      className="form-control"
+                      placeholder="Search by name | case number | case type "
+                      value={searchText}
+                      onChange={(e) => searchByName(e.target.value, "End")}
+                    />
+                  </div>
+                  {/* Start Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder="Start Date"
+                        value={startFinishDate}
+                        onChange={(e) => searchByDate(e)}
+                      />
+                    </div>
+                  </div>
+                  {/* End Date */}
+                  <div className="col-lg-3 ">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder=" End Date"
+                        value={endDate}
+                        onChange={(e) => searchByEndDate(e)}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-lg-12 mb-3 print-btn">
+                    <button
+                      className="btn btn-sm btn-primary "
+                      onClick={() => {
+                        handlePrint();
+                      }}
+                    >
+                      {" "}
+                      <i class="fas fa-print"></i> print
+                    </button>
+                  </div>
+                </div>
+                {FinishedCases?.length > 0 && (
+                  <table
+                    ref={userRef}
+                    style={{ width: "100%" }}
+                    className="table text-center table-bordered"
+                  >
+                    <thead>
+                      <tr className="table-secondary">
+                        <th scope="col">#</th>
+                        <th scope="col" onClick={() => handleSort("dateIn")} style={{ cursor: "pointer" }}>StartedAtAt {renderSortIcon("dateIn")}</th>
+                        <th scope="col">FinishedAt</th>
+                        <th scope="col">day(s)</th>
+                        <th
+                          scope="col"
+                          onClick={() =>
+                            sortCasesByTechnacianName(FinishedCases, "End")
+                          }
+                        >
+                          Technacian
+                        </th>
+                        <th scope="col" onClick={() => handleSort("doctorName")} style={{ cursor: "pointer" }}>Doctor {renderSortIcon("doctorName")}</th>
+                        <th scope="col">Patient</th>
+                        <th scope="col" onClick={() => handleSort("assignedTo")} style={{ cursor: "pointer" }} className="text-start">Assigned {renderSortIcon("assignedTo")}</th>
+                        <th scope="col">Ceramic</th>
+                        {/* <th scope="col">Notes</th> */}
+                        <th scope="col">#teeth</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {FinishedCases.map((item) => (
+                        <tr
+                          className="c-pointer"
+                          key={item._id}
+                          // onClick={() => viewCase(item, "view")}
+                          onClick={() => {
+                            buffCaseHandle(item);
+                          }}
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewModal"
+                        >
+                          <td>{item.caseNumber}</td>
+                          <td>{getStartingDate(item)}</td>
+                          <td>{getFinisheingDate(item)}</td>
+                          <td>
+                            {handleCalculate(
+                              getFullStartingDate(item),
+                              getFullFinisheingDate(item)
+                            )}
+                          </td>
+                          <td>{getTechnicainName(item)}</td>
+                          <td>{item?.dentistObj?.name}</td>
+                          <td>{item.patientName}</td>
+                          {renderAssignedCell(item)}
+                          <td>
+                            <div className="text-start small">
+                              {(() => {
+                                const assignments = getCadCamAndCeramicAssignments(item);
+                                return (
+                                  <>
+                                    {/* <strong>{assignments.ceramic}</strong> */}
+                                    {/* {assignments.cadCam && (
+                                      <div><strong>CadCam:</strong> {assignments.cadCam}</div>
+                                    )} */}
+                                    {assignments.ceramic && item.isAssignedCeramic && (
+                                      <div className="text-center"><strong>{assignments.ceramic ? assignments.ceramic : "-"}</strong></div>
+                                    )}
+                                    {!assignments.ceramic && (
+                                      <div className="text-center"><strong>-</strong></div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          </td>
+                          {/* <td onClick={(e) => {
                             e.stopPropagation();
                             setCurrentNoteCase(item);
                             setShowNoteModal(true);
@@ -2007,270 +2007,308 @@ const CasesInDepartments = () => {
                               <i className="fas fa-comment-dots"></i> {item.notes?.length || 0}
                             </button>
                           </td> */}
-                            {userData.isAdmin && (
-                              <td className="teeth-pieces">
-                                {groupTeethNumbersByName(item.teethNumbers)?.map(
-                                  (item) => (
-                                    <p className="teeth-piece">
-                                      <span>{item.name}:</span>
-                                      <b className="badge text-bg-light">
-                                        {item.count}
-                                      </b>
-                                    </p>
-                                  )
-                                )}
-                              </td>
-                            )}
-                            {/* <td>
+                          {userData.isAdmin && (
+                            <td className="teeth-pieces">
+                              {groupTeethNumbersByName(item.teethNumbers)?.map(
+                                (item) => (
+                                  <p className="teeth-piece">
+                                    <span>{item.name}:</span>
+                                    <b className="badge text-bg-light">
+                                      {item.count}
+                                    </b>
+                                  </p>
+                                )
+                              )}
+                            </td>
+                          )}
+                          {/* <td>
                 { (user.roles[0] ===  _global.allRoles.technician && user.lastName === "Jamous" || user.roles[0] ===  _global.allRoles.technician && departments[0].name === "CadCam" ||  user.roles[0] ===  _global.allRoles.admin && departments[0].name === "QC")&&
                     <span className="c-primary ml-3" onClick={(e) => editCase(item._id)}>
                     <i class="fas fa-edit"></i>
                     </span>
                 }
                 </td> */}
+                        </tr>
+                      ))}
+                      {userData.isAdmin && (
+                        <>
+                          <tr>
+                            <td className="f-bold c-success" colSpan={8}>
+                              <b>Total of Pieces</b>
+                            </td>
+                            <td className="bg-success p-2 text-dark bg-opacity-50">
+                              <b>{sumOfTeethNumbersLength("End")}</b>
+                            </td>
                           </tr>
-                        ))}
-                        {userData.isAdmin && (
-                          <>
-                            <tr>
-                              <td className="f-bold c-success" colSpan={8}>
-                                <b>Total of Pieces</b>
-                              </td>
-                              <td className="bg-success p-2 text-dark bg-opacity-50">
-                                <b>{sumOfTeethNumbersLength("End")}</b>
-                              </td>
-                            </tr>
-                            {(departments[0].name === "cadCam" ||
-                              departments[0].name === "fitting") && (
-                                <tr>
-                                  <td className="f-bold c-success" colSpan={8}>
-                                    <b>Total Without Study</b>
-                                  </td>
-                                  <td className="bg-success p-2 text-dark bg-opacity-50">
-                                    <b>
-                                      {sumOfTeethNumbersLength("End") -
-                                        getStudyCases(
-                                          groupCasesTeethNumbersByName("End")
-                                        )}
-                                    </b>
-                                  </td>
-                                </tr>
-                              )}
-                            <tr>
-                              <td colSpan={9}>
-                                <div className="summary-teeth-cases">
-                                  {groupCasesTeethNumbersByName("End")?.map(
-                                    (item) => (
-                                      <p className="mb-0">
-                                        <span>{item.name}:</span>
-                                        <b className="badge text-bg-success">
-                                          {item.count}
-                                        </b>
-                                      </p>
-                                    )
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          </>
-                        )}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-                {FinishedCases?.length <= 0 && (
-                  <div className="text-center">
-                    <h6>No have Cases </h6>
-                  </div>
+                          {(departments[0].name === "cadCam" ||
+                            departments[0].name === "fitting") && (
+                              <tr>
+                                <td className="f-bold c-success" colSpan={8}>
+                                  <b>Total Without Study</b>
+                                </td>
+                                <td className="bg-success p-2 text-dark bg-opacity-50">
+                                  <b>
+                                    {sumOfTeethNumbersLength("End") -
+                                      getStudyCases(
+                                        groupCasesTeethNumbersByName("End")
+                                      )}
+                                  </b>
+                                </td>
+                              </tr>
+                            )}
+                          <tr>
+                            <td colSpan={9}>
+                              <div className="summary-teeth-cases">
+                                {groupCasesTeethNumbersByName("End")?.map(
+                                  (item) => (
+                                    <p className="mb-0">
+                                      <span>{item.name}:</span>
+                                      <b className="badge text-bg-success">
+                                        {item.count}
+                                      </b>
+                                    </p>
+                                  )
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
-        {FinishedCases.length > 0 && (
-          <div
-            class="modal fade"
-            id="viewModal"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            tabindex="-1"
-            aria-labelledby="exampleModalLabel"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog modal-xl">
-              <div class="modal-content">
-                <div class={`modal-header  text-white bg-primary`}>
-                  <h1 class="modal-title fs-5" id="exampleModalLabel">
-                    Case Information # {buffCase?.caseNumber}
-                  </h1>
-                  <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
+              {FinishedCases?.length <= 0 && (
+                <div className="text-center">
+                  <h6>No have Cases </h6>
                 </div>
-                <div class="modal-body">
-                  {console.log("buffCase", buffCase)}
-                  {buffCase && <ViewCase caseModel={buffCase} />}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Note Modal */}
-        {showNoteModal && (
-          <div
-            className="modal fade show d-block"
-            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-            tabIndex="-1"
-            role="dialog"
-          >
-            <div className="modal-dialog modal-dialog-centered" role="document">
-              <div className="modal-content">
-                <div className="modal-header bg-primary text-white">
-                  <h5 className="modal-title">Notes for Case #{currentNoteCase?.caseNumber}</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => {
-                      setShowNoteModal(false);
-                      setCurrentNoteCase(null);
-                      setNewNoteText("");
-                    }}
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <div style={{ maxHeight: "300px", overflowY: "auto", marginBottom: "15px" }}>
-                    {currentNoteCase?.notes && currentNoteCase.notes.length > 0 ? (
-                      currentNoteCase.notes.map((note, index) => (
-                        <div key={index} className="mb-3 p-2 border rounded bg-light">
-                          <div className="d-flex justify-content-between text-muted small mb-1">
-                            <strong>{note.author || note.name}</strong>
-                            <span>{new Date(note.date).toLocaleString()}</span>
-                          </div>
-                          <div>{note.text || note.msg}</div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-center text-muted">No notes yet.</p>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <textarea
-                      className="form-control"
-                      rows="3"
-                      placeholder="Type a new note here..."
-                      value={newNoteText}
-                      onChange={(e) => setNewNoteText(e.target.value)}
-                    ></textarea>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      setShowNoteModal(false);
-                      setCurrentNoteCase(null);
-                      setNewNoteText("");
-                    }}
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={async () => {
-                      if (!newNoteText.trim()) return;
-                      try {
-                        const newNote = {
-                          author: user.firstName + " " + user.lastName,
-                          name: user.firstName + " " + user.lastName,
-                          date: new Date().toISOString(),
-                          text: newNoteText,
-                          msg: newNoteText
-                        };
-
-                        const updatedNotes = [...(currentNoteCase.notes || []), newNote];
-
-                        await axios.patch(`${_global.BASE_URL}cases/${currentNoteCase._id}`, {
-                          notes: updatedNotes
-                        });
-
-                        // Update local state
-                        setCurrentNoteCase({
-                          ...currentNoteCase,
-                          notes: updatedNotes
-                        });
-
-                        // Also correctly update the tracking lists
-                        const updateList = (list) => list.map((c) =>
-                          c._id === currentNoteCase._id ? { ...c, notes: updatedNotes } : c
-                        );
-
-                        setStartCases(updateList(startCases));
-                        setPauseCases(updateList(pauseCases));
-                        setFinishedCases(updateList(FinishedCases));
-                        setBuffStartingCasesUser(updateList(buffCasesStartingUser));
-                        setBuffCasesHoldingUser(updateList(buffCasesHoldingUser));
-                        setBuffCasesUser(updateList(buffCasesUser));
-
-                        setNewNoteText("");
-                      } catch (err) {
-                        console.error("Error adding note", err);
-                        alert("Failed to add note.");
-                      }
-                    }}
-                    disabled={!newNoteText.trim()}
-                  >
-                    Add Note
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Hidden Print Area */}
-        <div style={{ display: "none" }}>
-          <div ref={userRef3} style={{ padding: "20px" }}>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div>
-                <strong>Printed by:</strong> ___________________
-              </div>
-              <h4 className="text-center m-0"> {department.name === "Ceramic" ? "Invoices" : "Cases"} </h4>
-              <div>
-                <strong>Date:</strong> {new Date().toLocaleString()}
-              </div>
-            </div>
-            <div className="row">
-              {startCases
-                .filter((c) => selectedStartCases.includes(c._id))
-                .map((item, index) => (
-                  <div className="col-6 mb-4" key={index}>
-                    <div style={{ border: "2px solid #fd0d91ff", borderRadius: "8px", padding: "15px", height: "100%", fontSize: "14px", pageBreakInside: "avoid" }}>
-                      <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Case Number:</strong> {item.caseNumber}</p>
-                      <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>StartedAt:</strong> {getStartingDate1(item) || "-"}</p>
-                      <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Technician Name:</strong> {getTechnicainName(item) || "-"}</p>
-                      <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>shade:</strong> </p>
-                      <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Dr. Name:</strong> {item.dentistObj?.name || "-"}</p>
-                      <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Pt. Name:</strong> {item.patientName || "-"}</p>
-                      <p className="mb-0"><strong style={{ color: "#2a0580ff" }}>Items:</strong> </p>
-                      <br />
-                      <br />
-                      <br />
-                      <br />
-                    </div>
-                  </div>
-                ))}
+              )}
             </div>
           </div>
         </div>
       </div>
-    );
+      {FinishedCases.length > 0 && (
+        <div
+          class="modal fade"
+          id="viewModal"
+          data-bs-backdrop="static"
+          data-bs-keyboard="false"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+              <div class={`modal-header  text-white bg-primary`}>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">
+                  Case Information # {buffCase?.caseNumber}
+                </h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                {console.log("buffCase", buffCase)}
+                {buffCase && <ViewCase caseModel={buffCase} />}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Note Modal */}
+      {showNoteModal && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          tabIndex="-1"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title">Notes for Case #{currentNoteCase?.caseNumber}</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
+                    setShowNoteModal(false);
+                    setCurrentNoteCase(null);
+                    setNewNoteText("");
+                  }}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div style={{ maxHeight: "300px", overflowY: "auto", marginBottom: "15px" }}>
+                  {currentNoteCase?.notes && currentNoteCase.notes.length > 0 ? (
+                    currentNoteCase.notes.map((note, index) => (
+                      <div key={index} className="mb-3 p-2 border rounded bg-light">
+                        <div className="d-flex justify-content-between text-muted small mb-1">
+                          <strong>{note.author || note.name}</strong>
+                          <span>{new Date(note.date).toLocaleString()}</span>
+                        </div>
+                        <div>{note.text || note.msg}</div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-muted">No notes yet.</p>
+                  )}
+                </div>
+                <div className="form-group">
+                  <textarea
+                    className="form-control"
+                    rows="3"
+                    placeholder="Type a new note here..."
+                    value={newNoteText}
+                    onChange={(e) => setNewNoteText(e.target.value)}
+                  ></textarea>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setShowNoteModal(false);
+                    setCurrentNoteCase(null);
+                    setNewNoteText("");
+                  }}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={async () => {
+                    if (!newNoteText.trim()) return;
+                    try {
+                      const newNote = {
+                        author: user.firstName + " " + user.lastName,
+                        name: user.firstName + " " + user.lastName,
+                        date: new Date().toISOString(),
+                        text: newNoteText,
+                        msg: newNoteText
+                      };
+
+                      const updatedNotes = [...(currentNoteCase.notes || []), newNote];
+
+                      await axios.patch(`${_global.BASE_URL}cases/${currentNoteCase._id}`, {
+                        notes: updatedNotes
+                      });
+
+                      // Update local state
+                      setCurrentNoteCase({
+                        ...currentNoteCase,
+                        notes: updatedNotes
+                      });
+
+                      // Also correctly update the tracking lists
+                      const updateList = (list) => list.map((c) =>
+                        c._id === currentNoteCase._id ? { ...c, notes: updatedNotes } : c
+                      );
+
+                      setStartCases(updateList(startCases));
+                      setPauseCases(updateList(pauseCases));
+                      setFinishedCases(updateList(FinishedCases));
+                      setBuffStartingCasesUser(updateList(buffCasesStartingUser));
+                      setBuffCasesHoldingUser(updateList(buffCasesHoldingUser));
+                      setBuffCasesUser(updateList(buffCasesUser));
+
+                      setNewNoteText("");
+                    } catch (err) {
+                      console.error("Error adding note", err);
+                      alert("Failed to add note.");
+                    }
+                  }}
+                  disabled={!newNoteText.trim()}
+                >
+                  Add Note
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden Print Area */}
+      <div style={{ display: "none" }}>
+        <div ref={userRef3} style={{ padding: "20px" }}>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <strong>Printed by:</strong> ___________________
+            </div>
+            <h4 className="text-center m-0"> {department.name === "Ceramic" ? "Invoices" : "Cases"} </h4>
+            <div>
+              <strong>Date:</strong> {new Date().toLocaleString()}
+            </div>
+          </div>
+          <div className="row">
+            {startCases
+              .filter((c) => selectedStartCases.includes(c._id))
+              .map((item, index) => (
+                <div className="col-6 mb-4" key={index}>
+                  <div style={{ border: "2px solid #fd0d91ff", borderRadius: "8px", padding: "15px", height: "100%", fontSize: "14px", pageBreakInside: "avoid" }}>
+                    <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Case Number:</strong> {item.caseNumber}</p>
+                    <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>StartedAt:</strong> {getStartingDate1(item) || "-"}</p>
+                    <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Technician Name:</strong> {getTechnicainName(item) || "-"}</p>
+                    <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Shade:</strong > <span style={{ fontWeight: "bold", color: "#166534", background: "#f0fdf4", padding: "1px 7px", borderRadius: "5px", border: "1px solid #bbf7d0" }}> {item.shadeCase.shade || "-"}</span>  </p>
+                    <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Dr. Name:</strong> {item.dentistObj?.name || "-"}</p>
+                    <p className="mb-2"><strong style={{ color: "#2a0580ff" }}>Pt. Name:</strong> {item.patientName || "-"}</p>
+
+                    {/* Shade from cadCam.obj */}
+                    {item.cadCam?.obj?.confirmShade && (
+                      <p className="mb-2">
+                        <strong style={{ color: "#2a0580ff" }}>Shade from CadCam:</strong>{" "}
+                        <span style={{ fontWeight: "bold", color: "#27b49dff", background: "#f0fdf4", padding: "1px 7px", borderRadius: "5px", border: "1px solid #bbf7d0" }}>
+                          {item.cadCam.obj.confirmShade}
+                        </span>
+                      </p>
+                    )}
+
+                    {/* Selected Items from cadCam.obj */}
+                    {item.cadCam?.obj?.selectedItems && item.cadCam.obj.selectedItems.length > 0 && (
+                      <div className="mb-2">
+                        <strong style={{ color: "#2a0580ff" }}>Items:</strong>
+                        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "4px", fontSize: "12px" }}>
+                          <thead>
+                            <tr style={{ background: "#f3e8ff", borderBottom: "1px solid #d8b4fe" }}>
+                              <th style={{ textAlign: "left", padding: "3px 6px", color: "#2a0580ff" }}>#</th>
+                              <th style={{ textAlign: "left", padding: "3px 6px", color: "#2a0580ff" }}>Item</th>
+                              <th style={{ textAlign: "center", padding: "3px 6px", color: "#2a0580ff" }}>Qty</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {item.cadCam.obj.selectedItems.map((si, siIdx) => (
+                              <tr key={siIdx} style={{ borderBottom: "1px solid #ede9fe" }}>
+                                {/* <td style={{ padding: "3px 6px", color: "#555" }}>{siIdx + 1}</td> */}
+                                <td style={{ padding: "3px 6px" }}>{si.name || "-"}</td>
+                                <td style={{ padding: "3px 6px", textAlign: "center", fontWeight: "bold" }}>{si.qty ?? "-"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* Notes from cadCam.obj */}
+                    {item.cadCam?.obj?.notes && (
+                      <p className="mb-0" style={{ marginTop: "6px" }}>
+                        <strong style={{ color: "#2a0580ff" }}>Notes:</strong>{" "}
+                        <span style={{ fontStyle: "italic", color: "#444" }}>{item.cadCam.obj.notes}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CasesInDepartments;
