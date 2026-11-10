@@ -560,6 +560,10 @@ label {
   color: rgb(41, 147, 223);
 }
 
+.c-info {
+  color: #0284c7 !important;
+}
+
 .bg-history-danger {
   border: 1px solid #fff6f6;
   padding: 5px 10px;

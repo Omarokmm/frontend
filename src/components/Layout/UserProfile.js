@@ -28,7 +28,12 @@ const UserProfile = () => {
   const [allAssignedCasesUnfiltered, setAllAssignedCasesUnfiltered] = useState(
     [],
   );
+  const [buffAssignedCases, setBuffAssignedCases] = useState([]);
+  const [buffAllAssignedCasesUnfiltered, setBuffAllAssignedCasesUnfiltered] =
+    useState([]);
+  const [assignmentHistoryCase, setAssignmentHistoryCase] = useState(null);
   const [userData, setUserData] = useState(state ? state : user);
+
   const [searchText, setSearchText] = useState("");
   const [searchTextStart, setSearchTextStart] = useState("");
   const [searchTextHold, setSearchTextHold] = useState("");
@@ -206,7 +211,9 @@ const UserProfile = () => {
         console.log("Excluded case IDs:", excludeIds);
 
         setAssignedCases(filteredAssignedCases);
+        setBuffAssignedCases(filteredAssignedCases);
         setAllAssignedCasesUnfiltered(allCasesWithoutStatusFilter);
+        setBuffAllAssignedCasesUnfiltered(allCasesWithoutStatusFilter);
       })
       .catch((error) => {
         console.error("Error fetching assigned cases:", error);
@@ -259,6 +266,7 @@ const UserProfile = () => {
     setPauseCases((prev) => sortData(prev, key, direction));
     setCasesUser((prev) => sortData(prev, key, direction));
     setAssignedCases((prev) => sortData(prev, key, direction));
+    setAllAssignedCasesUnfiltered((prev) => sortData(prev, key, direction));
   };
 
   const renderSortIcon = (columnKey) => {
@@ -585,18 +593,19 @@ const UserProfile = () => {
     if (type === "Assigned") {
       setSearchTextAssigned(searchText);
       if (searchText !== "") {
-        const filteredCases = assignedCases.filter(
-          (item) =>
-            item.caseNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.dentistObj?.name
-              .toLowerCase()
-              .includes(searchText.toLowerCase()) ||
-            item?.patientName.toLowerCase().includes(searchText.toLowerCase()),
+        const query = searchText.toLowerCase();
+        const matchesQuery = (item) =>
+          item.caseNumber?.toLowerCase().includes(query) ||
+          item.dentistObj?.name?.toLowerCase().includes(query) ||
+          item?.patientName?.toLowerCase().includes(query);
+
+        setAssignedCases(buffAssignedCases.filter(matchesQuery));
+        setAllAssignedCasesUnfiltered(
+          buffAllAssignedCasesUnfiltered.filter(matchesQuery),
         );
-        setAssignedCases(filteredCases);
       } else {
-        // Reset to original assigned cases when search is cleared
-        // fetchAssignedCases();
+        setAssignedCases(buffAssignedCases);
+        setAllAssignedCasesUnfiltered(buffAllAssignedCasesUnfiltered);
       }
     }
   };
@@ -1850,6 +1859,8 @@ const UserProfile = () => {
               setSearchTextAssigned("");
               setSearchCaseNumber("");
               setStartCases(buffCasesStartingUser);
+              setAssignedCases(buffAssignedCases);
+              setAllAssignedCasesUnfiltered(buffAllAssignedCasesUnfiltered);
             }}
           >
             {/* Assigned Cases */}
@@ -2048,6 +2059,21 @@ const UserProfile = () => {
                                     <i className="fas fa-comment-dots"></i>{" "}
                                     {item.notes?.length || 0}
                                   </span>
+                                  {(userData?.isAdmin ||
+                                    user?.roles?.[0] === 0 ||
+                                    user?.roles?.[0] === 8) && (
+                                      <span
+                                        className="c-info ms-2"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setAssignmentHistoryCase(item);
+                                        }}
+                                        title="View Assignment History"
+                                      >
+                                        <i className="fas fa-history"></i>
+                                      </span>
+                                    )}
                                 </div>
                               </td>
                             </tr>
@@ -2104,7 +2130,7 @@ const UserProfile = () => {
                                     : "")
                               }
                             >
-                              <td>{item.caseNumber}11111111</td>
+                              <td>{item.caseNumber}</td>
                               <td>{item.dentistObj?.name}</td>
                               <td>{item.patientName}</td>
                               <td
@@ -2246,6 +2272,21 @@ const UserProfile = () => {
                                     <i className="fas fa-comment-dots"></i>{" "}
                                     {item.notes?.length || 0}
                                   </span>
+                                  {(userData?.isAdmin ||
+                                    user?.roles?.[0] === 0 ||
+                                    user?.roles?.[0] === 8) && (
+                                      <span
+                                        className="c-info ms-2"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setAssignmentHistoryCase(item);
+                                        }}
+                                        title="View Assignment History"
+                                      >
+                                        <i className="fas fa-history"></i>
+                                      </span>
+                                    )}
                                 </div>
                               </td>
                             </tr>
@@ -2598,7 +2639,7 @@ const UserProfile = () => {
                                 {item.notes?.length || 0}
                               </span>
                               <span
-                                className="c-success"
+                                className="c-success ms-2"
                                 // onClick={() => viewCase(item, "view")}
                                 onClick={() => {
                                   buffCaseHandle(item);
@@ -2608,6 +2649,21 @@ const UserProfile = () => {
                               >
                                 <i class="fa-solid fa-eye"></i>
                               </span>
+                              {(userData?.isAdmin ||
+                                user?.roles?.[0] === 0 ||
+                                user?.roles?.[0] === 8) && (
+                                  <span
+                                    className="c-info ms-2"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAssignmentHistoryCase(item);
+                                    }}
+                                    title="View Assignment History"
+                                  >
+                                    <i className="fas fa-history"></i>
+                                  </span>
+                                )}
                             </div>
                           </td>
                         </tr>
@@ -2816,7 +2872,7 @@ const UserProfile = () => {
                               </span>
 
                               <span
-                                className="c-success"
+                                className="c-success ms-2"
                                 // onClick={() => viewCase(item, "view")}
                                 onClick={() => {
                                   buffCaseHandle(item);
@@ -2826,6 +2882,21 @@ const UserProfile = () => {
                               >
                                 <i class="fa-solid fa-eye"></i>
                               </span>
+                              {(userData?.isAdmin ||
+                                user?.roles?.[0] === 0 ||
+                                user?.roles?.[0] === 8) && (
+                                  <span
+                                    className="c-info ms-2"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAssignmentHistoryCase(item);
+                                    }}
+                                    title="View Assignment History"
+                                  >
+                                    <i className="fas fa-history"></i>
+                                  </span>
+                                )}
                             </div>
                           </td>
                         </tr>
@@ -3018,6 +3089,21 @@ const UserProfile = () => {
                                 <i className="fas fa-comment-dots"></i>{" "}
                                 {item.notes?.length || 0}
                               </span>
+                              {(userData?.isAdmin ||
+                                user?.roles?.[0] === 0 ||
+                                user?.roles?.[0] === 8) && (
+                                  <span
+                                    className="c-info ms-2"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAssignmentHistoryCase(item);
+                                    }}
+                                    title="View Assignment History"
+                                  >
+                                    <i className="fas fa-history"></i>
+                                  </span>
+                                )}
                             </div>
                           </td>
 
@@ -3420,6 +3506,252 @@ const UserProfile = () => {
                   disabled={!newNoteText.trim()}
                 >
                   Add Note
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assignment History Modal — React-controlled (no Bootstrap JS) */}
+      {assignmentHistoryCase && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", zIndex: 1060 }}
+          tabIndex="-1"
+          role="dialog"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setAssignmentHistoryCase(null);
+          }}
+        >
+          <div
+            className="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered"
+            role="document"
+          >
+            <div className="modal-content shadow border-0">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title d-flex align-items-center gap-2 mb-0">
+                  <i className="fas fa-history"></i>
+                  <span>
+                    Assignment History — Case #{assignmentHistoryCase?.caseNumber}
+                  </span>
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  aria-label="Close"
+                  onClick={() => setAssignmentHistoryCase(null)}
+                ></button>
+              </div>
+
+              {/* Case Summary Bar */}
+              <div className="bg-light border-bottom px-3 py-2">
+                <div className="row g-2 text-muted small">
+                  <div className="col-sm-4">
+                    <strong>Doctor: </strong>
+                    <span className="text-dark">
+                      {assignmentHistoryCase?.dentistObj?.name ||
+                        assignmentHistoryCase?.doctorName ||
+                        "-"}
+                    </span>
+                  </div>
+                  <div className="col-sm-4">
+                    <strong>Patient: </strong>
+                    <span className="text-dark">
+                      {assignmentHistoryCase?.patientName || "-"}
+                    </span>
+                  </div>
+                  <div className="col-sm-4">
+                    <strong>Date In: </strong>
+                    <span className="text-dark">
+                      {assignmentHistoryCase?.dateIn
+                        ? _global.formatDateToYYYYMMDD(
+                          assignmentHistoryCase.dateIn,
+                        )
+                        : "-"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className="modal-body p-3"
+                style={{ maxHeight: "70vh", overflowY: "auto" }}
+              >
+                {assignmentHistoryCase?.assignmentHistory &&
+                  assignmentHistoryCase.assignmentHistory.length > 0 ? (
+                  <div className="d-flex flex-column gap-3">
+                    {assignmentHistoryCase.assignmentHistory.map(
+                      (entry, index) => {
+                        const dateVal =
+                          entry.assignedAt ||
+                          entry.date ||
+                          entry.createdAt ||
+                          entry.timestamp;
+                        let formattedDateTime = "-";
+                        if (dateVal) {
+                          try {
+                            const d = new Date(dateVal);
+                            if (!isNaN(d.getTime())) {
+                              formattedDateTime = d.toLocaleString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true,
+                              });
+                            } else {
+                              formattedDateTime = String(dateVal);
+                            }
+                          } catch (err) {
+                            formattedDateTime = String(dateVal);
+                          }
+                        }
+                        return (
+                          <div
+                            key={index}
+                            className="border rounded p-3 bg-white shadow-sm"
+                          >
+                            {/* Header: Assignment #, Action badge, Date & Time */}
+                            <div className="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-2 gap-2">
+                              <div className="d-flex align-items-center gap-2">
+                                <span className="badge bg-primary">
+                                  #{index + 1} Assignment
+                                </span>
+                                {entry.action && (
+                                  <span className="badge bg-secondary text-capitalize">
+                                    {entry.action}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-muted small">
+                                <i className="far fa-clock me-1 text-primary"></i>
+                                <strong>{formattedDateTime}</strong>
+                              </div>
+                            </div>
+
+                            {/* Who Assigned */}
+                            <div className="mb-2 small">
+                              <span className="text-muted me-1">
+                                <i className="fas fa-user-check text-success me-1"></i>
+                                <strong>Assigned By:</strong>
+                              </span>
+                              <span className="fw-bold text-dark">
+                                {entry.performedBy?.name}
+                              </span>
+                            </div>
+
+                            {/* New Assignments Table */}
+                            {entry.newAssignment &&
+                              entry.newAssignment.length > 0 ? (
+                              <div className="table-responsive mt-2">
+                                <table className="table table-sm table-bordered align-middle mb-0 text-center">
+                                  <thead className="table-light">
+                                    <tr>
+                                      <th style={{ width: "60px" }}>#</th>
+                                      <th>Department</th>
+                                      <th>Assigned To</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {entry.newAssignment.map((assign, aIdx) => (
+                                      <tr key={aIdx}>
+                                        <td className="text-muted">{aIdx + 1}</td>
+                                        <td>
+                                          <span
+                                            className={`badge ${assign.department === "CadCam"
+                                              ? "bg-info text-dark"
+                                              : assign.department ===
+                                                "Caramic" ||
+                                                assign.department ===
+                                                "Ceramic"
+                                                ? "bg-warning text-dark"
+                                                : assign.department ===
+                                                  "Fitting"
+                                                  ? "bg-secondary text-white"
+                                                  : "bg-light text-dark border"
+                                              }`}
+                                          >
+                                            {assign.department || "-"}
+                                          </span>
+                                        </td>
+                                        <td className="fw-semibold">
+                                          <i className="fas fa-user me-1 text-muted"></i>
+                                          {assign.userName ||
+                                            assign.name ||
+                                            assign.userId ||
+                                            "-"}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="text-muted small italic">
+                                <i className="fas fa-info-circle me-1"></i>
+                                No department breakdown recorded for this entry.
+                              </div>
+                            )}
+
+                            {/* Old Assignment if present */}
+                            {entry.oldAssignment &&
+                              entry.oldAssignment.length > 0 && (
+                                <div className="mt-2 pt-2 border-top small text-muted">
+                                  <strong>Previous Assignment: </strong>
+                                  {entry.oldAssignment
+                                    .map(
+                                      (old) =>
+                                        `${old.department || "Dept"}: ${old.userName || old.name || "-"
+                                        }`,
+                                    )
+                                    .join(" | ")}
+                                </div>
+                              )}
+                          </div>
+                        );
+                      },
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <i className="fas fa-history fa-3x text-muted mb-3 d-block opacity-50"></i>
+                    <h6 className="text-muted">
+                      No assignment history recorded for this case.
+                    </h6>
+                    <div className="small text-muted mt-2">
+                      {assignmentHistoryCase?.lastAssignedByName && (
+                        <div>
+                          Last assigned by:{" "}
+                          <strong>
+                            {assignmentHistoryCase.lastAssignedByName}
+                          </strong>
+                        </div>
+                      )}
+                      {assignmentHistoryCase?.lastAssignedAt && (
+                        <div>
+                          Last assigned at:{" "}
+                          <strong>
+                            {new Date(
+                              assignmentHistoryCase.lastAssignedAt,
+                            ).toLocaleString()}
+                          </strong>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="modal-footer bg-light py-2">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setAssignmentHistoryCase(null)}
+                >
+                  Close
                 </button>
               </div>
             </div>
