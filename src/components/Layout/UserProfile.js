@@ -3745,6 +3745,80 @@ const UserProfile = () => {
                 )}
               </div>
 
+              {/* Top Priority History Section */}
+              {assignmentHistoryCase?.historyTopPriority &&
+                assignmentHistoryCase.historyTopPriority.length > 0 && (
+                  <div className="px-3 pb-3">
+                    <div className="border rounded p-3 bg-white shadow-sm">
+                      <h6 className="d-flex align-items-center gap-2 mb-2 text-black fw-bold">
+                        <i className="fas fa-star"></i>
+                        Top Priority History
+                        <span className="badge bg-black text-white ms-1" style={{ fontSize: "0.75rem" }}>
+                          {assignmentHistoryCase.historyTopPriority.length}
+                        </span>
+                      </h6>
+                      <div className="table-responsive">
+                        <table className="table table-sm table-bordered align-middle mb-0 text-center">
+                          <thead className="table-warning">
+                            <tr>
+                              <th style={{ width: "50px" }}>#</th>
+                              <th>Date Set as Top Priority</th>
+                              <th>Set By</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {assignmentHistoryCase.historyTopPriority.map((entry, idx) => {
+                              let formattedDate = "-";
+                              const dateVal = entry.date || entry.assignedAt || entry.createdAt;
+                              if (dateVal) {
+                                try {
+                                  const d = new Date(dateVal);
+                                  if (!isNaN(d.getTime())) {
+                                    formattedDate = d.toLocaleString("en-US", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    });
+                                  }
+                                } catch (e) {
+                                  formattedDate = String(dateVal);
+                                }
+                              }
+                              return (
+                                <tr key={idx}>
+                                  <td className="text-muted fw-semibold">{idx + 1}</td>
+                                  <td>
+                                    <i className="far fa-calendar-alt me-1 text-warning"></i>
+                                    <strong>{formattedDate}</strong>
+                                  </td>
+                                  <td>
+                                    {entry.setBy || entry?.name || entry.assignedBy || (
+                                      <span className="text-muted">-</span>
+                                    )}
+                                  </td>
+                                  <td>
+                                    {entry.isActive === false ? (
+                                      <span className="badge bg-secondary">Removed</span>
+                                    ) : (
+                                      <span className="badge bg-warning text-dark">
+                                        <i className="fas fa-star me-1"></i>Top Priority
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               <div className="modal-footer bg-light py-2">
                 <button
                   type="button"
