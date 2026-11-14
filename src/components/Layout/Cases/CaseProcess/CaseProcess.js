@@ -47,6 +47,7 @@ const CaseProcess = () => {
   const [cadCamNotes, setCadCamNotes] = useState("");
   const [itemSearch, setItemSearch] = useState("");
   const [itemsLoading, setItemsLoading] = useState(false);
+
   const changeStatus = (id, type, actionName) => {
     console.log(actionName);
     let isUrgent = caseData.isUrgent

@@ -86,7 +86,6 @@
 
 /* ── Professional Case Overview Panel ── */
 .case-overview-bar {
-    background: #ffffff;
     border-radius: 12px;
     padding: 10px 35px;
     display: flex;
@@ -94,6 +93,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    position: relative;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .case-overview-grid {
@@ -108,8 +109,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--ov-card-bg, #f8fafc);
+    border: 1px solid var(--ov-card-border, #e2e8f0);
     border-radius: 9px;
     padding: 8px 14px;
     min-height: 52px;
@@ -167,7 +168,7 @@
 .overview-label {
     font-size: 0.65rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--ov-label-color, #64748b);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 2px;
@@ -176,7 +177,7 @@
 .overview-value {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--ov-text-color, #1e293b);
     max-width: 280px;
     white-space: nowrap;
     overflow: hidden;
