@@ -5,6 +5,8 @@ import { format } from "date-fns";
 
 import axios from "axios";
 const ViewCase = ({ caseModel }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   console.log("caseModelLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL", caseModel);
   const numOfTeeth = _global.numOfTeeth;
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const ViewCase = ({ caseModel }) => {
   useEffect(() => {
     console.log("ViewCase got new data:", caseModel);
   }, [caseModel]);
-  console.log("stateeeeeeeeeeeeeeeeeeeeee22222222222", caseModel);
+
   //  useEffect(() => {
   //    // get cases
   //    axios
@@ -170,7 +172,105 @@ const ViewCase = ({ caseModel }) => {
               </div> */}
               </div>
             </div>
+
             <div className="col-lg-12 mt-4">
+              {/* Assignment History with Top Priority badge on max right */}
+              {caseModel?.assignmentHistory && caseModel.assignmentHistory.length > 0 && (user?.roles?.[0] === _global.allRoles.admin || user?.roles?.[0] === _global.allRoles.Reception) &&
+                (() => {
+                  const lastHistory = caseModel.assignmentHistory[caseModel.assignmentHistory.length - 1];
+                  const lastAssignment = lastHistory?.newAssignment?.length > 0
+                    ? lastHistory.newAssignment[lastHistory.newAssignment.length - 1]
+                    : null;
+                  const lastTopPriority = caseModel?.historyTopPriority?.length > 0
+                    ? caseModel.historyTopPriority[caseModel.historyTopPriority.length - 1]
+                    : null;
+                  return (
+                    <div className="mb-3">
+                      {/* Header: title on left, badge pushed to max right */}
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                        <strong style={{ fontSize: "0.85rem" }}>
+                          <i className="fas fa-history me-1 text-primary"></i>
+                          Assignment History
+                        </strong>
+                        {(lastTopPriority || lastAssignment) && (
+                          <b
+                            style={{
+                              background: "#f0fdf4",
+                              color: "#236516ff",
+                              fontSize: "0.72rem",
+                              fontWeight: "500",
+                              borderRadius: "6px",
+                              padding: "3px 8px",
+                              border: "1px solid #bbf7d0",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+
+                            <span className="text-danger">
+                              <i className="fas fa-calendar-check me-1"></i>
+                              {lastTopPriority?.name && <>Top Priority by: {lastTopPriority.name}</>} </span>
+                            {lastTopPriority?.date && <> &bull; {_global.formatDateToYYYYMMDD(lastTopPriority.date)} </>}
+                          </b>
+                        )}
+                      </div>
+
+                      {/* Single flat table */}
+                      <table className="table table-sm table-bordered align-middle mb-0 text-center" style={{ fontSize: "0.75rem" }}>
+                        <thead className="table-light">
+                          <tr>
+                            <th style={{ width: "30px" }}>#</th>
+                            <th>Date</th>
+                            <th>Department</th>
+                            <th>Assigned By</th>
+                            <th>Assigned To</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {caseModel.assignmentHistory.map((entry, idx) => {
+                            const lastNew = entry.newAssignment?.length > 0
+                              ? entry.newAssignment[entry.newAssignment.length - 1]
+                              : null;
+                            const dateVal = entry.timestamp || entry.assignedAt;
+                            const formattedDate = dateVal
+                              ? new Date(dateVal).toLocaleString("en-US", {
+                                year: "numeric", month: "short", day: "numeric",
+                                hour: "2-digit", minute: "2-digit", hour12: true,
+                              })
+                              : "-";
+                            return (
+                              <tr key={idx}>
+                                <td className="text-muted">{idx + 1}</td>
+                                <td style={{ whiteSpace: "nowrap" }}>{formattedDate}</td>
+                                <td>
+                                  <span className={`badge ${entry.department === "CadCam" ? "bg-info text-dark"
+                                    : entry.department === "Caramic" || entry.department === "Ceramic" ? "bg-warning text-dark"
+                                      : "bg-secondary"
+                                    }`}>
+                                    {entry.department || "-"}
+                                  </span>
+                                </td>
+                                <td>
+                                  <i className="fas fa-user-check text-success me-1"></i>
+                                  {entry.performedBy?.name || "-"}
+                                </td>
+                                <td>
+                                  <i className="fas fa-user me-1 text-muted"></i>
+                                  {lastNew?.userName || "-"}
+                                </td>
+                                <td>
+                                  <span className={`badge ${entry.action === "reassign" ? "bg-secondary" : "bg-primary"}`}>
+                                    {entry.action || "-"}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
               <strong>Case Status</strong>
               <div className="all-phases">
                 {caseModel.caseType === "Physical" && (
@@ -735,7 +835,7 @@ const ViewCase = ({ caseModel }) => {
                             <tr>
                               <th>ID</th>
                               <th>Item Name</th>
-                              <th style={{width:'70px', textAlign:'center'}}>Qty</th>
+                              <th style={{ width: '70px', textAlign: 'center' }}>Qty</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -743,7 +843,7 @@ const ViewCase = ({ caseModel }) => {
                               <tr key={i}>
                                 <td><span className="badge bg-primary bg-opacity-75 fw-normal">{item.itemId}</span></td>
                                 <td>{item.name}</td>
-                                <td style={{textAlign:'center'}}><strong>{item.qty}</strong></td>
+                                <td style={{ textAlign: 'center' }}><strong>{item.qty}</strong></td>
                               </tr>
                             ))}
                           </tbody>

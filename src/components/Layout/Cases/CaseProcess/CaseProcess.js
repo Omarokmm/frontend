@@ -256,6 +256,97 @@ const CaseProcess = () => {
             <strong>{_global.formatDateToYYYYMMDD(caseData.dateOut)}</strong>
           </span>
         </h5>
+
+        {/* ── Professional Case Overview Panel ── */}
+        <div className="case-overview-bar">
+          <div className="case-overview-grid">
+            {/* Doctor */}
+            <div className="overview-card" title={caseData.dentistObj?.name || "Doctor"}>
+              <div className="overview-icon doctor-icon">
+                <i className="fas fa-user-md"></i>
+              </div>
+              <div className="overview-content">
+                <span className="overview-label">Doctor</span>
+                <span className="overview-value">{caseData.dentistObj?.name || "—"}</span>
+              </div>
+            </div>
+
+            {/* Patient */}
+            <div className="overview-card" title={caseData.patientName || "Patient"}>
+              <div className="overview-icon patient-icon">
+                <i className="fas fa-user"></i>
+              </div>
+              <div className="overview-content">
+                <span className="overview-label">Patient</span>
+                <span className="overview-value">{caseData.patientName || "—"}</span>
+              </div>
+            </div>
+
+            {/* Date In */}
+            <div className="overview-card">
+              <div className="overview-icon datein-icon">
+                <i className="fas fa-calendar-plus"></i>
+              </div>
+              <div className="overview-content">
+                <span className="overview-label">Date In</span>
+                <span className="overview-value">
+                  {caseData.dateIn ? _global.formatDateToYYYYMMDD(caseData.dateIn) : "—"}
+                </span>
+              </div>
+            </div>
+
+            {/* Due Date */}
+            <div className="overview-card">
+              <div className="overview-icon duedate-icon">
+                <i className="fas fa-calendar-check"></i>
+              </div>
+              <div className="overview-content">
+                <span className="overview-label">Due Date</span>
+                <span className="overview-value">
+                  {caseData.dateOut ? _global.formatDateToYYYYMMDD(caseData.dateOut) : "—"}
+                </span>
+              </div>
+            </div>
+
+            {/* Shade */}
+            {caseData.shadeCase?.shade && (
+              <div className="overview-card">
+                <div className="overview-icon shade-icon">
+                  <i className="fas fa-palette"></i>
+                </div>
+                <div className="overview-content">
+                  <span className="overview-label">Shade</span>
+                  <span className="overview-value">
+                    {caseData.shadeCase.shade}
+                    {caseData.shadeCase.stumpShade ? ` / ${caseData.shadeCase.stumpShade}` : ""}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Status Badges */}
+          {(caseData.isUrgent || isStudy || isTemporary) && (
+            <div className="overview-badges">
+              {caseData.isUrgent && (
+                <span className="overview-badge badge-urgent">
+                  <i className="fas fa-exclamation-circle"></i> URGENT
+                </span>
+              )}
+              {isStudy && (
+                <span className="overview-badge badge-study">
+                  <i className="fas fa-flask"></i> Study
+                </span>
+              )}
+              {isTemporary && (
+                <span className="overview-badge badge-temporary">
+                  <i className="fas fa-clock"></i> Temporary
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="card-body">
           <div class="row mb-3">
             {caseData.caseType === "Physical" && (
@@ -809,11 +900,11 @@ const CaseProcess = () => {
 
               {/* ── Items Checklist ── */}
               <div className="mb-2 d-flex align-items-center justify-content-between">
-                <strong style={{fontSize:'14px'}}>Items Used</strong>
+                <strong style={{ fontSize: '14px' }}>Items Used</strong>
                 <input
                   type="text"
                   className="form-control form-control-sm"
-                  style={{width:'200px'}}
+                  style={{ width: '200px' }}
                   placeholder="🔍 Search items..."
                   value={itemSearch}
                   onChange={(e) => setItemSearch(e.target.value)}
@@ -826,16 +917,16 @@ const CaseProcess = () => {
                   </div>
                 </div>
               ) : cadCamItems.length === 0 ? (
-                <div className="alert alert-info py-2" style={{fontSize:'13px'}}>No items in list yet. Ask admin to add items.</div>
+                <div className="alert alert-info py-2" style={{ fontSize: '13px' }}>No items in list yet. Ask admin to add items.</div>
               ) : (
                 <div className="cadcam-items-table-wrapper">
                   <table className="table table-sm table-hover cadcam-items-table mb-0">
                     <thead className="table-light">
                       <tr>
-                        <th style={{width:'40px'}}></th>
+                        <th style={{ width: '40px' }}></th>
                         <th>ID</th>
                         <th>Name</th>
-                        <th style={{width:'90px'}}>Qty</th>
+                        <th style={{ width: '90px' }}>Qty</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -864,7 +955,7 @@ const CaseProcess = () => {
                                 value={si.qty}
                                 disabled={!si.checked}
                                 onChange={(e) => setItemQty(si._id, e.target.value)}
-                                style={{width:'65px'}}
+                                style={{ width: '65px' }}
                               />
                             </td>
                           </tr>
@@ -893,7 +984,7 @@ const CaseProcess = () => {
                 data-bs-dismiss="modal"
                 onClick={() => {
                   setZirconName(''); setEmaxName(''); setImplantName(''); setStudy(''); setConfirmShade('');
-                  setSelectedItems(prev => prev.map(si => ({...si, checked: false, qty: 1})));
+                  setSelectedItems(prev => prev.map(si => ({ ...si, checked: false, qty: 1 })));
                   setCadCamNotes(''); setItemSearch('');
                 }}
               >Cancel</button>
