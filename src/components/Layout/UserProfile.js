@@ -1749,24 +1749,40 @@ const UserProfile = () => {
     const nextIsComplete = !completeTargetCase.isComplete;
     setIsUpdatingComplete(true);
     try {
+      const historyEntry = {
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        date: new Date().toISOString(),
+        isComplete: nextIsComplete,
+        msg: `Case marked as ${nextIsComplete ? "complete" : "incomplete"}`,
+      };
+
+      const updatedCompleteHistory = [
+        ...(completeTargetCase.completeHistory || []),
+        historyEntry,
+      ];
+
       await axios.patch(
         `${_global.BASE_URL}cases/${completeTargetCase._id}`,
-        { isComplete: nextIsComplete },
+        {
+          isComplete: nextIsComplete,
+          completeHistory: updatedCompleteHistory,
+        },
       );
 
       const updateList = (list) =>
         list.map((c) =>
           c._id === completeTargetCase._id
-            ? { ...c, isComplete: nextIsComplete }
-            : c,
+              ? { ...c, isComplete: nextIsComplete, completeHistory: updatedCompleteHistory }
+              : c,
         );
 
       setStartCases((prev) => updateList(prev));
       setBuffStartingCasesUser((prev) => updateList(prev));
       setBuffCase((prev) =>
         prev && prev._id === completeTargetCase._id
-          ? { ...prev, isComplete: nextIsComplete }
-          : prev,
+            ? { ...prev, isComplete: nextIsComplete, completeHistory: updatedCompleteHistory }
+            : prev,
       );
 
       showToastMessage(

@@ -42,7 +42,10 @@ const CasesInDepartments = () => {
   const [newNoteText, setNewNoteText] = useState("");
 
   // Complete Tab States
+  const todayDateStr = _global.formatDateToYYYYMMDD(new Date());
   const [searchTextComplete, setSearchTextComplete] = useState("");
+  const [completeFromDate, setCompleteFromDate] = useState(todayDateStr);
+  const [completeToDate, setCompleteToDate] = useState(todayDateStr);
   const [uncompleteTargetCase, setUncompleteTargetCase] = useState(null);
   const [isUpdatingComplete, setIsUpdatingComplete] = useState(false);
 
@@ -1377,15 +1380,65 @@ const CasesInDepartments = () => {
     setBuffCase(newItem);
   };
 
-  // Started cases with isComplete === true and no dateEnd on the last cadCam action
-  const completedCases = (buffCasesStartingUser || []).filter((item) => {
-    if (!item || !item.isComplete) return false;
-    const cadCamActions = item.cadCam?.actions;
-    const lastCadCamAction =
-      Array.isArray(cadCamActions) && cadCamActions.length > 0
-        ? cadCamActions[cadCamActions.length - 1]
-        : null;
-    if (lastCadCamAction?.dateEnd) return false;
+    const getCompletedCaseDate = (item) => {
+      if (!item) return "";
+      const completeHistory = Array.isArray(item.completeHistory)
+        ? item.completeHistory
+        : [];
+      const lastCompleteEntry =
+        [...completeHistory].reverse().find((h) => h?.isComplete === true) ||
+        completeHistory[completeHistory.length - 1];
+      if (lastCompleteEntry?.date) {
+        return _global.formatDateToYYYYMMDD(lastCompleteEntry.date);
+      }
+      const cadCamActions = Array.isArray(item.cadCam?.actions)
+        ? item.cadCam.actions
+        : [];
+      const lastCadCamAction =
+  cadCamActions.length > 0 ? cadCamActions[cadCamActions.length - 1] : null;
+  if (lastCadCamAction?.dateEnd) {
+    return _global.formatDateToYYYYMMDD(lastCadCamAction.dateEnd);
+  }
+  if (lastCadCamAction?.dateStart) {
+    return _global.formatDateToYYYYMMDD(lastCadCamAction.dateStart);
+  }
+  return item.dateIn ? _global.formatDateToYYYYMMDD(item.dateIn) : "";
+};
+
+  const getCompletedRowStartedAt = (item) => {
+    if (!item) return "-";
+    const deptKey = state?.shortDescription;
+    const actions = Array.isArray(item?.[deptKey]?.actions)
+      ? item[deptKey].actions
+      : [];
+    const lastWithStart = [...actions].reverse().find((a) => a?.dateStart);
+    if (lastWithStart?.dateStart) {
+      return _global.formatDateToYYYYMMDD(lastWithStart.dateStart);
+    }
+    const fallbackDate = getCompletedCaseDate(item);
+    return fallbackDate || "-";
+  };
+
+// Cases with isComplete === true (including those with dateEnd on last cadCam action),
+// filtered by date range (defaulting to today) and search text
+const completedCases = (() => {
+  const seen = new Set();
+  const all = [
+    ...(buffCasesStartingUser || []),
+    ...(buffCasesHoldingUser || []),
+    ...(buffCasesUser || []),
+  ];
+  return all.filter((item) => {
+    if (!item || !item.isComplete || seen.has(item._id)) return false;
+    seen.add(item._id);
+
+    if (completeFromDate || completeToDate) {
+      const caseDate = getCompletedCaseDate(item);
+      if (!caseDate) return false;
+      if (completeFromDate && caseDate < completeFromDate) return false;
+      if (completeToDate && caseDate > completeToDate) return false;
+    }
+
     if (!searchTextComplete.trim()) return true;
     const q = searchTextComplete.toLowerCase();
     return (
@@ -1394,144 +1447,163 @@ const CasesInDepartments = () => {
       item.patientName?.toLowerCase().includes(q)
     );
   });
+})();
 
-  const handleConfirmUncomplete = async () => {
-    if (!uncompleteTargetCase) return;
-    setIsUpdatingComplete(true);
-    try {
-      await axios.patch(
-        `${_global.BASE_URL}cases/${uncompleteTargetCase._id}`,
-        { isComplete: false }
+const handleConfirmUncomplete = async () => {
+  if (!uncompleteTargetCase) return;
+  setIsUpdatingComplete(true);
+  try {
+    const historyEntry = {
+      id: user._id,
+      name: `${user.firstName} ${user.lastName}`,
+      date: new Date().toISOString(),
+      isComplete: false,
+      msg: "Case marked as incomplete",
+    };
+
+    const updatedCompleteHistory = [
+      ...(uncompleteTargetCase.completeHistory || []),
+      historyEntry,
+    ];
+
+    await axios.patch(
+      `${_global.BASE_URL}cases/${uncompleteTargetCase._id}`,
+      {
+        isComplete: false,
+        completeHistory: updatedCompleteHistory,
+      }
+    );
+
+    const updateList = (list) =>
+      (list || []).map((c) =>
+        c._id === uncompleteTargetCase._id
+          ? { ...c, isComplete: false, completeHistory: updatedCompleteHistory }
+          : c
       );
 
-      const updateList = (list) =>
-        (list || []).map((c) =>
-          c._id === uncompleteTargetCase._id ? { ...c, isComplete: false } : c
-        );
+    setStartCases((prev) => updateList(prev));
+    setBuffStartingCasesUser((prev) => updateList(prev));
+    setPauseCases((prev) => updateList(prev));
+    setBuffCasesHoldingUser((prev) => updateList(prev));
+    setFinishedCases((prev) => updateList(prev));
+    setBuffCasesUser((prev) => updateList(prev));
+    setBuffCase((prev) =>
+      prev && prev._id === uncompleteTargetCase._id
+        ? { ...prev, isComplete: false, completeHistory: updatedCompleteHistory }
+        : prev
+    );
 
-      setStartCases((prev) => updateList(prev));
-      setBuffStartingCasesUser((prev) => updateList(prev));
-      setPauseCases((prev) => updateList(prev));
-      setBuffCasesHoldingUser((prev) => updateList(prev));
-      setFinishedCases((prev) => updateList(prev));
-      setBuffCasesUser((prev) => updateList(prev));
-      setBuffCase((prev) =>
-        prev && prev._id === uncompleteTargetCase._id
-          ? { ...prev, isComplete: false }
-          : prev
-      );
-
-      showToastMessage(
-        `Case #${uncompleteTargetCase.caseNumber} marked as incomplete`,
-        "success"
-      );
-      setUncompleteTargetCase(null);
-    } catch (error) {
-      console.error("Error updating case complete status:", error);
-      showToastMessage("Error updating case complete status", "error");
-    } finally {
-      setIsUpdatingComplete(false);
-    }
-  };
-  return (
-    <div className="content user-profile">
-      <div className="card">
-        <h5 class="card-title">
-          <span>{department.name} Cases </span>
-        </h5>
-        <div className="card-body">
-          {/* Tabs  */}
-          <ul class="nav nav-tabs flex-nowrap" id="myTab" role="tablist">
-            <li class="nav-item flex-fill" role="presentation">
-              <button
-                class="nav-link active bgc-info w-100"
-                id="completedCases-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#completedCases-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="completedCases-tab-pane"
-                aria-selected="true"
-                onClick={() => {
-                  setSearchTextComplete("");
-                }}
-              >
-                Is Complete? <small>({completedCases.length})</small>
-              </button>
-            </li>
-            <li class="nav-item flex-fill" role="presentation">
-              <button
-                class="nav-link bgc-primary w-100"
-                id="startCases-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#startCases-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="startCases-tab-pane"
-                aria-selected="false"
-                onClick={() => {
-                  searchByName("", "Start");
-                  setStartDate("");
-                }}
-              >
-                Start <small>({startCases.length})</small>
-              </button>
-            </li>
-            <li class="nav-item flex-fill" role="presentation">
-              <button
-                class="nav-link bgc-danger w-100"
-                id="holdCases-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#holdCases-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="holdCases-tab-pane"
-                onClick={() => {
-                  searchByName("", "Pause");
-                  setPauseDate("");
-                }}
-                aria-selected="true"
-              >
-                Hold <small>({pauseCases.length})</small>
-              </button>
-            </li>
-            <li class="nav-item flex-fill" role="presentation">
-              <button
-                class="nav-link bgc-success w-100"
-                id="endCases-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#endCases-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="endCases-tab-pane"
-                onClick={() => {
-                  searchByName("", "End");
-                  setStartFinishDate("");
-                  setEndDate("");
-                }}
-                aria-selected="true"
-              >
-                End <small>({FinishedCases?.length})</small>
-              </button>
-            </li>
-          </ul>
-          {/* Tabs Contents */}
-          {/* Starting Cases */}
-          <div
-            class="tab-content"
-            id="myTabContent"
-          >
-            {/* Completed Cases */}
-            <div
-              class="tab-pane fade show active"
-              id="completedCases-tab-pane"
-              role="tabpanel"
-              aria-labelledby="completedCases-tab"
-              tabIndex="0"
+    showToastMessage(
+      `Case #${uncompleteTargetCase.caseNumber} marked as incomplete`,
+      "success"
+    );
+    setUncompleteTargetCase(null);
+  } catch (error) {
+    console.error("Error updating case complete status:", error);
+    showToastMessage("Error updating case complete status", "error");
+  } finally {
+    setIsUpdatingComplete(false);
+  }
+};
+return (
+  <div className="content user-profile">
+    <div className="card">
+      <h5 class="card-title">
+        <span>{department.name} Cases </span>
+      </h5>
+      <div className="card-body">
+        {/* Tabs  */}
+        <ul class="nav nav-tabs flex-nowrap" id="myTab" role="tablist">
+          <li class="nav-item flex-fill" role="presentation">
+            <button
+              class="nav-link active bgc-info w-100"
+              id="completedCases-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#completedCases-tab-pane"
+              type="button"
+              role="tab"
+              aria-controls="completedCases-tab-pane"
+              aria-selected="true"
+              onClick={() => {
+                setSearchTextComplete("");
+              }}
             >
-              <div>
-                <div className="row">
-                  <div className="col-lg-12 mb-3">
+              Is Complete? <small>({completedCases.length})</small>
+            </button>
+          </li>
+          <li class="nav-item flex-fill" role="presentation">
+            <button
+              class="nav-link bgc-primary w-100"
+              id="startCases-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#startCases-tab-pane"
+              type="button"
+              role="tab"
+              aria-controls="startCases-tab-pane"
+              aria-selected="false"
+              onClick={() => {
+                searchByName("", "Start");
+                setStartDate("");
+              }}
+            >
+              Start <small>({startCases.length})</small>
+            </button>
+          </li>
+          <li class="nav-item flex-fill" role="presentation">
+            <button
+              class="nav-link bgc-danger w-100"
+              id="holdCases-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#holdCases-tab-pane"
+              type="button"
+              role="tab"
+              aria-controls="holdCases-tab-pane"
+              onClick={() => {
+                searchByName("", "Pause");
+                setPauseDate("");
+              }}
+              aria-selected="true"
+            >
+              Hold <small>({pauseCases.length})</small>
+            </button>
+          </li>
+          <li class="nav-item flex-fill" role="presentation">
+            <button
+              class="nav-link bgc-success w-100"
+              id="endCases-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#endCases-tab-pane"
+              type="button"
+              role="tab"
+              aria-controls="endCases-tab-pane"
+              onClick={() => {
+                searchByName("", "End");
+                setStartFinishDate("");
+                setEndDate("");
+              }}
+              aria-selected="true"
+            >
+              End <small>({FinishedCases?.length})</small>
+            </button>
+          </li>
+        </ul>
+        {/* Tabs Contents */}
+        {/* Starting Cases */}
+        <div
+          class="tab-content"
+          id="myTabContent"
+        >
+          {/* Completed Cases */}
+          <div
+            class="tab-pane fade show active"
+            id="completedCases-tab-pane"
+            role="tabpanel"
+            aria-labelledby="completedCases-tab"
+            tabIndex="0"
+          >
+            <div>
+              <div className="row">
+                  <div className="col-lg-6 mb-3">
                     <input
                       type="text"
                       name="searchTextComplete"
@@ -1540,6 +1612,28 @@ const CasesInDepartments = () => {
                       value={searchTextComplete}
                       onChange={(e) => setSearchTextComplete(e.target.value)}
                     />
+                  </div>
+                  <div className="col-lg-3 mb-3">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder="From Date"
+                        value={completeFromDate}
+                        onChange={(e) => setCompleteFromDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-lg-3 mb-3">
+                    <div className="form-group">
+                      <input
+                        type="date"
+                        className="form-control"
+                        placeholder="To Date"
+                        value={completeToDate}
+                        onChange={(e) => setCompleteToDate(e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
                 {completedCases?.length > 0 && (
@@ -1583,7 +1677,7 @@ const CasesInDepartments = () => {
                             data-bs-toggle="modal"
                             data-bs-target="#viewModal"
                           >
-                            {getStartingDate1(item)}
+                            {getCompletedRowStartedAt(item)}
                           </td>
                           <td
                             onClick={() => {
@@ -2624,7 +2718,7 @@ const CasesInDepartments = () => {
         </div>
       </div>
     </div>
-  );
+    );
 };
 
-export default CasesInDepartments;
+    export default CasesInDepartments;
