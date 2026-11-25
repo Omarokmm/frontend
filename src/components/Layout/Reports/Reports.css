@@ -1,0 +1,21 @@
+@media print {
+  body,
+  html {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .sidebar,
+  .navbar,
+  .bottom_content {
+    display: none !important;
+  }
+
+  .pages,
+  .layout-content,
+  .content,
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
